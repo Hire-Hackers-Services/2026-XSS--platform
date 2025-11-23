@@ -1,4 +1,4 @@
-# 🌸 蓝莲花 XSS 在线平台
+# 🌸 蓝莲花 XSS 在线平台源码 - 地表最强。
 
 <div align="center">
 
@@ -9,7 +9,12 @@
 
 **专业的XSS漏洞检测与Web安全测试平台**
 
-[🌐 官网](https://xss.li) | [📚 文档](#快速开始) | [💬 社区](https://t.me/hackhub7)
+[🌐 官网](https://xss.li) |  | [Telegram技术合作](https://t.me/hackhub7)
+
+<img width="2215" height="1637" alt="xss4" src="https://github.com/user-attachments/assets/b6da1ecd-2882-47ce-99c1-6785b9868561" />
+<img width="2311" height="1732" alt="xss3" src="https://github.com/user-attachments/assets/dad0af89-8320-4c15-865a-c01ccbe5813e" />
+<img width="2061" height="1731" alt="xss2" src="https://github.com/user-attachments/assets/d80d6b27-cd18-44bd-9b6f-f44cf444d954" />
+<img width="2140" height="1806" alt="xss1" src="https://github.com/user-attachments/assets/99e43cee-d103-47c5-93d2-4a055fb74b6d" />
 
 </div>
 
@@ -90,6 +95,7 @@ bash deploy.sh
 
 ```bash
 # 启动服务
+
 docker-compose up -d
 
 # 停止服务
@@ -422,4 +428,5 @@ docker-compose logs -f
 Made with ❤️ by Security Researchers
 
 </div>
+
 
