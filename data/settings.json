@@ -1,0 +1,25 @@
+{
+  "smtp": {
+    "enabled": false,
+    "server": "",
+    "port": 587,
+    "username": "",
+    "password": "",
+    "recipient": "",
+    "security": "tls"
+  },
+  "notifications": {
+    "email_enabled": false,
+    "new_request_alert": true,
+    "interval": "immediate",
+    "template": ""
+  },
+  "security": {
+    "session_timeout": 60,
+    "ip_whitelist": true,
+    "allowed_ips": "127.0.0.1\n192.168.0.0/16\n172.16.0.0/16\n10.0.0.0/8",
+    "rate_limit": true,
+    "max_requests": 100,
+    "block_duration": 30
+  }
+}

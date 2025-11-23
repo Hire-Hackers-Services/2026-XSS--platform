@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1b017292-f7f3-4db9-8976-d6c980b780a4",
+    "timestamp": "2025-11-19T11:31:48.699859",
+    "ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:145.0) Gecko/20100101 Firefox/145.0",
+    "referer": "",
+    "url": "http://127.0.0.1:5000/",
+    "method": "GET",
+    "cookies": {
+      "__wzda241110ecdbcf7ce5dc3": "1763523042|0a1332bda456",
+      "session": "9645a6d2-b2c3-41b3-a70c-ca7a6afe9cbc"
+    },
+    "args": {},
+    "form": {},
+    "json": {},
+    "headers": {
+      "Host": "127.0.0.1:5000",
+      "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:145.0) Gecko/20100101 Firefox/145.0",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
+      "Accept-Encoding": "gzip, deflate, br, zstd",
+      "Connection": "keep-alive",
+      "Cookie": "__wzda241110ecdbcf7ce5dc3=1763523042|0a1332bda456; session=9645a6d2-b2c3-41b3-a70c-ca7a6afe9cbc",
+      "Upgrade-Insecure-Requests": "1",
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "none",
+      "Sec-Fetch-User": "?1",
+      "Priority": "u=0, i"
+    },
+    "raw_data": null,
+    "content_type": "",
+    "content_length": "0",
+    "host": "127.0.0.1:5000",
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "accept_encoding": "gzip, deflate, br, zstd",
+    "accept_language": "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
+    "connection": "keep-alive",
+    "files": {}
+  }
+]
