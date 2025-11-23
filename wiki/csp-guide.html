@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+    <meta name="description" content="CSP内容安全策略完整配置指南，包括指令详解、Nonce使用、报告机制等实战技巧，有效防御XSS攻击。">
+    <meta name="keywords" content="CSP,Content Security Policy,内容安全策略,XSS防御,Web安全,Nonce,CSP报告">
+    <title>内容安全策略(CSP)配置实战指南 - XSS安全知识库</title>
+    <link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/libs/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/libs/prism/css/prism-tomorrow.min.css">
+    <style>.article-header{background:linear-gradient(135deg,var(--bg-secondary),var(--bg-tertiary));padding:3rem 0;margin-bottom:2rem;border-bottom:2px solid var(--neon-green)}.article-title{font-size:2.5rem;color:var(--text-highlight);margin-bottom:1rem}.article-content{max-width:900px;margin:0 auto;padding:2rem;background:rgba(0,0,0,0.3);border-radius:var(--border-radius);line-height:1.8}.article-content h2{color:var(--neon-green);margin-top:2.5rem;padding-bottom:0.5rem;border-bottom:2px solid rgba(0,255,65,0.3)}.article-content pre{background:rgba(0,0,0,0.5);padding:1.5rem;border-radius:var(--border-radius);border-left:3px solid var(--neon-green);overflow-x:auto}.info-box{background:rgba(0,123,255,0.1);border-left:4px solid #007bff;padding:1rem;margin:1.5rem 0}        
+        /* 鍥炲埌椤堕儴鎸夐挳 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb" style="background:transparent;padding:1rem 0"><li class="breadcrumb-item"><a href="../index.html" style="color:var(--neon-green)">首页</a></li><li class="breadcrumb-item"><a href="../wiki.html" style="color:var(--neon-green)">知识库</a></li><li class="breadcrumb-item active">CSP配置实战</li></ol></nav></div>
+    <div class="article-header"><div class="container text-center"><h1 class="article-title"><i class="fas fa-shield-alt"></i> 内容安全策略(CSP)配置实战指南</h1><div style="color:var(--text-secondary)"><span><i class="far fa-clock"></i> 20分钟阅读</span> | <span><i class="fas fa-tag"></i> 防御方法</span></div></div></div>
+    <div class="container"><div class="article-content">
+        <h2><i class="fas fa-info-circle"></i> 一、什么是CSP</h2>
+        <p>内容安全策略(Content Security Policy)是一种浏览器安全机制，通过白名单的方式控制页面可以加载和执行的资源，有效防御XSS、数据注入等攻击。</p>
+        
+        <h3>1.1 CSP的核心功能</h3>
+        <ul>
+            <li>限制JavaScript、CSS、图片等资源的来源</li>
+            <li>禁止内联脚本和eval()的使用</li>
+            <li>控制表单提交目标</li>
+            <li>防止点击劫持</li>
+        </ul>
+
+        <h2><i class="fas fa-code"></i> 二、CSP指令详解</h2>
+        
+        <h3>2.1 基础指令</h3>
+        <pre><code class="language-markup">&lt;!-- 最严格的CSP策略 --&gt;
+&lt;meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self'; 
+               script-src 'self'; 
+               style-src 'self'; 
+               img-src 'self' data:; 
+               font-src 'self'; 
+               connect-src 'self'; 
+               frame-ancestors 'none'"&gt;</code></pre>
+
+        <h3>2.2 常用指令说明</h3>
+        <pre><code class="language-javascript">// default-src: 默认策略，其他未指定的资源类型都使用此策略
+// script-src: JavaScript来源
+// style-src: CSS来源
+// img-src: 图片来源
+// font-src: 字体来源
+// connect-src: XHR、WebSocket、EventSource来源
+// frame-src: iframe来源
+// frame-ancestors: 允许嵌入的父页面
+// form-action: 表单提交目标
+// base-uri: &lt;base&gt;标签允许的URL</code></pre>
+
+        <h3>2.3 使用Nonce</h3>
+        <pre><code class="language-php">&lt;?php
+$nonce = base64_encode(random_bytes(16));
+header("Content-Security-Policy: script-src 'nonce-$nonce'");
+?&gt;
+&lt;script nonce="&lt;?php echo $nonce; ?&gt;"&gt;
+    // 只有带正确nonce的脚本才会执行
+    console.log('允许执行');
+&lt;/script&gt;</code></pre>
+
+        <h3>2.4 使用Hash</h3>
+        <pre><code class="language-markup">&lt;!-- 计算脚本的SHA-256 hash --&gt;
+&lt;meta http-equiv="Content-Security-Policy" 
+      content="script-src 'sha256-hash值'"&gt;
+
+&lt;script&gt;console.log('hello');&lt;/script&gt;</code></pre>
+
+        <h2><i class="fas fa-bug"></i> 三、CSP报告机制</h2>
+        
+        <h3>3.1 配置报告端点</h3>
+        <pre><code class="language-php">header("Content-Security-Policy: 
+    default-src 'self'; 
+    report-uri /csp-violation-report; 
+    report-to csp-endpoint");
+
+header("Report-To: {
+    \"group\": \"csp-endpoint\",
+    \"max_age\": 10886400,
+    \"endpoints\": [{\"url\": \"/csp-violation-report\"}]
+}");</code></pre>
+
+        <h3>3.2 处理违规报告</h3>
+        <pre><code class="language-php">// /csp-violation-report 端点
+$data = json_decode(file_get_contents('php://input'), true);
+error_log('CSP违规: ' . json_encode($data));
+
+// 报告格式
+/*
+{
+  "csp-report": {
+    "document-uri": "https://example.com/page",
+    "violated-directive": "script-src 'self'",
+    "blocked-uri": "https://evil.com/bad.js"
+  }
+}
+*/</code></pre>
+
+        <h2><i class="fas fa-wrench"></i> 四、常见场景配置</h2>
+        
+        <h3>4.1 静态网站</h3>
+        <pre><code class="language-markup">Content-Security-Policy: 
+    default-src 'self'; 
+    img-src 'self' data: https:; 
+    style-src 'self' 'unsafe-inline'</code></pre>
+
+        <h3>4.2 使用CDN</h3>
+        <pre><code class="language-markup">Content-Security-Policy: 
+    default-src 'self'; 
+    script-src 'self' https://cdn.jsdelivr.net; 
+    style-src 'self' https://cdn.jsdelivr.net;</code></pre>
+
+        <h3>4.3 单页应用(SPA)</h3>
+        <pre><code class="language-markup">Content-Security-Policy: 
+    default-src 'self'; 
+    script-src 'self' 'nonce-{随机值}'; 
+    connect-src 'self' https://api.example.com; 
+    style-src 'self' 'nonce-{随机值}'</code></pre>
+
+        <div class="info-box">
+            <h4><i class="fas fa-lightbulb"></i> 最佳实践</h4>
+            <p>1. 从Report-Only模式开始测试<br>
+            2. 使用nonce或hash代替unsafe-inline<br>
+            3. 避免使用unsafe-eval<br>
+            4. 定期审查CSP报告<br>
+            5. 逐步收紧策略</p>
+        </div>
+
+        <h2><i class="fas fa-tools"></i> 五、调试工具</h2>
+        <ul>
+            <li>Chrome DevTools: Console查看CSP错误</li>
+            <li>CSP Evaluator: Google提供的在线检测工具</li>
+            <li>Report URI: CSP报告收集服务</li>
+        </ul>
+
+        <h2><i class="fas fa-book"></i> 总结</h2>
+        <p>CSP是防御XSS的重要防线，合理配置可以大幅提升安全性。记住从严格策略开始，配合报告机制逐步优化。</p>
+
+        <div style="display:flex;justify-content:space-between;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border-color)">
+            <a href="xss-defense.html" style="color:var(--neon-green);text-decoration:none"><i class="fas fa-arrow-left"></i> 上一篇</a>
+            <a href="../wiki.html" style="color:var(--neon-green);text-decoration:none">返回知识库</a>
+            <a href="blind-xss.html" style="color:var(--neon-green);text-decoration:none">下一篇 <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div></div>
+    <footer class="footer"><div class="container-fluid"><div style="display:flex;justify-content:space-between"><span>© 2025 蓝莲花XSS平台</span><a href="../index.html" style="color:var(--neon-green)"><i class="fas fa-home"></i> 首页</a></div></div></footer>    
+    <!-- 鍥炲埌椤堕儴鎸夐挳 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/libs/prism/js/prism.min.js"></script>    <script>
+        // 鍥炲埌椤堕儴鍔熻兘
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

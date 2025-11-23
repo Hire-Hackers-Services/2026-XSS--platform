@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>API调试工具</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 { color: #4ec9b0; }
+        h2 { color: #569cd6; }
+        .test-btn {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-btn:hover { background: #005a9e; }
+        .result {
+            background: #252526;
+            border-left: 3px solid #4ec9b0;
+            padding: 15px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { border-left-color: #4ec9b0; }
+        .error { border-left-color: #f48771; color: #f48771; }
+        .info { border-left-color: #569cd6; }
+    </style>
+</head>
+<body>
+    <h1>🔍 API调试工具</h1>
+    
+    <div>
+        <h2>Step 1: 测试最简单的API</h2>
+        <button class="test-btn" onclick="testSimple()">测试 /api/simple-test.php</button>
+        <div class="result" id="result1">点击按钮开始测试...</div>
+    </div>
+    
+    <div>
+        <h2>Step 2: 测试带配置的API</h2>
+        <button class="test-btn" onclick="testWithConfig()">测试 /api/test.php</button>
+        <div class="result" id="result2">点击按钮开始测试...</div>
+    </div>
+    
+    <div>
+        <h2>Step 3: 测试完整的collect API</h2>
+        <button class="test-btn" onclick="testCollect()">测试 /api/collect.php</button>
+        <div class="result" id="result3">点击按钮开始测试...</div>
+    </div>
+    
+    <div>
+        <h2>Step 4: 直接浏览器访问测试</h2>
+        <p>请直接在浏览器打开以下链接查看原始响应：</p>
+        <ul>
+            <li><a href="/api/simple-test.php" target="_blank">/api/simple-test.php</a></li>
+            <li><a href="/api/test.php" target="_blank">/api/test.php</a></li>
+            <li><a href="/api/collect.php?test=1" target="_blank">/api/collect.php?test=1</a></li>
+        </ul>
+    </div>
+
+    <script>
+        async function testSimple() {
+            const div = document.getElementById('result1');
+            div.className = 'result info';
+            div.textContent = '正在测试...';
+            
+            try {
+                const response = await fetch('/api/simple-test.php');
+                const status = response.status;
+                const contentType = response.headers.get('content-type');
+                const text = await response.text();
+                
+                div.textContent = `HTTP状态: ${status}
+Content-Type: ${contentType}
+
+原始响应:
+${text}`;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    try {
+                        const json = JSON.parse(text);
+                        div.textContent += '\n\nJSON解析成功:\n' + JSON.stringify(json, null, 2);
+                        div.className = 'result success';
+                    } catch (e) {
+                        div.textContent += '\n\n[错误] JSON解析失败: ' + e.message;
+                        div.className = 'result error';
+                    }
+                } else {
+                    div.textContent += '\n\n[警告] 返回的不是JSON格式';
+                    div.className = 'result error';
+                }
+            } catch (error) {
+                div.textContent = '[错误] 请求失败:\n' + error.message;
+                div.className = 'result error';
+            }
+        }
+        
+        async function testWithConfig() {
+            const div = document.getElementById('result2');
+            div.className = 'result info';
+            div.textContent = '正在测试...';
+            
+            try {
+                const response = await fetch('/api/test.php');
+                const status = response.status;
+                const contentType = response.headers.get('content-type');
+                const text = await response.text();
+                
+                div.textContent = `HTTP状态: ${status}
+Content-Type: ${contentType}
+
+原始响应:
+${text}`;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    try {
+                        const json = JSON.parse(text);
+                        div.textContent += '\n\nJSON解析成功:\n' + JSON.stringify(json, null, 2);
+                        div.className = 'result success';
+                    } catch (e) {
+                        div.textContent += '\n\n[错误] JSON解析失败: ' + e.message;
+                        div.className = 'result error';
+                    }
+                } else {
+                    div.textContent += '\n\n[警告] 返回的不是JSON格式';
+                    div.className = 'result error';
+                }
+            } catch (error) {
+                div.textContent = '[错误] 请求失败:\n' + error.message;
+                div.className = 'result error';
+            }
+        }
+        
+        async function testCollect() {
+            const div = document.getElementById('result3');
+            div.className = 'result info';
+            div.textContent = '正在测试...';
+            
+            try {
+                const response = await fetch('/api/collect.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'debug_test',
+                        message: 'API调试测试',
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                
+                const status = response.status;
+                const contentType = response.headers.get('content-type');
+                const text = await response.text();
+                
+                div.textContent = `HTTP状态: ${status}
+Content-Type: ${contentType}
+
+原始响应:
+${text.substring(0, 2000)}`;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    try {
+                        const json = JSON.parse(text);
+                        div.textContent += '\n\nJSON解析成功:\n' + JSON.stringify(json, null, 2);
+                        div.className = 'result success';
+                    } catch (e) {
+                        div.textContent += '\n\n[错误] JSON解析失败: ' + e.message;
+                        div.className = 'result error';
+                    }
+                } else {
+                    div.textContent += '\n\n[警告] 返回的不是JSON格式，可能是PHP错误页面';
+                    div.className = 'result error';
+                }
+            } catch (error) {
+                div.textContent = '[错误] 请求失败:\n' + error.message;
+                div.className = 'result error';
+            }
+        }
+    </script>
+</body>
+</html>

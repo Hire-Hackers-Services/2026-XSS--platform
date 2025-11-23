@@ -1,0 +1,28 @@
+# Nginx配置参考 - 添加到你的站点配置文件中
+# 位置通常在: /etc/nginx/sites-available/你的站点名
+# 或: /etc/nginx/conf.d/你的站点名.conf
+
+# 在 server {} 块中添加以下配置:
+
+# API路径重写 - 支持 /api/collect 访问 /api/collect.php
+location ~ ^/api/([^/]+)$ {
+    try_files /api/$1.php /api/$1 =404;
+    fastcgi_pass unix:/var/run/php/php-fpm.sock;  # 或 127.0.0.1:9000
+    fastcgi_index index.php;
+    fastcgi_param SCRIPT_FILENAME $document_root/api/$1.php;
+    include fastcgi_params;
+}
+
+# 或者更简单的方式 - 直接处理.php文件
+location ~ \.php$ {
+    try_files $uri =404;
+    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    fastcgi_pass unix:/var/run/php/php-fpm.sock;  # 根据你的PHP-FPM配置调整
+    fastcgi_index index.php;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    include fastcgi_params;
+}
+
+# 重启Nginx使配置生效:
+# sudo nginx -t              # 测试配置
+# sudo systemctl reload nginx  # 重载配置

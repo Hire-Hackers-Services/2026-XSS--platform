@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+    <meta name="description" content="全面的XSS防御指南，包括输入验证、输出编码、CSP配置、HttpOnly Cookie等多层防护策略。学习如何构建安全的Web应用。">
+    <meta name="keywords" content="XSS防御,Web安全,输入验证,输出编码,CSP,Content Security Policy,安全编程,XSS Prevention">
+    <meta name="author" content="蓝莲花XSS平台">
+    <meta property="og:title" content="XSS防御完全指南 - XSS安全知识库">
+    <meta property="og:description" content="从输入到输出的全链路XSS防护策略，构建安全的Web应用">
+    <title>XSS防御完全指南：从输入到输出的全链路防护 - XSS安全知识库</title>
+    <link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/libs/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/libs/prism/css/prism-tomorrow.min.css">
+    
+    <style>
+        .article-header{background:linear-gradient(135deg,var(--bg-secondary) 0%,var(--bg-tertiary) 100%);padding:3rem 0;margin-bottom:2rem;border-bottom:2px solid var(--neon-green)}
+        .article-title{font-size:2.5rem;color:var(--text-highlight);margin-bottom:1rem;text-shadow:0 0 10px rgba(0,255,65,0.3)}
+        .article-content{max-width:900px;margin:0 auto;padding:2rem;background:rgba(0,0,0,0.3);border-radius:var(--border-radius);line-height:1.8}
+        .article-content h2{color:var(--neon-green);margin-top:2.5rem;margin-bottom:1.5rem;padding-bottom:0.5rem;border-bottom:2px solid rgba(0,255,65,0.3)}
+        .article-content h3{color:var(--text-highlight);margin-top:2rem;margin-bottom:1rem}
+        .article-content code{background:rgba(0,255,65,0.1);padding:0.2rem 0.5rem;border-radius:3px;color:var(--neon-green)}
+        .article-content pre{background:rgba(0,0,0,0.5);padding:1.5rem;border-radius:var(--border-radius);border-left:3px solid var(--neon-green);overflow-x:auto;margin:1.5rem 0}
+        .success-box{background:rgba(40,167,69,0.1);border-left:4px solid #28a745;padding:1rem;margin:1.5rem 0;border-radius:4px}
+        .warning-box{background:rgba(255,193,7,0.1);border-left:4px solid #ffc107;padding:1rem;margin:1.5rem 0;border-radius:4px}
+        .info-box{background:rgba(0,123,255,0.1);border-left:4px solid #007bff;padding:1rem;margin:1.5rem 0;border-radius:4px}        
+        /* 鍥炲埌椤堕儴鎸夐挳 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb" style="background:transparent;padding:1rem 0">
+                <li class="breadcrumb-item"><a href="../index.html" style="color:var(--neon-green)">首页</a></li>
+                <li class="breadcrumb-item"><a href="../wiki.html" style="color:var(--neon-green)">知识库</a></li>
+                <li class="breadcrumb-item active" style="color:var(--text-secondary)">XSS防御完全指南</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="article-header">
+        <div class="container text-center">
+            <h1 class="article-title">
+                <i class="fas fa-shield-alt"></i> XSS防御完全指南：从输入到输出的全链路防护
+            </h1>
+            <div style="color:var(--text-secondary);font-size:0.95rem">
+                <span><i class="far fa-calendar"></i> 2025-01-16</span>
+                <span class="mx-3">|</span>
+                <span><i class="far fa-clock"></i> 22分钟阅读</span>
+                <span class="mx-3">|</span>
+                <span><i class="fas fa-tag"></i> 防御方法</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="article-content">
+            <h2><i class="fas fa-book"></i> 一、XSS防御核心原则</h2>
+            
+            <p>XSS防御遵循"纵深防御"策略，包含多个层次：</p>
+            
+            <div class="success-box">
+                <h4><i class="fas fa-check-circle"></i> 防御三原则</h4>
+                <p>1. <strong>输入验证</strong>：永远不要信任用户输入<br>
+                2. <strong>输出编码</strong>：在输出到页面前进行适当编码<br>
+                3. <strong>纵深防御</strong>：使用多层防护机制</p>
+            </div>
+
+            <h3>1.1 为什么需要多层防御？</h3>
+            <ul>
+                <li>单一防护措施可能被绕过</li>
+                <li>不同场景需要不同的防护策略</li>
+                <li>防止人为失误导致的安全漏洞</li>
+                <li>符合安全编码最佳实践</li>
+            </ul>
+
+            <h2><i class="fas fa-filter"></i> 二、输入验证与过滤</h2>
+            
+            <h3>2.1 白名单验证（推荐）</h3>
+            <p>只接受符合预期格式的输入：</p>
+            <pre><code class="language-php">// PHP示例
+function validateUsername($username) {
+    // 只允许字母、数字和下划线，长度3-20
+    if (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $username)) {
+        throw new Exception('无效的用户名格式');
+    }
+    return $username;
+}
+
+// 验证邮箱
+function validateEmail($email) {
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw new Exception('无效的邮箱地址');
+    }
+    return $email;
+}</code></pre>
+
+            <pre><code class="language-javascript">// JavaScript客户端验证
+function validateInput(input, type) {
+    const patterns = {
+        username: /^[a-zA-Z0-9_]{3,20}$/,
+        email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        phone: /^1[3-9]\d{9}$/,
+        url: /^https?:\/\/.+/
+    };
+    
+    return patterns[type]?.test(input) || false;
+}</code></pre>
+
+            <h3>2.2 黑名单过滤（不推荐作为唯一防御）</h3>
+            <pre><code class="language-php">// 移除危险字符（容易被绕过）
+function removeXSS($input) {
+    $dangerous = ['&lt;script&gt;', '&lt;/script&gt;', 'javascript:', 'onerror='];
+    return str_ireplace($dangerous, '', $input);
+}
+
+// 更好的方式是使用HTML Purifier等库</code></pre>
+
+            <h3>2.3 内容长度限制</h3>
+            <pre><code class="language-javascript">// 限制输入长度
+function limitLength(input, maxLength = 200) {
+    if (input.length > maxLength) {
+        throw new Error('输入超过最大长度限制');
+    }
+    return input;
+}</code></pre>
+
+            <h2><i class="fas fa-code"></i> 三、输出编码策略</h2>
+            
+            <h3>3.1 HTML上下文编码</h3>
+            <p>在HTML标签之间输出时：</p>
+            <pre><code class="language-php">// PHP
+function encodeHTML($str) {
+    return htmlspecialchars($str, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+}
+
+// 使用示例
+echo '&lt;div&gt;' . encodeHTML($userInput) . '&lt;/div&gt;';</code></pre>
+
+            <pre><code class="language-javascript">// JavaScript
+function encodeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// 或使用现成方法
+function escapeHTML(str) {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .replace(/\//g, '&#x2F;');
+}</code></pre>
+
+            <h3>3.2 HTML属性上下文编码</h3>
+            <pre><code class="language-markup">&lt;!-- 正确做法 --&gt;
+&lt;div title="&lt;?php echo encodeHTMLAttribute($userInput); ?&gt;"&gt;&lt;/div&gt;
+
+&lt;!-- 错误做法 --&gt;
+&lt;div title="&lt;?php echo $userInput; ?&gt;"&gt;&lt;/div&gt;</code></pre>
+
+            <pre><code class="language-php">function encodeHTMLAttribute($str) {
+    // 除了HTML编码，还要处理属性特殊字符
+    return htmlspecialchars($str, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+}</code></pre>
+
+            <h3>3.3 JavaScript上下文编码</h3>
+            <pre><code class="language-markup">&lt;script&gt;
+// 错误做法
+var userInput = "&lt;?php echo $userInput; ?&gt;";
+
+// 正确做法
+var userInput = &lt;?php echo json_encode($userInput, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?&gt;;
+&lt;/script&gt;</code></pre>
+
+            <pre><code class="language-javascript">// JavaScript中安全地插入动态内容
+function safeInnerHTML(element, html) {
+    // 使用textContent代替innerHTML
+    element.textContent = html;
+}
+
+// 或使用DOMPurify库
+import DOMPurify from 'dompurify';
+element.innerHTML = DOMPurify.sanitize(html);</code></pre>
+
+            <h3>3.4 URL上下文编码</h3>
+            <pre><code class="language-php">// PHP
+$safeURL = 'https://example.com/search?q=' . urlencode($userInput);
+
+// 验证URL协议
+function validateURL($url) {
+    $parsed = parse_url($url);
+    if (!in_array($parsed['scheme'] ?? '', ['http', 'https'])) {
+        throw new Exception('不允许的URL协议');
+    }
+    return $url;
+}</code></pre>
+
+            <pre><code class="language-javascript">// JavaScript
+const safeURL = 'https://example.com/search?q=' + encodeURIComponent(userInput);
+
+// 验证URL
+function isValidURL(url) {
+    try {
+        const parsed = new URL(url);
+        return ['http:', 'https:'].includes(parsed.protocol);
+    } catch {
+        return false;
+    }
+}</code></pre>
+
+            <h3>3.5 CSS上下文编码</h3>
+            <pre><code class="language-markup">&lt;!-- 避免在CSS中使用用户输入 --&gt;
+&lt;style&gt;
+.user-color {
+    /* 不要这样做 */
+    background: &lt;?php echo $userInput; ?&gt;;
+}
+&lt;/style&gt;
+
+&lt;!-- 如果必须使用，严格验证 --&gt;
+&lt;?php
+function validateColor($color) {
+    if (!preg_match('/^#[0-9A-Fa-f]{6}$/', $color)) {
+        return '#000000'; // 默认颜色
+    }
+    return $color;
+}
+?&gt;</code></pre>
+
+            <h2><i class="fas fa-lock"></i> 四、内容安全策略(CSP)</h2>
+            
+            <h3>4.1 CSP基础配置</h3>
+            <pre><code class="language-markup">&lt;!-- 最严格的CSP --&gt;
+&lt;meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'"&gt;</code></pre>
+
+            <pre><code class="language-php">// PHP设置CSP头
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-" . $nonce . "'; style-src 'self' 'nonce-" . $nonce . "'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");</code></pre>
+
+            <h3>4.2 使用Nonce的CSP</h3>
+            <pre><code class="language-php">&lt;?php
+// 生成随机nonce
+$nonce = base64_encode(random_bytes(16));
+
+// 设置CSP头
+header("Content-Security-Policy: script-src 'nonce-$nonce' 'strict-dynamic'");
+?&gt;
+
+&lt;!-- 在script标签中使用nonce --&gt;
+&lt;script nonce="&lt;?php echo $nonce; ?&gt;"&gt;
+    console.log('这个脚本会被执行');
+&lt;/script&gt;
+
+&lt;!-- 没有nonce的脚本会被阻止 --&gt;
+&lt;script&gt;
+    console.log('这个脚本会被CSP阻止');
+&lt;/script&gt;</code></pre>
+
+            <h3>4.3 CSP报告</h3>
+            <pre><code class="language-php">// 设置CSP报告端点
+header("Content-Security-Policy: default-src 'self'; report-uri /csp-report; report-to csp-endpoint");
+header("Report-To: {\"group\":\"csp-endpoint\",\"max_age\":10886400,\"endpoints\":[{\"url\":\"/csp-report\"}]}");</code></pre>
+
+            <pre><code class="language-php">// 处理CSP报告
+// /csp-report 端点
+$report = json_decode(file_get_contents('php://input'), true);
+
+if ($report) {
+    // 记录违规信息
+    error_log('CSP Violation: ' . json_encode($report));
+    
+    // 可以发送到安全监控系统
+    sendToSecurityMonitor($report);
+}</code></pre>
+
+            <div class="info-box">
+                <h4><i class="fas fa-lightbulb"></i> CSP最佳实践</h4>
+                <p>1. 从严格策略开始，逐步放宽<br>
+                2. 使用nonce或hash而非'unsafe-inline'<br>
+                3. 启用报告功能监控违规<br>
+                4. 定期审查和更新CSP策略</p>
+            </div>
+
+            <h2><i class="fas fa-cookie-bite"></i> 五、Cookie安全配置</h2>
+            
+            <h3>5.1 HttpOnly和Secure标志</h3>
+            <pre><code class="language-php">// PHP设置安全Cookie
+setcookie(
+    'session_id',
+    $sessionId,
+    [
+        'expires' => time() + 3600,
+        'path' => '/',
+        'domain' => '.example.com',
+        'secure' => true,      // 仅HTTPS
+        'httponly' => true,    // 禁止JS访问
+        'samesite' => 'Strict' // 防CSRF
+    ]
+);</code></pre>
+
+            <pre><code class="language-javascript">// Express.js示例
+app.use(session({
+    secret: 'your-secret-key',
+    cookie: {
+        secure: true,
+        httpOnly: true,
+        sameSite: 'strict',
+        maxAge: 3600000
+    }
+}));</code></pre>
+
+            <h3>5.2 SameSite Cookie</h3>
+            <ul>
+                <li><code>Strict</code>：完全禁止跨站发送</li>
+                <li><code>Lax</code>：允许部分跨站场景（GET请求）</li>
+                <li><code>None</code>：允许跨站（需配合Secure）</li>
+            </ul>
+
+            <h2><i class="fas fa-tools"></i> 六、框架级别的防御</h2>
+            
+            <h3>6.1 使用模板引擎的自动转义</h3>
+            <pre><code class="language-markup">&lt;!-- Twig (PHP) --&gt;
+{{ userInput }}  {# 自动HTML转义 #}
+{{ userInput|raw }}  {# 禁用转义（危险！） #}</code></pre>
+
+            <pre><code class="language-javascript">// React自动转义
+function UserProfile({ name }) {
+    return &lt;div&gt;{name}&lt;/div&gt;;  // 自动转义
+}
+
+// 危险的做法（不推荐）
+function DangerousComponent({ html }) {
+    return &lt;div dangerouslySetInnerHTML={{ __html: html }} /&gt;;
+}</code></pre>
+
+            <h3>6.2 框架内置的XSS防护</h3>
+            <pre><code class="language-javascript">// Angular自动转义
+&lt;div&gt;{{ userInput }}&lt;/div&gt;  &lt;!-- 自动转义 --&gt;
+
+// Vue.js自动转义
+&lt;div&gt;{{ userInput }}&lt;/div&gt;  &lt;!-- 自动转义 --&gt;
+&lt;div v-html="userInput"&gt;&lt;/div&gt;  &lt;!-- 不转义，危险！ --&gt;</code></pre>
+
+            <h3>6.3 使用安全的API</h3>
+            <pre><code class="language-javascript">// 使用textContent代替innerHTML
+element.textContent = userInput;  // 安全
+element.innerHTML = userInput;    // 危险
+
+// 使用setAttribute代替直接赋值
+element.setAttribute('title', userInput);  // 相对安全
+element.title = userInput;                 // 也可以
+
+// 避免eval和Function构造器
+eval(userInput);  // 极度危险
+new Function(userInput)();  // 极度危险
+
+// 使用JSON.parse代替eval
+const data = JSON.parse(jsonString);  // 安全</code></pre>
+
+            <h2><i class="fas fa-check-double"></i> 七、完整的XSS防御清单</h2>
+            
+            <div class="success-box">
+                <h4><i class="fas fa-clipboard-check"></i> 开发阶段</h4>
+                <p>☑ 对所有用户输入进行验证<br>
+                ☑ 在适当的上下文进行输出编码<br>
+                ☑ 使用自动转义的模板引擎<br>
+                ☑ 避免使用innerHTML、eval等危险API<br>
+                ☑ 实施严格的CSP策略<br>
+                ☑ 配置安全的Cookie属性<br>
+                ☑ 使用HTTPS传输敏感数据</p>
+            </div>
+
+            <div class="info-box">
+                <h4><i class="fas fa-vial"></i> 测试阶段</h4>
+                <p>☑ 进行XSS安全测试<br>
+                ☑ 使用自动化扫描工具<br>
+                ☑ 人工审查关键代码<br>
+                ☑ 测试CSP配置是否生效<br>
+                ☑ 验证所有输入输出点</p>
+            </div>
+
+            <div class="warning-box">
+                <h4><i class="fas fa-server"></i> 部署阶段</h4>
+                <p>☑ 启用WAF（Web应用防火墙）<br>
+                ☑ 配置安全响应头<br>
+                ☑ 定期更新框架和依赖库<br>
+                ☑ 监控安全日志<br>
+                ☑ 实施入侵检测系统</p>
+            </div>
+
+            <h2><i class="fas fa-code-branch"></i> 八、不同场景的防御策略</h2>
+            
+            <h3>8.1 富文本编辑器</h3>
+            <pre><code class="language-javascript">// 使用DOMPurify清理HTML
+import DOMPurify from 'dompurify';
+
+function sanitizeRichText(html) {
+    return DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'a'],
+        ALLOWED_ATTR: ['href', 'title', 'target'],
+        ALLOW_DATA_ATTR: false
+    });
+}</code></pre>
+
+            <h3>8.2 Markdown渲染</h3>
+            <pre><code class="language-javascript">// 使用marked + DOMPurify
+import marked from 'marked';
+import DOMPurify from 'dompurify';
+
+function renderMarkdown(markdown) {
+    const html = marked(markdown);
+    return DOMPurify.sanitize(html);
+}</code></pre>
+
+            <h3>8.3 JSON API</h3>
+            <pre><code class="language-php">// 设置正确的Content-Type
+header('Content-Type: application/json');
+
+// 输出JSON数据
+echo json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);</code></pre>
+
+            <h2><i class="fas fa-graduation-cap"></i> 九、总结</h2>
+            
+            <p>XSS防御是一个系统工程，需要在多个层面实施防护：</p>
+            
+            <ol>
+                <li><strong>输入层</strong>：验证和过滤用户输入</li>
+                <li><strong>处理层</strong>：安全地处理和存储数据</li>
+                <li><strong>输出层</strong>：根据上下文进行适当编码</li>
+                <li><strong>HTTP层</strong>：配置安全响应头和Cookie</li>
+                <li><strong>客户端层</strong>：使用CSP等浏览器安全特性</li>
+            </ol>
+
+            <p>记住：<strong>永远不要信任用户输入，永远进行适当的输出编码！</strong></p>
+
+            <div style="display:flex;justify-content:space-between;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border-color)">
+                <a href="cookie-stealing.html" style="color:var(--neon-green);text-decoration:none">
+                    <i class="fas fa-arrow-left"></i> 上一篇：Cookie窃取实战
+                </a>
+                <a href="../wiki.html" style="color:var(--neon-green);text-decoration:none">
+                    返回知识库 <i class="fas fa-list"></i>
+                </a>
+                <a href="csp-guide.html" style="color:var(--neon-green);text-decoration:none">
+                    下一篇：CSP配置实战指南 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="footer-content" style="display:flex;justify-content:space-between;align-items:center">
+                <div><span>© 2025 蓝莲花XSS在线平台</span></div>
+                <div><a href="../index.html" style="color:var(--neon-green);text-decoration:none"><i class="fas fa-home"></i> 返回首页</a></div>
+            </div>
+        </div>
+    </footer>    
+    <!-- 鍥炲埌椤堕儴鎸夐挳 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+
+    <script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/libs/prism/js/prism.min.js"></script>
+    <script src="../static/libs/prism/js/prism-javascript.min.js"></script>
+    <script src="../static/libs/prism/js/prism-php.min.js"></script>    <script>
+        // 鍥炲埌椤堕儴鍔熻兘
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

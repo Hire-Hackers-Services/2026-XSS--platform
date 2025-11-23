@@ -1,0 +1,1133 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+    <meta name="description" content="详细教程：如何使用Cookie登录网站。包含Chrome和Firefox浏览器的完整操作步骤，手动和自动化登录方法，适合新手学习。">
+    <meta name="keywords" content="Cookie登录,浏览器Cookie,Chrome Cookie,Firefox Cookie,Cookie教程,免密登录,会话管理">
+    <meta name="author" content="蓝莲花XSS平台">
+    <meta property="og:title" content="使用Cookie登录网站完全教程 - XSS安全知识库">
+    <meta property="og:description" content="从零开始学习如何使用Cookie登录网站，包含Chrome和Firefox的详细操作步骤">
+    <meta property="og:type" content="article">
+    <title>使用Cookie登录网站完全教程 - XSS安全知识库</title>
+    <link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/libs/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/libs/prism/css/prism-tomorrow.min.css">
+    
+    <style>
+        .article-header {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 20, 10, 0.95) 100%);
+            padding: 80px 0 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .article-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 65, 0.03) 0px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: var(--neon-green);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--text-secondary);
+        }
+        
+        .article-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff41, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        
+        .article-meta {
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        
+        .article-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            margin: 2rem 0;
+        }
+        
+        .article-content h2 {
+            color: var(--neon-green);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .article-content h3 {
+            color: var(--text-highlight);
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .article-content h4 {
+            color: var(--cyan);
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .article-content p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        
+        .article-content ul, .article-content ol {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .article-content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            color: var(--text-primary);
+        }
+        
+        .warning-box {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box h4 {
+            color: #ffc107;
+            margin-top: 0;
+        }
+        
+        .info-box {
+            background: rgba(0, 255, 65, 0.1);
+            border-left: 4px solid var(--neon-green);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .info-box h4 {
+            color: var(--neon-green);
+            margin-top: 0;
+        }
+        
+        .success-box {
+            background: rgba(40, 167, 69, 0.1);
+            border-left: 4px solid #28a745;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .success-box h4 {
+            color: #28a745;
+            margin-top: 0;
+        }
+        
+        .toc {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .toc h3 {
+            color: var(--neon-green);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc ul ul {
+            padding-left: 1.5rem;
+        }
+        
+        .toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .toc a:hover {
+            color: var(--neon-green);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: var(--neon-green);
+            color: #000;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .screenshot-placeholder {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: var(--text-tertiary);
+        }
+        
+        .screenshot-placeholder i {
+            font-size: 3rem;
+            color: var(--neon-green);
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <!-- Article Header -->
+    <div class="article-header">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="../wiki.html"><i class="fas fa-book"></i> 知识库</a></li>
+                    <li class="breadcrumb-item active">使用Cookie登录网站完全教程</li>
+                </ol>
+            </nav>
+            <h1 class="article-title">使用Cookie登录网站完全教程</h1>
+            <div class="article-meta">
+                <span><i class="far fa-calendar"></i> 2025年1月</span>
+                <span class="mx-3">|</span>
+                <span><i class="far fa-clock"></i> 20分钟阅读</span>
+                <span class="mx-3">|</span>
+                <span><i class="fas fa-tag"></i> 基础知识</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 offset-lg-1">
+                    <!-- Table of Contents -->
+                    <div class="toc">
+                        <h3><i class="fas fa-list"></i> 目录</h3>
+                        <ul>
+                            <li><a href="#what-is-cookie">1. 什么是Cookie</a></li>
+                            <li><a href="#why-cookie-login">2. 为什么可以用Cookie登录</a></li>
+                            <li><a href="#get-cookie">3. 如何获取Cookie</a>
+                                <ul>
+                                    <li><a href="#chrome-cookie">3.1 Chrome浏览器获取Cookie</a></li>
+                                    <li><a href="#firefox-cookie">3.2 Firefox浏览器获取Cookie</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#use-cookie-login">4. 使用Cookie登录网站</a>
+                                <ul>
+                                    <li><a href="#manual-chrome">4.1 Chrome手动设置Cookie</a></li>
+                                    <li><a href="#manual-firefox">4.2 Firefox手动设置Cookie</a></li>
+                                    <li><a href="#auto-script">4.3 使用脚本自动登录</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#advanced">5. 高级技巧</a></li>
+                            <li><a href="#security">6. 安全注意事项</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Article Content -->
+                    <div class="article-content">
+                        <h2 id="what-is-cookie">1. 什么是Cookie</h2>
+                        <p>
+                            Cookie是网站存储在用户浏览器中的小型文本文件，用于记录用户的登录状态、偏好设置等信息。当你登录一个网站后，网站会生成一个Cookie并存储在你的浏览器中，之后每次访问该网站时，浏览器都会自动携带这个Cookie，网站通过验证Cookie来识别你的身份。
+                        </p>
+                        
+                        <div class="info-box">
+                            <h4><i class="fas fa-info-circle"></i> Cookie的组成部分</h4>
+                            <ul>
+                                <li><strong>Name (名称)</strong>: Cookie的标识符，如 "session_id"</li>
+                                <li><strong>Value (值)</strong>: Cookie存储的实际数据，如 "abc123xyz"</li>
+                                <li><strong>Domain (域名)</strong>: Cookie生效的域名范围</li>
+                                <li><strong>Path (路径)</strong>: Cookie生效的URL路径</li>
+                                <li><strong>Expires (过期时间)</strong>: Cookie的有效期</li>
+                                <li><strong>HttpOnly</strong>: 防止JavaScript访问的安全标志</li>
+                                <li><strong>Secure</strong>: 仅在HTTPS连接中传输</li>
+                            </ul>
+                        </div>
+                        
+                        <h2 id="why-cookie-login">2. 为什么可以用Cookie登录</h2>
+                        <p>
+                            当你在网站上输入用户名和密码登录后，服务器会验证你的身份，验证成功后会生成一个<strong>会话标识(Session ID)</strong>或<strong>认证令牌(Auth Token)</strong>，并通过Cookie发送到你的浏览器保存。
+                        </p>
+                        <p>
+                            之后每次访问该网站时，浏览器会自动携带这个Cookie，服务器通过验证Cookie中的会话信息来确认你的登录状态，无需再次输入用户名和密码。这就是为什么我们可以直接使用Cookie来登录网站。
+                        </p>
+                        
+                        <div class="code-block">
+                            <pre><code class="language-markup">典型的登录Cookie示例：
+
+Name: session_id
+Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMjM0NTY3ODkwfQ
+Domain: .example.com
+Path: /
+Expires: 2025-02-01 12:00:00
+HttpOnly: true
+Secure: true</code></pre>
+                        </div>
+                        
+                        <h2 id="get-cookie">3. 如何获取Cookie</h2>
+                        
+                        <h3 id="chrome-cookie">3.1 Chrome浏览器获取Cookie</h3>
+                        
+                        <h4><span class="step-number">1</span>打开开发者工具</h4>
+                        <p>在Chrome浏览器中打开目标网站，然后按下以下快捷键打开开发者工具：</p>
+                        <ul>
+                            <li><strong>Windows/Linux</strong>: <code>F12</code> 或 <code>Ctrl + Shift + I</code></li>
+                            <li><strong>Mac</strong>: <code>Cmd + Option + I</code></li>
+                        </ul>
+                        
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 2px solid var(--neon-green); border-radius: 8px; padding: 20px; margin: 1.5rem 0;">
+                            <p style="text-align: center; color: var(--neon-green); margin-bottom: 15px;"><strong>步骤1图示</strong></p>
+                            <svg width="100%" height="300" viewBox="0 0 800 300" style="background: #1a1a1a; border-radius: 4px;">
+                                <!-- 浏览器窗口 -->
+                                <rect x="50" y="30" width="700" height="240" fill="#2a2a2a" stroke="#00ff41" stroke-width="2" rx="5"/>
+                                <!-- 地址栏 -->
+                                <rect x="60" y="40" width="680" height="30" fill="#3a3a3a" rx="3"/>
+                                <text x="70" y="60" fill="#00ff41" font-size="14">https://example.com</text>
+                                <!-- 开发者工具分隔线 -->
+                                <line x1="50" y1="150" x2="750" y2="150" stroke="#00ff41" stroke-width="3"/>
+                                <!-- 页面内容区域 -->
+                                <rect x="60" y="80" width="680" height="60" fill="#1a1a1a"/>
+                                <text x="70" y="100" fill="#666" font-size="12">网页内容区域</text>
+                                <text x="70" y="120" fill="#666" font-size="12">...</text>
+                                <!-- 开发者工具区域 -->
+                                <rect x="60" y="160" width="680" height="100" fill="#0a0a0a"/>
+                                <text x="70" y="180" fill="#00ff41" font-size="14" font-weight="bold">开发者工具 (F12)</text>
+                                <text x="70" y="200" fill="#888" font-size="11">Elements | Console | Sources | Network | Application</text>
+                                <text x="70" y="220" fill="#666" font-size="10">&gt; 按 F12 或 Ctrl+Shift+I 打开</text>
+                                <text x="70" y="240" fill="#666" font-size="10">&gt; Mac: Cmd+Option+I</text>
+                            </svg>
+                            <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">按F12打开开发者工具，界面通常显示在浏览器右侧或底部</p>
+                        </div>
+                        
+                        <h4><span class="step-number">2</span>切换到Application标签</h4>
+                        <p>在开发者工具顶部找到<strong>"Application"</strong>标签并点击。如果没看到，点击右侧的<code>&gt;&gt;</code>图标展开更多选项。</p>
+                        
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 2px solid var(--neon-green); border-radius: 8px; padding: 20px; margin: 1.5rem 0;">
+                            <p style="text-align: center; color: var(--neon-green); margin-bottom: 15px;"><strong>步骤2图示</strong></p>
+                            <svg width="100%" height="200" viewBox="0 0 800 200" style="background: #0a0a0a; border-radius: 4px;">
+                                <!-- 开发者工具标题栏 -->
+                                <rect x="20" y="20" width="760" height="40" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+                                <!-- 标签导航 -->
+                                <rect x="30" y="25" width="100" height="30" fill="#2a2a2a" rx="3"/>
+                                <text x="50" y="45" fill="#888" font-size="13">Elements</text>
+                                <rect x="135" y="25" width="100" height="30" fill="#2a2a2a" rx="3"/>
+                                <text x="155" y="45" fill="#888" font-size="13">Console</text>
+                                <rect x="240" y="25" width="100" height="30" fill="#2a2a2a" rx="3"/>
+                                <text x="260" y="45" fill="#888" font-size="13">Sources</text>
+                                <rect x="345" y="25" width="100" height="30" fill="#2a2a2a" rx="3"/>
+                                <text x="365" y="45" fill="#888" font-size="13">Network</text>
+                                <!-- Application 标签高亮 -->
+                                <rect x="450" y="25" width="110" height="30" fill="#00ff41" rx="3"/>
+                                <text x="460" y="45" fill="#000" font-size="13" font-weight="bold">Application</text>
+                                <!-- 箭头指示 -->
+                                <path d="M 505 70 L 505 90 L 490 90 L 505 110 L 520 90 L 505 90 Z" fill="#00ff41"/>
+                                <text x="450" y="135" fill="#00ff41" font-size="14" font-weight="bold">点击这里 ↑</text>
+                                <!-- 内容区域 -->
+                                <rect x="30" y="65" width="740" height="110" fill="#0a0a0a" stroke="#333" stroke-width="1"/>
+                                <text x="40" y="85" fill="#666" font-size="11">在这里管理Cookie、Storage等</text>
+                            </svg>
+                            <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">开发者工具顶部导航：Elements | Console | Sources | Network | <strong style="color: var(--neon-green);">Application</strong></p>
+                        </div>
+                        
+                        <h4><span class="step-number">3</span>查看Cookies</h4>
+                        <p>在左侧导航栏中，找到<strong>"Storage"</strong>部分下的<strong>"Cookies"</strong>，展开后会显示当前域名。点击域名即可看到所有Cookie。</p>
+                        
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 2px solid var(--neon-green); border-radius: 8px; padding: 20px; margin: 1.5rem 0;">
+                            <p style="text-align: center; color: var(--neon-green); margin-bottom: 15px;"><strong>步骤3图示</strong></p>
+                            <svg width="100%" height="350" viewBox="0 0 800 350" style="background: #0a0a0a; border-radius: 4px;">
+                                <!-- 左侧导航栏 -->
+                                <rect x="20" y="20" width="200" height="310" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+                                <text x="30" y="40" fill="#888" font-size="12">Application</text>
+                                <text x="30" y="65" fill="#888" font-size="11">▼ Storage</text>
+                                <text x="45" y="85" fill="#00ff41" font-size="11" font-weight="bold">▼ Cookies</text>
+                                <rect x="50" y="95" width="160" height="25" fill="rgba(0,255,65,0.1)" rx="2"/>
+                                <text x="60" y="110" fill="#00ff41" font-size="10">https://example.com</text>
+                                <text x="45" y="135" fill="#888" font-size="11">▶ Local Storage</text>
+                                <text x="45" y="155" fill="#888" font-size="11">▶ Session Storage</text>
+                                <text x="45" y="175" fill="#888" font-size="11">▶ IndexedDB</text>
+                                <!-- 右侧Cookie表格 -->
+                                <rect x="240" y="20" width="540" height="310" fill="#0a0a0a" stroke="#333" stroke-width="1"/>
+                                <!-- 表头 -->
+                                <rect x="245" y="25" width="530" height="30" fill="#1a1a1a"/>
+                                <text x="255" y="45" fill="#00ff41" font-size="11" font-weight="bold">Name</text>
+                                <text x="395" y="45" fill="#00ff41" font-size="11" font-weight="bold">Value</text>
+                                <text x="585" y="45" fill="#00ff41" font-size="11" font-weight="bold">Domain</text>
+                                <text x="715" y="45" fill="#00ff41" font-size="11" font-weight="bold">Path</text>
+                                <!-- 分隔线 -->
+                                <line x1="245" y1="55" x2="775" y2="55" stroke="#00ff41" stroke-width="1"/>
+                                <!-- Cookie数据行 -->
+                                <text x="255" y="75" fill="#0ff" font-size="10">session_id</text>
+                                <text x="395" y="75" fill="#ccc" font-size="10">abc123xyz...</text>
+                                <text x="585" y="75" fill="#888" font-size="10">.example.com</text>
+                                <text x="715" y="75" fill="#888" font-size="10">/</text>
+                                <text x="255" y="95" fill="#0ff" font-size="10">auth_token</text>
+                                <text x="395" y="95" fill="#ccc" font-size="10">eyJhbGciOi...</text>
+                                <text x="585" y="95" fill="#888" font-size="10">.example.com</text>
+                                <text x="715" y="95" fill="#888" font-size="10">/</text>
+                                <text x="255" y="115" fill="#0ff" font-size="10">user_id</text>
+                                <text x="395" y="115" fill="#ccc" font-size="10">123456</text>
+                                <text x="585" y="115" fill="#888" font-size="10">.example.com</text>
+                                <text x="715" y="115" fill="#888" font-size="10">/</text>
+                                <!-- 提示框 -->
+                                <rect x="390" y="160" width="200" height="60" fill="rgba(0,255,65,0.1)" stroke="#00ff41" stroke-width="2" rx="5"/>
+                                <text x="400" y="180" fill="#00ff41" font-size="11">双击Value列可复制</text>
+                                <text x="400" y="200" fill="#888" font-size="9">右键可删除或编辑</text>
+                            </svg>
+                            <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">左侧栏: Storage → Cookies → https://example.com<br>右侧表格显示所有Cookie的Name、Value、Domain等信息</p>
+                        </div>
+                        
+                        <h4><span class="step-number">4</span>复制Cookie值</h4>
+                        <p>找到需要的Cookie（通常是<code>session_id</code>、<code>auth_token</code>等），双击<strong>Value</strong>列的值，按<code>Ctrl+C</code>(或<code>Cmd+C</code>)复制。</p>
+                        
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// Chrome控制台快速导出所有Cookie
+document.cookie.split(';').forEach(c => console.log(c.trim()));
+
+// 或者获取格式化的Cookie对象
+const cookies = {};
+document.cookie.split(';').forEach(c => {
+    const [name, value] = c.trim().split('=');
+    cookies[name] = value;
+});
+console.log(JSON.stringify(cookies, null, 2));</code></pre>
+                        </div>
+                        
+                        <h3 id="firefox-cookie">3.2 Firefox浏览器获取Cookie</h3>
+                        
+                        <h4><span class="step-number">1</span>打开开发者工具</h4>
+                        <p>在Firefox浏览器中打开目标网站，按下快捷键：</p>
+                        <ul>
+                            <li><strong>Windows/Linux</strong>: <code>F12</code> 或 <code>Ctrl + Shift + I</code></li>
+                            <li><strong>Mac</strong>: <code>Cmd + Option + I</code></li>
+                        </ul>
+                        
+                        <h4><span class="step-number">2</span>切换到存储标签</h4>
+                        <p>在开发者工具顶部找到<strong>"存储"</strong>(Storage)标签并点击。</p>
+                        
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 2px solid var(--neon-green); border-radius: 8px; padding: 20px; margin: 1.5rem 0;">
+                            <p style="text-align: center; color: var(--neon-green); margin-bottom: 15px;"><strong>步骤2图示 - Firefox</strong></p>
+                            <svg width="100%" height="200" viewBox="0 0 800 200" style="background: #0a0a0a; border-radius: 4px;">
+                                <!-- Firefox开发者工具标题栏 -->
+                                <rect x="20" y="20" width="760" height="40" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+                                <!-- 标签导航 -->
+                                <rect x="30" y="25" width="80" height="30" fill="#2a2a2a" rx="3"/>
+                                <text x="45" y="45" fill="#888" font-size="12">检查器</text>
+                                <rect x="115" y="25" width="80" height="30" fill="#2a2a2a" rx="3"/>
+                                <text x="130" y="45" fill="#888" font-size="12">控制台</text>
+                                <rect x="200" y="25" width="80" height="30" fill="#2a2a2a" rx="3"/>
+                                <text x="215" y="45" fill="#888" font-size="12">调试器</text>
+                                <!-- 存储标签高亮 -->
+                                <rect x="285" y="25" width="70" height="30" fill="#00ff41" rx="3"/>
+                                <text x="300" y="45" fill="#000" font-size="12" font-weight="bold">存储</text>
+                                <!-- 箭头指示 -->
+                                <path d="M 320 70 L 320 90 L 305 90 L 320 110 L 335 90 L 320 90 Z" fill="#00ff41"/>
+                                <text x="280" y="135" fill="#00ff41" font-size="14" font-weight="bold">点击这里 ↑</text>
+                                <!-- 内容区域 -->
+                                <rect x="30" y="65" width="740" height="110" fill="#0a0a0a" stroke="#333" stroke-width="1"/>
+                                <text x="40" y="85" fill="#666" font-size="11">在这里管理Cookie和存储</text>
+                            </svg>
+                            <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">Firefox开发者工具: 检查器 | 控制台 | 调试器 | <strong style="color: var(--neon-green);">存储</strong></p>
+                        </div>
+                        
+                        <h4><span class="step-number">3</span>查看Cookie</h4>
+                        <p>在左侧展开<strong>"Cookie"</strong>，点击对应的域名，右侧表格会显示所有Cookie信息。</p>
+                        
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 2px solid var(--neon-green); border-radius: 8px; padding: 20px; margin: 1.5rem 0;">
+                            <p style="text-align: center; color: var(--neon-green); margin-bottom: 15px;"><strong>步骤3图示 - Firefox存储面板</strong></p>
+                            <svg width="100%" height="320" viewBox="0 0 800 320" style="background: #0a0a0a; border-radius: 4px;">
+                                <!-- 左侧导航栏 -->
+                                <rect x="20" y="20" width="180" height="280" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+                                <text x="30" y="40" fill="#888" font-size="11">存储</text>
+                                <text x="30" y="60" fill="#00ff41" font-size="11" font-weight="bold">▼ Cookie</text>
+                                <rect x="40" y="70" width="150" height="22" fill="rgba(0,255,65,0.1)" rx="2"/>
+                                <text x="50" y="85" fill="#00ff41" font-size="10">https://example.com</text>
+                                <text x="30" y="110" fill="#888" font-size="11">▶ 本地存储</text>
+                                <text x="30" y="130" fill="#888" font-size="11">▶ 会话存储</text>
+                                <text x="30" y="150" fill="#888" font-size="11">▶ IndexedDB</text>
+                                <text x="30" y="170" fill="#888" font-size="11">▶ 缓存存储</text>
+                                <!-- 右侧Cookie表格 -->
+                                <rect x="220" y="20" width="560" height="280" fill="#0a0a0a" stroke="#333" stroke-width="1"/>
+                                <!-- 表头 -->
+                                <rect x="225" y="25" width="550" height="28" fill="#1a1a1a"/>
+                                <text x="235" y="43" fill="#00ff41" font-size="10" font-weight="bold">名称</text>
+                                <text x="345" y="43" fill="#00ff41" font-size="10" font-weight="bold">值</text>
+                                <text x="515" y="43" fill="#00ff41" font-size="10" font-weight="bold">域</text>
+                                <text x="655" y="43" fill="#00ff41" font-size="10" font-weight="bold">路径</text>
+                                <text x="715" y="43" fill="#00ff41" font-size="10" font-weight="bold">过期</text>
+                                <!-- 分隔线 -->
+                                <line x1="225" y1="53" x2="775" y2="53" stroke="#00ff41" stroke-width="1"/>
+                                <!-- Cookie数据 -->
+                                <text x="235" y="70" fill="#0ff" font-size="9">session_id</text>
+                                <text x="345" y="70" fill="#ccc" font-size="9">abc123xyz...</text>
+                                <text x="515" y="70" fill="#888" font-size="9">.example.com</text>
+                                <text x="655" y="70" fill="#888" font-size="9">/</text>
+                                <text x="715" y="70" fill="#888" font-size="9">会话</text>
+                                <text x="235" y="88" fill="#0ff" font-size="9">auth_token</text>
+                                <text x="345" y="88" fill="#ccc" font-size="9">eyJhbGci...</text>
+                                <text x="515" y="88" fill="#888" font-size="9">.example.com</text>
+                                <text x="655" y="88" fill="#888" font-size="9">/</text>
+                                <text x="715" y="88" fill="#888" font-size="9">2025-12</text>
+                            </svg>
+                            <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">左侧: Cookie → https://example.com<br>右侧表格: 名称 | 值 | 域 | 路径 | 过期时间</p>
+                        </div>
+                        
+                        <h4><span class="step-number">4</span>复制Cookie</h4>
+                        <p>右键点击需要的Cookie行，选择<strong>"复制"</strong>，或者直接双击<strong>值</strong>列进行复制。</p>
+                        
+                        <h2 id="use-cookie-login">4. 使用Cookie登录网站</h2>
+                        
+                        <h3 id="manual-chrome">4.1 Chrome手动设置Cookie</h3>
+                        
+                        <div class="warning-box">
+                            <h4><i class="fas fa-exclamation-triangle"></i> 重要提示</h4>
+                            <p>手动设置Cookie前，请确保：</p>
+                            <ul>
+                                <li>已经退出当前账号（清除现有Cookie）</li>
+                                <li>Cookie来自合法渠道（自己的另一个设备或浏览器）</li>
+                                <li>注意Cookie的过期时间</li>
+                            </ul>
+                        </div>
+                        
+                        <h4>方法一：通过开发者工具手动添加</h4>
+                        
+                        <p><span class="step-number">1</span> 打开目标网站（未登录状态）</p>
+                        <p><span class="step-number">2</span> 按<code>F12</code>打开开发者工具</p>
+                        <p><span class="step-number">3</span> 切换到<strong>Application</strong> → <strong>Cookies</strong></p>
+                        <p><span class="step-number">4</span> 在Cookie列表空白处双击，可以添加新Cookie</p>
+                        <p><span class="step-number">5</span> 填写Cookie的Name和Value，其他字段保持默认或根据需要填写</p>
+                        <p><span class="step-number">6</span> 刷新页面(<code>F5</code>)，如果Cookie有效，应该会自动登录</p>
+                        
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 2px solid var(--neon-green); border-radius: 8px; padding: 20px; margin: 1.5rem 0;">
+                            <p style="text-align: center; color: var(--neon-green); margin-bottom: 15px;"><strong>手动添加Cookie示意图</strong></p>
+                            <svg width="100%" height="280" viewBox="0 0 800 280" style="background: #0a0a0a; border-radius: 4px;">
+                                <!-- Cookie表格 -->
+                                <rect x="50" y="30" width="700" height="220" fill="#0a0a0a" stroke="#333" stroke-width="1"/>
+                                <!-- 表头 -->
+                                <rect x="55" y="35" width="690" height="30" fill="#1a1a1a"/>
+                                <text x="70" y="55" fill="#00ff41" font-size="11" font-weight="bold">Name</text>
+                                <text x="250" y="55" fill="#00ff41" font-size="11" font-weight="bold">Value</text>
+                                <text x="500" y="55" fill="#00ff41" font-size="11" font-weight="bold">Domain</text>
+                                <text x="680" y="55" fill="#00ff41" font-size="11" font-weight="bold">Path</text>
+                                <!-- 已有Cookie -->
+                                <text x="70" y="85" fill="#0ff" font-size="10">user_id</text>
+                                <text x="250" y="85" fill="#ccc" font-size="10">123456</text>
+                                <text x="500" y="85" fill="#888" font-size="10">.example.com</text>
+                                <text x="680" y="85" fill="#888" font-size="10">/</text>
+                                <!-- 新增行高亮 -->
+                                <rect x="60" y="100" width="680" height="25" fill="rgba(0,255,65,0.15)" stroke="#00ff41" stroke-width="2" stroke-dasharray="5,5" rx="3"/>
+                                <text x="70" y="117" fill="#00ff41" font-size="10" font-weight="bold">session_id</text>
+                                <text x="250" y="117" fill="#00ff41" font-size="10" font-weight="bold">abc123xyz</text>
+                                <text x="500" y="117" fill="#888" font-size="10">.example.com</text>
+                                <text x="680" y="117" fill="#888" font-size="10">/</text>
+                                <!-- 空白行提示 -->
+                                <rect x="60" y="135" width="680" height="25" fill="#0a0a0a" stroke="#333" stroke-width="1" stroke-dasharray="3,3"/>
+                                <text x="350" y="150" fill="#666" font-size="10" text-anchor="middle">← 双击空白行添加新Cookie</text>
+                                <!-- 操作提示 -->
+                                <rect x="200" y="180" width="400" height="50" fill="rgba(0,255,65,0.05)" stroke="#00ff41" stroke-width="1" rx="5"/>
+                                <text x="400" y="200" fill="#00ff41" font-size="11" text-anchor="middle" font-weight="bold">操作步骤：</text>
+                                <text x="400" y="215" fill="#ccc" font-size="9" text-anchor="middle">1. 双击空白行  2. 输入Name和Value  3. 按Enter保存</text>
+                                <!-- 鼠标指针 -->
+                                <path d="M 160 140 L 160 155 L 165 150 L 170 158 L 173 156 L 168 148 L 175 148 Z" fill="#00ff41"/>
+                            </svg>
+                            <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">在Cookie表格底部空白行双击，输入Name和Value</p>
+                        </div>
+                        
+                        <h4>方法二：使用控制台脚本设置</h4>
+                        
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 步骤1: 打开控制台 (Ctrl+Shift+J 或 F12 → Console)
+// 步骤2: 粘贴以下代码并修改Cookie值
+
+// 设置单个Cookie
+document.cookie = "session_id=your_session_value; path=/; domain=.example.com";
+
+// 设置多个Cookie
+document.cookie = "user_id=123456; path=/";
+document.cookie = "auth_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9; path=/";
+
+// 设置带过期时间的Cookie (7天后过期)
+const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
+document.cookie = `session_id=abc123; expires=${expires}; path=/`;
+
+// 步骤3: 刷新页面
+location.reload();</code></pre>
+                        </div>
+                        
+                        <div class="success-box">
+                            <h4><i class="fas fa-check-circle"></i> 完整示例</h4>
+                            <div class="code-block">
+                                <pre><code class="language-javascript">// 假设你要登录 https://example.com
+// 你已经从另一个浏览器获取到了以下Cookie:
+// session_id=abc123xyz
+
+// 1. 打开 https://example.com (未登录状态)
+// 2. 按F12打开控制台
+// 3. 粘贴并执行以下代码:
+
+document.cookie = "session_id=abc123xyz; path=/; domain=.example.com";
+console.log("Cookie已设置，正在刷新页面...");
+setTimeout(() => location.reload(), 1000);
+
+// 4. 页面刷新后应该会自动登录</code></pre>
+                            </div>
+                        </div>
+                        
+                        <h3 id="manual-firefox">4.2 Firefox手动设置Cookie</h3>
+                        
+                        <h4>方法一：通过存储面板设置</h4>
+                        <p>Firefox的开发者工具<strong>不支持</strong>直接在存储面板中手动添加Cookie，需要使用控制台脚本方法。</p>
+                        
+                        <h4>方法二：使用控制台脚本（推荐）</h4>
+                        
+                        <p><span class="step-number">1</span> 打开目标网站（未登录状态）</p>
+                        <p><span class="step-number">2</span> 按<code>Ctrl+Shift+K</code>(或<code>Cmd+Option+K</code>)打开Web控制台</p>
+                        <p><span class="step-number">3</span> 粘贴以下代码并修改Cookie值：</p>
+                        
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// Firefox控制台设置Cookie
+document.cookie = "session_id=your_session_value; path=/; domain=.example.com";
+
+// 验证Cookie是否设置成功
+console.log("当前Cookie:", document.cookie);
+
+// 刷新页面
+location.reload();</code></pre>
+                        </div>
+                        
+                        <h4>方法三：使用Firefox扩展（推荐新手）</h4>
+                        <p>安装<strong>"Cookie Editor"</strong>或<strong>"EditThisCookie"</strong>扩展，可以更方便地管理Cookie：</p>
+                        <ol>
+                            <li>访问Firefox附加组件市场搜索"Cookie Editor"</li>
+                            <li>点击"添加到Firefox"安装</li>
+                            <li>打开目标网站，点击浏览器工具栏的Cookie Editor图标</li>
+                            <li>点击"+"按钮添加新Cookie</li>
+                            <li>填写Name和Value，点击保存</li>
+                            <li>刷新页面即可登录</li>
+                        </ol>
+                        
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 2px solid var(--neon-green); border-radius: 8px; padding: 20px; margin: 1.5rem 0;">
+                            <p style="text-align: center; color: var(--neon-green); margin-bottom: 15px;"><strong>Cookie Editor扩展界面</strong></p>
+                            <svg width="100%" height="350" viewBox="0 0 800 350" style="background: #1a1a1a; border-radius: 4px;">
+                                <!-- 浏览器顶部 -->
+                                <rect x="50" y="20" width="700" height="35" fill="#2a2a2a" rx="3"/>
+                                <text x="65" y="42" fill="#00ff41" font-size="12">example.com</text>
+                                <!-- 扩展图标 -->
+                                <circle cx="700" cy="37" r="12" fill="#00ff41"/>
+                                <text x="695" y="42" fill="#000" font-size="14" font-weight="bold">C</text>
+                                <!-- 箭头 -->
+                                <path d="M 700 55 L 700 75" stroke="#00ff41" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                <defs><marker id="arrowhead" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto"><polygon points="0 0, 10 5, 0 10" fill="#00ff41"/></marker></defs>
+                                <!-- Cookie Editor弹窗 -->
+                                <rect x="520" y="80" width="240" height="240" fill="#1a1a1a" stroke="#00ff41" stroke-width="2" rx="5"/>
+                                <!-- 标题栏 -->
+                                <rect x="525" y="85" width="230" height="30" fill="#2a2a2a" rx="3"/>
+                                <text x="585" y="105" fill="#00ff41" font-size="13" font-weight="bold">Cookie Editor</text>
+                                <!-- 添加按钮 -->
+                                <rect x="695" y="90" width="50" height="20" fill="#00ff41" rx="3"/>
+                                <text x="710" y="104" fill="#000" font-size="14" font-weight="bold">+ 添加</text>
+                                <!-- Cookie列表 -->
+                                <rect x="530" y="125" width="220" height="30" fill="#2a2a2a" rx="2"/>
+                                <text x="540" y="142" fill="#0ff" font-size="10">session_id</text>
+                                <text x="540" y="152" fill="#888" font-size="8">abc123...</text>
+                                <rect x="530" y="160" width="220" height="30" fill="#2a2a2a" rx="2"/>
+                                <text x="540" y="177" fill="#0ff" font-size="10">auth_token</text>
+                                <text x="540" y="187" fill="#888" font-size="8">eyJhbGc...</text>
+                                <!-- 新增Cookie表单 -->
+                                <rect x="530" y="200" width="220" height="105" fill="rgba(0,255,65,0.05)" stroke="#00ff41" stroke-width="1" stroke-dasharray="3,3" rx="3"/>
+                                <text x="540" y="218" fill="#00ff41" font-size="9">Name:</text>
+                                <rect x="540" y="222" width="200" height="18" fill="#0a0a0a" stroke="#333" stroke-width="1" rx="2"/>
+                                <text x="545" y="234" fill="#ccc" font-size="9">session_id</text>
+                                <text x="540" y="255" fill="#00ff41" font-size="9">Value:</text>
+                                <rect x="540" y="259" width="200" height="18" fill="#0a0a0a" stroke="#333" stroke-width="1" rx="2"/>
+                                <text x="545" y="271" fill="#ccc" font-size="9">your_value_here</text>
+                                <rect x="640" y="284" width="50" height="16" fill="#00ff41" rx="2"/>
+                                <text x="652" y="295" fill="#000" font-size="9" font-weight="bold">保存</text>
+                                <!-- 提示文字 -->
+                                <text x="400" y="290" fill="#00ff41" font-size="12" text-anchor="middle">点击右上角扩展图标</text>
+                                <text x="400" y="310" fill="#ccc" font-size="10" text-anchor="middle">→ 弹出Cookie管理面板</text>
+                                <text x="400" y="330" fill="#ccc" font-size="10" text-anchor="middle">→ 点击"+"添加新Cookie</text>
+                            </svg>
+                            <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">点击浏览器右上角图标 → 弹出Cookie管理面板 → 点击"+"添加Cookie</p>
+                        </div>
+                        
+                        <h3 id="auto-script">4.3 使用脚本自动登录</h3>
+                        
+                        <p>如果你需要频繁使用Cookie登录，可以编写一个自动化脚本。以下是使用Tampermonkey油猴脚本的示例：</p>
+                        
+                        <h4><span class="step-number">1</span>安装Tampermonkey扩展</h4>
+                        <ul>
+                            <li><strong>Chrome</strong>: <a href="https://chrome.google.com/webstore" style="color: var(--cyan);">Chrome网上应用店</a>搜索"Tampermonkey"</li>
+                            <li><strong>Firefox</strong>: <a href="https://addons.mozilla.org" style="color: var(--cyan);">Firefox附加组件</a>搜索"Tampermonkey"</li>
+                        </ul>
+                        
+                        <h4><span class="step-number">2</span>创建新脚本</h4>
+                        <p>点击Tampermonkey图标 → 创建新脚本 → 粘贴以下代码：</p>
+                        
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// ==UserScript==
+// @name         自动Cookie登录
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  自动设置Cookie并登录网站
+// @author       You
+// @match        https://example.com/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+    
+    // 配置区域 - 修改为你的Cookie值
+    const COOKIES = {
+        'session_id': 'your_session_value_here',
+        'user_id': '123456',
+        'auth_token': 'your_token_here'
+    };
+    
+    // 检查是否已登录
+    function isLoggedIn() {
+        // 根据网站实际情况修改判断逻辑
+        return document.querySelector('.user-profile') !== null;
+    }
+    
+    // 设置Cookie
+    function setCookies() {
+        for (const [name, value] of Object.entries(COOKIES)) {
+            document.cookie = `${name}=${value}; path=/; domain=.example.com`;
+        }
+        console.log('[Auto Login] Cookies已设置');
+    }
+    
+    // 主逻辑
+    if (!isLoggedIn()) {
+        console.log('[Auto Login] 检测到未登录，正在设置Cookie...');
+        setCookies();
+        
+        // 等待1秒后刷新页面
+        setTimeout(() => {
+            console.log('[Auto Login] 刷新页面...');
+            location.reload();
+        }, 1000);
+    } else {
+        console.log('[Auto Login] 已登录');
+    }
+})();</code></pre>
+                        </div>
+                        
+                        <h4><span class="step-number">3</span>保存并启用脚本</h4>
+                        <p>点击<strong>文件 → 保存</strong>(或按<code>Ctrl+S</code>)，脚本会自动启用。下次访问目标网站时会自动设置Cookie并登录。</p>
+                        
+                        <div class="info-box">
+                            <h4><i class="fas fa-lightbulb"></i> 脚本使用说明</h4>
+                            <ul>
+                                <li>修改<code>@match</code>为你的目标网站URL</li>
+                                <li>在<code>COOKIES</code>对象中填写你的Cookie名称和值</li>
+                                <li>根据网站实际情况修改<code>isLoggedIn()</code>函数的判断逻辑</li>
+                                <li>脚本会在页面加载时自动运行</li>
+                            </ul>
+                        </div>
+                        
+                        <h2 id="advanced">5. 高级技巧</h2>
+                        
+                        <h3>5.1 批量导入导出Cookie</h3>
+                        
+                        <p>使用浏览器扩展或脚本批量管理Cookie：</p>
+                        
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 导出所有Cookie为JSON格式
+function exportCookies() {
+    const cookies = {};
+    document.cookie.split(';').forEach(c => {
+        const [name, value] = c.trim().split('=');
+        cookies[name] = value;
+    });
+    
+    const json = JSON.stringify(cookies, null, 2);
+    console.log('导出的Cookie:');
+    console.log(json);
+    
+    // 复制到剪贴板
+    navigator.clipboard.writeText(json).then(() => {
+        console.log('已复制到剪贴板');
+    });
+    
+    return json;
+}
+
+// 批量导入Cookie
+function importCookies(cookiesJson) {
+    const cookies = JSON.parse(cookiesJson);
+    const domain = window.location.hostname;
+    
+    for (const [name, value] of Object.entries(cookies)) {
+        document.cookie = `${name}=${value}; path=/; domain=${domain}`;
+    }
+    
+    console.log(`成功导入 ${Object.keys(cookies).length} 个Cookie`);
+    setTimeout(() => location.reload(), 1000);
+}
+
+// 使用示例:
+// 1. 导出: exportCookies()
+// 2. 导入: importCookies('{"session_id":"abc","user_id":"123"}')</code></pre>
+                        </div>
+                        
+                        <h3>5.2 Cookie持久化保存</h3>
+                        
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 将Cookie保存到localStorage，防止关闭浏览器后丢失
+function saveCookiesToStorage() {
+    const cookies = {};
+    document.cookie.split(';').forEach(c => {
+        const [name, value] = c.trim().split('=');
+        cookies[name] = value;
+    });
+    localStorage.setItem('saved_cookies', JSON.stringify(cookies));
+    console.log('Cookie已保存到本地存储');
+}
+
+// 从localStorage恢复Cookie
+function restoreCookiesFromStorage() {
+    const saved = localStorage.getItem('saved_cookies');
+    if (!saved) {
+        console.log('没有保存的Cookie');
+        return;
+    }
+    
+    const cookies = JSON.parse(saved);
+    for (const [name, value] of Object.entries(cookies)) {
+        document.cookie = `${name}=${value}; path=/`;
+    }
+    console.log('Cookie已恢复');
+    location.reload();
+}
+
+// 使用方法:
+// 登录后执行: saveCookiesToStorage()
+// 需要登录时执行: restoreCookiesFromStorage()</code></pre>
+                        </div>
+                        
+                        <h3>5.3 跨浏览器同步Cookie</h3>
+                        
+                        <p>通过生成二维码或分享链接的方式，在不同浏览器间同步Cookie：</p>
+                        
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 生成Cookie分享链接
+function generateCookieShareLink() {
+    const cookies = {};
+    document.cookie.split(';').forEach(c => {
+        const [name, value] = c.trim().split('=');
+        cookies[name] = value;
+    });
+    
+    const encoded = btoa(JSON.stringify(cookies));
+    const shareUrl = `${window.location.origin}?cookies=${encoded}`;
+    
+    console.log('分享链接:', shareUrl);
+    navigator.clipboard.writeText(shareUrl);
+    alert('分享链接已复制到剪贴板！');
+    
+    return shareUrl;
+}
+
+// 从URL参数中导入Cookie
+function importCookiesFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const encoded = params.get('cookies');
+    
+    if (!encoded) {
+        console.log('URL中没有Cookie数据');
+        return;
+    }
+    
+    try {
+        const cookies = JSON.parse(atob(encoded));
+        for (const [name, value] of Object.entries(cookies)) {
+            document.cookie = `${name}=${value}; path=/`;
+        }
+        console.log('Cookie导入成功');
+        
+        // 清除URL参数并刷新
+        window.history.replaceState({}, '', window.location.pathname);
+        location.reload();
+    } catch (e) {
+        console.error('Cookie导入失败:', e);
+    }
+}
+
+// 页面加载时自动检查
+importCookiesFromUrl();</code></pre>
+                        </div>
+                        
+                        <h2 id="security">6. 安全注意事项</h2>
+                        
+                        <div class="warning-box">
+                            <h4><i class="fas fa-shield-alt"></i> 重要安全提示</h4>
+                            <ul>
+                                <li><strong>不要分享Cookie</strong>: Cookie相当于你的登录凭证，泄露后他人可以登录你的账号</li>
+                                <li><strong>注意Cookie来源</strong>: 只使用自己合法获取的Cookie，不要使用来历不明的Cookie</li>
+                                <li><strong>定期更换密码</strong>: 使用Cookie登录后，建议定期修改账号密码</li>
+                                <li><strong>HTTPS连接</strong>: 尽量只在HTTPS网站使用Cookie，避免被中间人攻击截获</li>
+                                <li><strong>公共电脑</strong>: 在公共电脑使用后，记得清除Cookie和浏览记录</li>
+                                <li><strong>HttpOnly Cookie</strong>: 某些重要的Cookie设置了HttpOnly标志，无法通过JavaScript读取</li>
+                            </ul>
+                        </div>
+                        
+                        <h3>6.1 如何清除Cookie</h3>
+                        
+                        <h4>Chrome清除Cookie</h4>
+                        <ol>
+                            <li>按<code>Ctrl+Shift+Delete</code>打开清除浏览数据窗口</li>
+                            <li>选择<strong>时间范围</strong>(如"过去1小时"或"全部时间")</li>
+                            <li>勾选<strong>Cookie及其他网站数据</strong></li>
+                            <li>点击<strong>清除数据</strong></li>
+                        </ol>
+                        
+                        <h4>Firefox清除Cookie</h4>
+                        <ol>
+                            <li>按<code>Ctrl+Shift+Delete</code>打开清除历史记录窗口</li>
+                            <li>选择<strong>清除时间范围</strong></li>
+                            <li>勾选<strong>Cookie</strong></li>
+                            <li>点击<strong>立即清除</strong></li>
+                        </ol>
+                        
+                        <h4>使用脚本清除特定Cookie</h4>
+                        
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 清除指定Cookie
+function deleteCookie(name) {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    console.log(`Cookie "${name}" 已删除`);
+}
+
+// 清除所有Cookie
+function deleteAllCookies() {
+    const cookies = document.cookie.split(';');
+    cookies.forEach(cookie => {
+        const name = cookie.split('=')[0].trim();
+        deleteCookie(name);
+    });
+    console.log('所有Cookie已清除');
+    location.reload();
+}
+
+// 使用示例
+deleteCookie('session_id');  // 删除指定Cookie
+// deleteAllCookies();       // 删除所有Cookie</code></pre>
+                        </div>
+                        
+                        <h3>6.2 Cookie有效期管理</h3>
+                        
+                        <p>Cookie有两种类型：</p>
+                        <ul>
+                            <li><strong>会话Cookie</strong>: 浏览器关闭后自动失效，没有设置过期时间</li>
+                            <li><strong>持久Cookie</strong>: 设置了过期时间，在过期前一直有效</li>
+                        </ul>
+                        
+                        <div class="code-block">
+                            <pre><code class="language-javascript">// 检查Cookie是否过期
+function checkCookieExpiry() {
+    // 大多数网站的Cookie过期时间无法通过JavaScript直接读取
+    // 只能通过开发者工具的Application/Storage面板查看
+    
+    console.log('当前所有Cookie:');
+    document.cookie.split(';').forEach(c => {
+        console.log('  -', c.trim());
+    });
+    
+    console.log('\n提示: 查看过期时间请使用开发者工具');
+}
+
+// 设置长期有效的Cookie (30天)
+function setLongTermCookie(name, value, days = 30) {
+    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
+    console.log(`Cookie "${name}" 已设置，${days}天后过期`);
+}
+
+// 使用示例
+setLongTermCookie('remember_me', 'true', 90);  // 90天后过期</code></pre>
+                        </div>
+                        
+                        <div class="success-box">
+                            <h4><i class="fas fa-graduation-cap"></i> 学习总结</h4>
+                            <p>通过本教程，你已经掌握了：</p>
+                            <ul>
+                                <li>✅ Cookie的基本概念和工作原理</li>
+                                <li>✅ 在Chrome和Firefox中查看和获取Cookie</li>
+                                <li>✅ 手动设置Cookie实现免密登录</li>
+                                <li>✅ 使用控制台脚本批量管理Cookie</li>
+                                <li>✅ 使用油猴脚本实现自动化登录</li>
+                                <li>✅ Cookie的安全注意事项和最佳实践</li>
+                            </ul>
+                            <p>建议在安全的环境中练习这些技术，不要将Cookie用于非法用途！</p>
+                        </div>
+                        
+                        <div class="info-box">
+                            <h4><i class="fas fa-question-circle"></i> 常见问题</h4>
+                            <p><strong>Q: 为什么设置了Cookie还是无法登录？</strong></p>
+                            <p>A: 可能原因：1) Cookie已过期 2) Cookie的Domain或Path不正确 3) 网站需要多个Cookie配合 4) 网站有额外的安全验证(如IP检查)</p>
+                            
+                            <p><strong>Q: HttpOnly的Cookie能否通过JavaScript设置？</strong></p>
+                            <p>A: 不能。HttpOnly Cookie只能由服务器通过HTTP响应头设置，JavaScript无法读取或修改这类Cookie，这是一种安全保护机制。</p>
+                            
+                            <p><strong>Q: 如何知道哪些Cookie是登录必需的？</strong></p>
+                            <p>A: 通常名为session_id、auth_token、user_id等的Cookie是关键。可以尝试逐个删除Cookie后刷新页面，观察是否被登出，从而确定必需的Cookie。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Article Navigation -->
+                    <div class="article-navigation" style="display: flex; justify-content: space-between; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
+                        <a href="../wiki.html" style="color: var(--neon-green); text-decoration: none;">
+                            <i class="fas fa-arrow-left"></i> 返回知识库
+                        </a>
+                        <a href="xss-payload.html" style="color: var(--neon-green); text-decoration: none;">
+                            下一篇：XSS Payload编写技巧 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <span>© 2025 蓝莲花XSS在线平台</span>
+                    <span class="text-tertiary">|</span>
+                    <span class="text-secondary">v2.0.8</span>
+                </div>
+                <div class="footer-links">
+                    <a href="../index.html"><i class="fas fa-home"></i> 返回首页</a>
+                    <a href="../login.php"><i class="fas fa-sign-in-alt"></i> 登录平台</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/libs/prism/js/prism.min.js"></script>
+    <script src="../static/libs/prism/js/prism-javascript.min.js"></script>
+    <script src="../static/libs/prism/js/prism-markup.min.js"></script>
+    <script>
+        // 回到顶部功能
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

