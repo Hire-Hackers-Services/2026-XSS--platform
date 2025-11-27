@@ -407,7 +407,7 @@ docker-compose logs -f
 ## 📞 联系我们
 
 - 🌐 **官方网站**: https://xss.li
-- 💬 **Telegram群组**: https://t.me/hackhub7
+- 💬 **Telegram群组**: https://t.me/HackhubTeam
 - 📧 **商务合作**: 通过Telegram联系
 - 🔗 **技术服务**: https://hackhub.org/contact-us.html
 
@@ -428,6 +428,7 @@ docker-compose logs -f
 Made with ❤️ by Security Researchers
 
 </div>
+
 
 
 
