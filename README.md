@@ -9,7 +9,7 @@
 
 **专业的XSS漏洞检测与Web安全测试平台**
 
-[🌐 官网](https://xss.li) |  | [Telegram技术合作](https://t.me/hackhub7)
+[🌐 官网](https://xss.li) |  | [Telegram技术合作](https://t.me/HackhubTeam)
 
 <img width="2215" height="1637" alt="xss4" src="https://github.com/user-attachments/assets/b6da1ecd-2882-47ce-99c1-6785b9868561" />
 <img width="2311" height="1732" alt="xss3" src="https://github.com/user-attachments/assets/dad0af89-8320-4c15-865a-c01ccbe5813e" />
@@ -428,5 +428,6 @@ docker-compose logs -f
 Made with ❤️ by Security Researchers
 
 </div>
+
 
 
